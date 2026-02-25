@@ -3,7 +3,7 @@
 OKTODO es una aplicación móvil enfocada en la organización de tareas, metas y eventos, integrando un sistema de motivación basado en gamificación y una mascota virtual llamada Okto que acompaña al usuario durante su progreso.
 
 <p align="center">
-  <img src="images/okto.png" alt="Okto Mascot" width="300">
+  <img src="media/okto.png" alt="Okto Mascot" width="300">
 </p>
 
 ## Descripción
