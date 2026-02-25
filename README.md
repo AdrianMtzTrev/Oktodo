@@ -56,7 +56,7 @@ Dirigida a usuarios que buscan mejorar su organización personal, mantener const
 </p>
 
 
-## Integrantes
-
-- Fátima Salazar Loyola
-- Adrián Martinez Treviño
+| Integrantes |
+| --- |
+| Fátima Salazar Loyola |
+| Adrián Martinez Treviño |
