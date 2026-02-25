@@ -54,3 +54,9 @@ Dirigida a usuarios que buscan mejorar su organización personal, mantener const
 <p align="left">
   <a href="media/OKTODO_1ER AVANCE.pptx" alt="Oktodo PowerPoint Presentation">Link de la presentacion 1er avance</a>
 </p>
+
+
+## Integrantes
+
+- Fátima Salazar Loyola
+- Adrián Martinez Treviño
