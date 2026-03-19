@@ -1,0 +1,52 @@
+# Gradle
+.gradle/
+.gradle-user/
+build/
+out/
+bin/
+gradle-app.setting
+gradle/wrapper/gradle-wrapper.jar
+
+# Local configuration (user-specific)
+local.properties
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Compiled output
+*.class
+*.jar
+*.war
+*.ear
+*.dex
+*.apk
+*.ap_
+*.hprof
+*.dSYM/
+kotlin.output/
+
+# Native build
+.externalNativeBuild/
+.cxx/
+
+# Signing keys (never commit these)
+*.keystore
+*.jks
+
+# Log & temp files
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# OS generated
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Android captures
+/captures
