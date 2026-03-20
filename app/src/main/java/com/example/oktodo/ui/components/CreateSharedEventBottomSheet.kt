@@ -67,7 +67,7 @@ fun CreateSharedEventBottomSheet(
                     onValueChange = {},
                     readOnly = true,
                     modifier = Modifier
-                        .menuAnchor()
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                         .fillMaxWidth(),
                     placeholder = { Text("Selecciona un grupo") },
                     shape = RoundedCornerShape(14.dp),

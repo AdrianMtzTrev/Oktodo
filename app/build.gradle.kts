@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.compose)  // Cambiado de kotlin.android a kotlin.compose
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -33,7 +34,9 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    // NO NECESITAS kotlinOptions con el plugin kotlin-compose
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 
     buildFeatures {
         compose = true

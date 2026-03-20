@@ -9,7 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -109,7 +109,7 @@ fun CalendarScreen(
                     )
                 }
 
-                Divider()
+                HorizontalDivider()
 
                 NavigationDrawerItem(
                     label = { Text("Año") },
