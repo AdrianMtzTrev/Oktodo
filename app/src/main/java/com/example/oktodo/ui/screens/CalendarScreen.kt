@@ -51,7 +51,7 @@ enum class CalendarView {
 
 @Composable
 fun CalendarScreen(
-    calendarViewModel: CalendarViewModel = viewModel()
+    calendarViewModel: CalendarViewModel
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     var selectedView by remember { mutableStateOf(CalendarView.MONTH) }

@@ -50,3 +50,9 @@ ehthumbs.db
 
 # Android captures
 /captures
+
+# Local planning files
+/createdFiles/
+
+# Claude Code settings
+.claude/

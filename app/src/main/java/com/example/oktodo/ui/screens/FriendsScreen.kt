@@ -31,7 +31,7 @@ import com.example.oktodo.ui.viewmodel.FriendsViewModel
 @Composable
 fun FriendsScreen(
     navController: NavController? = null,
-    viewModel: FriendsViewModel = viewModel()
+    viewModel: FriendsViewModel
 ) {
     val friends by viewModel.friends.collectAsState()
     val groups by viewModel.groups.collectAsState()

@@ -1,0 +1,70 @@
+package com.example.oktodo.ui.viewmodel
+
+import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.oktodo.data.local.UserPreferencesDataStore
+import com.example.oktodo.data.repository.TaskRepository
+import com.example.oktodo.ui.model.Task
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class TasksViewModel @Inject constructor(
+    private val repository: TaskRepository,
+    private val prefs: UserPreferencesDataStore
+) : ViewModel() {
+
+    val tasks: StateFlow<List<Task>> = repository.tasks
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    private val _showBottomSheet = MutableStateFlow(false)
+    val showBottomSheet: StateFlow<Boolean> = _showBottomSheet.asStateFlow()
+
+    val points: StateFlow<Int> = prefs.preferences
+        .map { it.points }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    fun addTask(title: String, time: String) {
+        if (title.isBlank() || time.isBlank()) return
+        viewModelScope.launch {
+            repository.add(
+                Task(
+                    title = title,
+                    time = time,
+                    priority = "Media",
+                    color = Color(0xFF7C3AED),
+                    isCompleted = false,
+                    pointsReward = 10
+                )
+            )
+            hideBottomSheet()
+        }
+    }
+
+    fun toggleTaskCompletion(task: Task) {
+        viewModelScope.launch {
+            val newState = !task.isCompleted
+            repository.update(task.copy(isCompleted = newState))
+            if (newState) prefs.addPoints(task.pointsReward)
+            else prefs.addPoints(-task.pointsReward)
+        }
+    }
+
+    fun deleteTask(task: Task) {
+        viewModelScope.launch {
+            if (task.isCompleted) prefs.addPoints(-task.pointsReward)
+            repository.delete(task)
+        }
+    }
+
+    fun showBottomSheet() { _showBottomSheet.value = true }
+    fun hideBottomSheet() { _showBottomSheet.value = false }
+}

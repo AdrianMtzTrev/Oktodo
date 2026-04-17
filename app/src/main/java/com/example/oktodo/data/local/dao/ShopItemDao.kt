@@ -1,0 +1,20 @@
+package com.example.oktodo.data.local.dao
+
+import androidx.room.*
+import com.example.oktodo.data.local.entity.ShopItemEntity
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface ShopItemDao {
+    @Query("SELECT * FROM shop_items ORDER BY price ASC")
+    fun getAllItems(): Flow<List<ShopItemEntity>>
+
+    @Query("SELECT COUNT(*) FROM shop_items")
+    suspend fun count(): Int
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(item: ShopItemEntity)
+
+    @Query("UPDATE shop_items SET isPurchased = 1 WHERE id = :id")
+    suspend fun markPurchased(id: String)
+}

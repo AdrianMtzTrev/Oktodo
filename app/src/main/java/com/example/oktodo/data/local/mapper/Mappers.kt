@@ -1,0 +1,126 @@
+package com.example.oktodo.data.local.mapper
+
+import androidx.compose.ui.graphics.Color
+import com.example.oktodo.data.local.entity.*
+import com.example.oktodo.ui.model.*
+import java.time.LocalDate
+import java.time.LocalTime
+
+// ── Task ──────────────────────────────────────────────
+fun TaskEntity.toDomain() = Task(
+    id = id,
+    title = title,
+    time = time,
+    priority = priority,
+    color = Color(colorArgb.toULong()),
+    isCompleted = isCompleted,
+    pointsReward = pointsReward
+)
+
+fun Task.toEntity() = TaskEntity(
+    id = id,
+    title = title,
+    time = time,
+    priority = priority,
+    colorArgb = color.value.toLong(),
+    isCompleted = isCompleted,
+    pointsReward = pointsReward
+)
+
+// ── CalendarEvent ─────────────────────────────────────
+fun CalendarEventEntity.toDomain() = CalendarEvent(
+    id = id,
+    title = title,
+    date = LocalDate.parse(dateString),
+    time = timeString?.let { LocalTime.parse(it) },
+    location = location,
+    color = Color(colorArgb.toULong()),
+    description = description
+)
+
+fun CalendarEvent.toEntity() = CalendarEventEntity(
+    id = id,
+    title = title,
+    dateString = date.toString(),
+    timeString = time?.toString(),
+    location = location,
+    colorArgb = color.value.toLong(),
+    description = description
+)
+
+// ── Friend ────────────────────────────────────────────
+fun FriendEntity.toDomain() = Friend(
+    id = id,
+    name = name,
+    points = points,
+    events = events,
+    avatar = avatar,
+    avatarColor = Color(avatarColorArgb.toULong())
+)
+
+fun Friend.toEntity() = FriendEntity(
+    id = id,
+    name = name,
+    points = points,
+    events = events,
+    avatar = avatar,
+    avatarColorArgb = avatarColor.value.toLong()
+)
+
+// ── Group ─────────────────────────────────────────────
+fun GroupEntity.toDomain() = Group(
+    id = id,
+    name = name,
+    icon = icon,
+    members = membersJoined.split(",").filter { it.isNotBlank() },
+    eventCount = eventCount
+)
+
+fun Group.toEntity() = GroupEntity(
+    id = id,
+    name = name,
+    icon = icon,
+    membersJoined = members.joinToString(","),
+    eventCount = eventCount
+)
+
+// ── SharedEvent ───────────────────────────────────────
+fun SharedEventEntity.toDomain() = SharedEvent(
+    id = id,
+    title = title,
+    creator = creator,
+    groupId = groupId,
+    date = date,
+    time = time,
+    location = location,
+    participants = participantsJoined.split(",").filter { it.isNotBlank() }
+)
+
+fun SharedEvent.toEntity() = SharedEventEntity(
+    id = id,
+    title = title,
+    creator = creator,
+    groupId = groupId,
+    date = date,
+    time = time,
+    location = location,
+    participantsJoined = participants.joinToString(",")
+)
+
+// ── ShopItem ──────────────────────────────────────────
+fun ShopItemEntity.toDomain() = ShopItem(
+    id = id,
+    title = title,
+    emoji = emoji,
+    price = price,
+    category = category
+)
+
+fun ShopItem.toEntity(isPurchased: Boolean = false) = ShopItemEntity(
+    id = id,
+    title = title,
+    emoji = emoji,
+    price = price,
+    category = category,
+    isPurchased = isPurchased
+)

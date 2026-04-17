@@ -61,17 +61,18 @@ import java.util.Calendar
 fun DashboardScreen(
     navController: NavController,
     themeViewModel: ThemeViewModel,
-    tasksViewModel: TasksViewModel = viewModel()
+    tasksViewModel: TasksViewModel
 ) {
     val tasks by tasksViewModel.tasks.collectAsState()
     val showBottomSheet by tasksViewModel.showBottomSheet.collectAsState()
     val points by tasksViewModel.points.collectAsState()
+    val isDarkMode by themeViewModel.isDarkMode.collectAsState()
 
     Scaffold(
         topBar = {
             DashboardHeader(
                 onThemeToggle = { themeViewModel.toggleTheme() },
-                isDarkMode = themeViewModel.isDarkMode,
+                isDarkMode = isDarkMode,
                 points = points
             )
         },

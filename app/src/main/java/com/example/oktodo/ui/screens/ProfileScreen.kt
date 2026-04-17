@@ -47,7 +47,7 @@ import com.example.oktodo.ui.viewmodel.ProfileViewModel
 @Composable
 fun ProfileScreen(
     navController: NavController? = null,
-    viewModel: ProfileViewModel = viewModel()
+    viewModel: ProfileViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
