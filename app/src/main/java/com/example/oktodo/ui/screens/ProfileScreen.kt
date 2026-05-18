@@ -144,7 +144,7 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Tu pulpito está esperando que completes tareas 🪄",
+                        text = "Okto está esperando que completes tareas 🪄",
                         color = onSurfaceVariant
                     )
 
@@ -159,7 +159,7 @@ fun ProfileScreen(
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         )
                     ) {
-                        Text("Consentir a mi pulpito")
+                        Text("Consentir a Okto")
                     }
                 }
             }

@@ -78,15 +78,16 @@ fun EditProfileScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
 
                 avatarOptions.chunked(4).forEach { rowItems ->
 
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
 
                         rowItems.forEach { avatar ->

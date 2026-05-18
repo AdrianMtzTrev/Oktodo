@@ -2,6 +2,7 @@ package com.example.oktodo.ui.screens
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.Notifications
@@ -40,7 +43,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -227,6 +232,7 @@ fun DashboardContent(
 
     val pendingTasks = tasks.filter { !it.isCompleted }
     val completedTasks = tasks.filter { it.isCompleted }
+    var showCompleted by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = modifier
@@ -267,14 +273,31 @@ fun DashboardContent(
 
         if (completedTasks.isNotEmpty()) {
             item {
-                SectionHeader(title = "Completadas (${completedTasks.size})")
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showCompleted = !showCompleted },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    SectionHeader(title = "Completadas (${completedTasks.size})")
+                    Icon(
+                        imageVector = if (showCompleted) Icons.Filled.KeyboardArrowUp
+                                      else Icons.Filled.KeyboardArrowDown,
+                        contentDescription = if (showCompleted) "Ocultar completadas"
+                                             else "Mostrar completadas",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                }
             }
 
-            items(completedTasks) { task ->
-                TaskItem(
-                    task = task,
-                    onToggle = { onTaskToggle(task) }
-                )
+            if (showCompleted) {
+                items(completedTasks) { task ->
+                    TaskItem(
+                        task = task,
+                        onToggle = { onTaskToggle(task) }
+                    )
+                }
             }
         }
     }
