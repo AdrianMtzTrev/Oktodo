@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -419,8 +418,8 @@ private fun ProfileHeader(
 
         Row(
             modifier = Modifier
-                .align(Alignment.BottomStart)
-                .offset(x = 16.dp, y = 24.dp),
+                .align(Alignment.CenterStart)
+                .padding(start = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -446,9 +445,7 @@ private fun ProfileHeader(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            Column(
-                modifier = Modifier.padding(top = 18.dp)
-            ) {
+            Column {
                 Text(
                     text = username,
                     style = MaterialTheme.typography.titleLarge,
