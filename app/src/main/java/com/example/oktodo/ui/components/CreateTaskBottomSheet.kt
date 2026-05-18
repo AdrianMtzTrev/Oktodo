@@ -3,6 +3,7 @@
 package com.example.oktodo.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -104,30 +105,41 @@ fun CreateTaskBottomSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
-                value = taskTime,
-                onValueChange = { taskTime = it },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Hora límite") },
-                placeholder = { Text("Ej: 14:30") },
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    cursorColor = MaterialTheme.colorScheme.primary
-                ),
-                trailingIcon = {
-                    IconButton(onClick = { showTimePicker = true }) {
-                        Icon(
-                            Icons.Outlined.AccessTime,
-                            contentDescription = "Seleccionar hora",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                },
-                readOnly = true,
-                singleLine = true
+            Text(
+                text = "Hora límite",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showTimePicker = true }
+                    .background(
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        RoundedCornerShape(16.dp)
+                    )
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = taskTime.ifBlank { "Toca para seleccionar hora" },
+                    color = if (taskTime.isBlank()) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Icon(
+                    Icons.Outlined.AccessTime,
+                    contentDescription = "Seleccionar hora",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 

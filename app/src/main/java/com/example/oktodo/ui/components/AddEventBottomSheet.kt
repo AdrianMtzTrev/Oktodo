@@ -3,6 +3,7 @@
 package com.example.oktodo.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,6 +43,8 @@ fun AddEventBottomSheet(
     var title by remember { mutableStateOf("") }
     var dateText by remember { mutableStateOf(initialDate.toString()) }
     var timeText by remember { mutableStateOf("") }
+    var showTimePicker by remember { mutableStateOf(false) }
+    val timePickerState = rememberTimePickerState(initialHour = 12, initialMinute = 0)
     var location by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf(Color(0xFF7C3AED)) }
@@ -138,18 +141,41 @@ fun AddEventBottomSheet(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            OutlinedTextField(
-                value = timeText,
-                onValueChange = { timeText = it },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Hora") },
-                placeholder = { Text("HH:mm") },
-                leadingIcon = {
-                    Icon(Icons.Outlined.AccessTime, contentDescription = null)
-                },
-                shape = RoundedCornerShape(16.dp),
-                singleLine = true
+            Text(
+                text = "Hora",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showTimePicker = true }
+                    .background(
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        RoundedCornerShape(16.dp)
+                    )
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = timeText.ifBlank { "Toca para seleccionar hora" },
+                    color = if (timeText.isBlank()) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Icon(
+                    Icons.Outlined.AccessTime,
+                    contentDescription = "Seleccionar hora",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
 
             Spacer(modifier = Modifier.height(14.dp))
 
@@ -238,5 +264,29 @@ fun AddEventBottomSheet(
 
             Spacer(modifier = Modifier.height(14.dp))
         }
+    }
+
+    if (showTimePicker) {
+        AlertDialog(
+            onDismissRequest = { showTimePicker = false },
+            title = { Text("Seleccionar hora") },
+            text = {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TimePicker(state = timePickerState)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    timeText = "%02d:%02d".format(timePickerState.hour, timePickerState.minute)
+                    showTimePicker = false
+                }) { Text("Aceptar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePicker = false }) { Text("Cancelar") }
+            }
+        )
     }
 }

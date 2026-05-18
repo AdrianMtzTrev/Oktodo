@@ -1,15 +1,23 @@
 package com.example.oktodo.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccessTime
+import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.oktodo.ui.model.Group
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,7 +31,10 @@ fun CreateSharedEventBottomSheet(
     var selectedGroupName by remember { mutableStateOf("") }
     var selectedGroupId by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
+    var showDatePicker by remember { mutableStateOf(false) }
     var time by remember { mutableStateOf("") }
+    var showTimePicker by remember { mutableStateOf(false) }
+    val timePickerState = rememberTimePickerState(initialHour = 12, initialMinute = 0)
     var location by remember { mutableStateOf("") }
 
     ModalBottomSheet(
@@ -95,23 +106,77 @@ fun CreateSharedEventBottomSheet(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedTextField(
-                    value = date,
-                    onValueChange = { date = it },
-                    modifier = Modifier.weight(1f),
-                    placeholder = { Text("2026-03-16") },
-                    shape = RoundedCornerShape(14.dp),
-                    singleLine = true
-                )
+            Text(
+                text = "Fecha",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
-                OutlinedTextField(
-                    value = time,
-                    onValueChange = { time = it },
-                    modifier = Modifier.weight(1f),
-                    placeholder = { Text("19:00") },
-                    shape = RoundedCornerShape(14.dp),
-                    singleLine = true
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showDatePicker = true }
+                    .background(
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        RoundedCornerShape(16.dp)
+                    )
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = date.ifBlank { "Toca para seleccionar fecha" },
+                    color = if (date.isBlank()) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Icon(
+                    Icons.Outlined.CalendarMonth,
+                    contentDescription = "Seleccionar fecha",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Hora",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showTimePicker = true }
+                    .background(
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        RoundedCornerShape(16.dp)
+                    )
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = time.ifBlank { "Toca para seleccionar hora" },
+                    color = if (time.isBlank()) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Icon(
+                    Icons.Outlined.AccessTime,
+                    contentDescription = "Seleccionar hora",
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
 
@@ -152,5 +217,58 @@ fun CreateSharedEventBottomSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
         }
+    }
+
+    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState()
+        AlertDialog(
+            onDismissRequest = { showDatePicker = false },
+            title = { Text("Seleccionar fecha") },
+            text = {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    DatePicker(state = datePickerState)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        date = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate().format(dateFormatter)
+                    }
+                    showDatePicker = false
+                }) { Text("Aceptar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancelar") }
+            }
+        )
+    }
+
+    if (showTimePicker) {
+        AlertDialog(
+            onDismissRequest = { showTimePicker = false },
+            title = { Text("Seleccionar hora") },
+            text = {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TimePicker(state = timePickerState)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    time = "%02d:%02d".format(timePickerState.hour, timePickerState.minute)
+                    showTimePicker = false
+                }) { Text("Aceptar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePicker = false }) { Text("Cancelar") }
+            }
+        )
     }
 }
