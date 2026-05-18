@@ -37,8 +37,18 @@ class CalendarViewModel @Inject constructor(
         viewModelScope.launch { repository.deleteById(eventId) }
     }
 
-    fun selectDate(date: LocalDate) { _selectedDate.value = date }
+    fun selectDate(date: LocalDate) {
+        _selectedDate.value = date
+        _selectedMonth.value = YearMonth.from(date)
+    }
+
     fun selectMonth(month: YearMonth) { _selectedMonth.value = month }
+
+    fun goToToday() {
+        val today = LocalDate.now()
+        _selectedDate.value = today
+        _selectedMonth.value = YearMonth.from(today)
+    }
 
     fun getEventsForDate(date: LocalDate): List<CalendarEvent> =
         events.value.filter { it.date == date }

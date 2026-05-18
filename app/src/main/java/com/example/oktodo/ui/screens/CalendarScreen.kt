@@ -80,7 +80,7 @@ fun CalendarScreen(
 
     val titleText = when (selectedView) {
         CalendarView.YEAR -> "Año ${selectedDate.year}"
-        CalendarView.MONTH -> selectedMonth
+        CalendarView.MONTH -> YearMonth.from(selectedDate)
             .format(DateTimeFormatter.ofPattern("MMMM yyyy"))
             .replaceFirstChar { it.uppercase() }
         CalendarView.WEEK -> "Semana"
@@ -162,8 +162,7 @@ fun CalendarScreen(
                         scope.launch { drawerState.open() }
                     },
                     onTodayClick = {
-                        calendarViewModel.selectDate(LocalDate.now())
-                        calendarViewModel.selectMonth(YearMonth.now())
+                        calendarViewModel.goToToday()
                     }
                 )
             },
@@ -194,7 +193,6 @@ fun CalendarScreen(
                             year = selectedDate.year,
                             events = events,
                             onMonthSelected = { yearMonth ->
-                                calendarViewModel.selectMonth(yearMonth)
                                 calendarViewModel.selectDate(yearMonth.atDay(1))
                                 selectedView = CalendarView.MONTH
                             }
@@ -202,17 +200,18 @@ fun CalendarScreen(
                     }
 
                     CalendarView.MONTH -> {
-                        MonthlyCalendar(
-                            selectedDate = selectedDate,
-                            events = events,
-                            onDateSelected = { date ->
-                                calendarViewModel.selectDate(date)
-                                calendarViewModel.selectMonth(YearMonth.from(date))
-                            },
-                            onEventClick = { event ->
-                                selectedEvent = event
-                            }
-                        )
+                        key(YearMonth.from(selectedDate)) {
+                            MonthlyCalendar(
+                                selectedDate = selectedDate,
+                                events = events,
+                                onDateSelected = { date ->
+                                    calendarViewModel.selectDate(date)
+                                },
+                                onEventClick = { event ->
+                                    selectedEvent = event
+                                }
+                            )
+                        }
                     }
 
                     CalendarView.WEEK -> {
