@@ -32,15 +32,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.oktodo.ui.components.DurationPickerDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
 fun FocusScreen() {
     var selectedDuration by remember { mutableStateOf(25) }
+    var sessionDurationSeconds by remember { mutableStateOf(25 * 60) }
     var isTimerRunning by remember { mutableStateOf(false) }
-    var timeLeft by remember { mutableStateOf(25 * 60) } // en segundos
+    var timeLeft by remember { mutableStateOf(25 * 60) }
     var progress by remember { mutableStateOf(0f) }
+    var showDurationPicker by remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -122,10 +125,20 @@ fun FocusScreen() {
                     )
 
                     Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.clickable {
+                            if (!isTimerRunning) showDurationPicker = true
+                        }
                     ) {
+                        val displayHours = timeLeft / 3600
+                        val displayMinutes = (timeLeft % 3600) / 60
+                        val displaySeconds = timeLeft % 60
                         Text(
-                            text = "${timeLeft / 60}:${String.format("%02d", timeLeft % 60)}",
+                            text = if (displayHours > 0) {
+                                "${displayHours}:${String.format("%02d", displayMinutes)}:${String.format("%02d", displaySeconds)}"
+                            } else {
+                                "${displayMinutes}:${String.format("%02d", displaySeconds)}"
+                            },
                             style = MaterialTheme.typography.displayMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -162,7 +175,7 @@ fun FocusScreen() {
                                 while (isTimerRunning && timeLeft > 0) {
                                     delay(1000)
                                     timeLeft--
-                                    progress = 1f - (timeLeft.toFloat() / (selectedDuration * 60))
+                                    progress = 1f - (timeLeft.toFloat() / sessionDurationSeconds)
                                 }
                                 if (timeLeft == 0) {
                                     isTimerRunning = false
@@ -183,21 +196,21 @@ fun FocusScreen() {
                 }
 
                 // Botón de reinicio
-                IconButton(
+                FloatingActionButton(
                     onClick = {
                         isTimerRunning = false
-                        timeLeft = selectedDuration * 60
+                        timeLeft = sessionDurationSeconds
                         progress = 0f
                     },
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = CircleShape,
+                    modifier = Modifier.size(72.dp)
                 ) {
                     Icon(
                         Icons.Default.Refresh,
                         contentDescription = "Reiniciar",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(32.dp)
                     )
                 }
             }
@@ -240,6 +253,7 @@ fun FocusScreen() {
                                 onClick = {
                                     if (!isTimerRunning) {
                                         selectedDuration = duration
+                                        sessionDurationSeconds = duration * 60
                                         timeLeft = duration * 60
                                         progress = 0f
                                     }
@@ -311,6 +325,21 @@ fun FocusScreen() {
         item {
             Spacer(modifier = Modifier.height(80.dp))
         }
+    }
+
+    if (showDurationPicker) {
+        DurationPickerDialog(
+            initialSeconds = sessionDurationSeconds,
+            onDismiss = { showDurationPicker = false },
+            onConfirm = { totalSeconds ->
+                sessionDurationSeconds = totalSeconds
+                selectedDuration = totalSeconds / 60
+                timeLeft = totalSeconds
+                progress = 0f
+                isTimerRunning = false
+                showDurationPicker = false
+            }
+        )
     }
 }
 
