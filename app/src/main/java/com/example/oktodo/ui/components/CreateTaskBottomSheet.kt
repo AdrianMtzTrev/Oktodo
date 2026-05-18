@@ -25,15 +25,16 @@ import kotlinx.coroutines.delay
 @Composable
 fun CreateTaskBottomSheet(
     onDismiss: () -> Unit,
-    onTaskCreated: (String, String) -> Unit
+    onTaskCreated: (String, String, String) -> Unit
 ) {
     var taskTitle by remember { mutableStateOf("") }
     var taskTime by remember { mutableStateOf("") }
     var showTimePicker by remember { mutableStateOf(false) }
+    var selectedPriority by remember { mutableStateOf("Media") }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val timePickerState = rememberTimePickerState(initialHour = 12, initialMinute = 0)
 
-    // Auto-focus en el campo de título cuando se abre
     LaunchedEffect(Unit) {
         delay(100)
         focusRequester.requestFocus()
@@ -62,7 +63,6 @@ fun CreateTaskBottomSheet(
                 .fillMaxWidth()
                 .padding(24.dp)
         ) {
-            // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -74,7 +74,6 @@ fun CreateTaskBottomSheet(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-
                 IconButton(onClick = onDismiss) {
                     Icon(
                         Icons.Default.Close,
@@ -86,7 +85,6 @@ fun CreateTaskBottomSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Campo de título
             OutlinedTextField(
                 value = taskTitle,
                 onValueChange = { taskTitle = it },
@@ -106,13 +104,12 @@ fun CreateTaskBottomSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo de hora
             OutlinedTextField(
                 value = taskTime,
                 onValueChange = { taskTime = it },
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text("Hora límite") },
-                placeholder = { Text("Ej: 10:00 AM") },
+                placeholder = { Text("Ej: 14:30") },
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -121,25 +118,60 @@ fun CreateTaskBottomSheet(
                 ),
                 trailingIcon = {
                     IconButton(onClick = { showTimePicker = true }) {
-                        // En el código:
                         Icon(
-                            Icons.Outlined.AccessTime,  // Cambiado de AccessTime a Icons.Outlined.AccessTime
+                            Icons.Outlined.AccessTime,
                             contentDescription = "Seleccionar hora",
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
+                readOnly = true,
                 singleLine = true
             )
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Prioridad",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf("Baja", "Media", "Alta").forEach { priority ->
+                    FilterChip(
+                        selected = selectedPriority == priority,
+                        onClick = { selectedPriority = priority },
+                        label = { Text(priority) },
+                        modifier = Modifier.weight(1f),
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = when (priority) {
+                                "Alta" -> MaterialTheme.colorScheme.errorContainer
+                                "Baja" -> MaterialTheme.colorScheme.tertiaryContainer
+                                else -> MaterialTheme.colorScheme.primaryContainer
+                            },
+                            selectedLabelColor = when (priority) {
+                                "Alta" -> MaterialTheme.colorScheme.onErrorContainer
+                                "Baja" -> MaterialTheme.colorScheme.onTertiaryContainer
+                                else -> MaterialTheme.colorScheme.onPrimaryContainer
+                            }
+                        )
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Botón de crear
             Button(
                 onClick = {
                     keyboardController?.hide()
                     if (taskTitle.isNotBlank() && taskTime.isNotBlank()) {
-                        onTaskCreated(taskTitle, taskTime)
+                        onTaskCreated(taskTitle, taskTime, selectedPriority)
                         onDismiss()
                     }
                 },
@@ -165,11 +197,27 @@ fun CreateTaskBottomSheet(
         }
     }
 
-    // Placeholder para el selector de hora
     if (showTimePicker) {
-        // Aquí puedes implementar un TimePicker real después
-        LaunchedEffect(showTimePicker) {
-            showTimePicker = false
-        }
+        AlertDialog(
+            onDismissRequest = { showTimePicker = false },
+            title = { Text("Seleccionar hora límite") },
+            text = {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TimePicker(state = timePickerState)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    taskTime = "%02d:%02d".format(timePickerState.hour, timePickerState.minute)
+                    showTimePicker = false
+                }) { Text("Aceptar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePicker = false }) { Text("Cancelar") }
+            }
+        )
     }
 }

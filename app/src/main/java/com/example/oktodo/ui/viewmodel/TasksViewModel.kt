@@ -32,15 +32,20 @@ class TasksViewModel @Inject constructor(
         .map { it.points }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
-    fun addTask(title: String, time: String) {
+    fun addTask(title: String, time: String, priority: String = "Media") {
         if (title.isBlank() || time.isBlank()) return
+        val color = when (priority) {
+            "Alta" -> Color(0xFFEF4444)
+            "Baja" -> Color(0xFF3B82F6)
+            else  -> Color(0xFF7C3AED)
+        }
         viewModelScope.launch {
             repository.add(
                 Task(
                     title = title,
                     time = time,
-                    priority = "Media",
-                    color = Color(0xFF7C3AED),
+                    priority = priority,
+                    color = color,
                     isCompleted = false,
                     pointsReward = 10
                 )

@@ -113,7 +113,8 @@ fun ShopItemEntity.toDomain() = ShopItem(
     title = title,
     emoji = emoji,
     price = price,
-    category = category
+    category = category,
+    isPurchased = isPurchased
 )
 
 fun ShopItem.toEntity(isPurchased: Boolean = false) = ShopItemEntity(

@@ -27,5 +27,6 @@ data class ShopItem(
     val title: String,
     val emoji: String,
     val price: Int,
-    val category: String
+    val category: String,
+    val isPurchased: Boolean = false
 )

@@ -67,13 +67,15 @@ fun DashboardScreen(
     val showBottomSheet by tasksViewModel.showBottomSheet.collectAsState()
     val points by tasksViewModel.points.collectAsState()
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
+    val pendingCount = tasks.count { !it.isCompleted }
 
     Scaffold(
         topBar = {
             DashboardHeader(
                 onThemeToggle = { themeViewModel.toggleTheme() },
                 isDarkMode = isDarkMode,
-                points = points
+                points = points,
+                pendingCount = pendingCount
             )
         },
         floatingActionButton = {
@@ -95,8 +97,8 @@ fun DashboardScreen(
     if (showBottomSheet) {
         CreateTaskBottomSheet(
             onDismiss = { tasksViewModel.hideBottomSheet() },
-            onTaskCreated = { title, time ->
-                tasksViewModel.addTask(title, time)
+            onTaskCreated = { title, time, priority ->
+                tasksViewModel.addTask(title, time, priority)
             }
         )
     }
@@ -106,7 +108,8 @@ fun DashboardScreen(
 fun DashboardHeader(
     onThemeToggle: () -> Unit,
     isDarkMode: Boolean,
-    points: Int
+    points: Int,
+    pendingCount: Int = 0
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -143,8 +146,8 @@ fun DashboardHeader(
                 IconButton(onClick = {}) {
                     BadgedBox(
                         badge = {
-                            Badge {
-                                Text("3")
+                            if (pendingCount > 0) {
+                                Badge { Text(pendingCount.toString()) }
                             }
                         }
                     ) {

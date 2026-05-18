@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -138,12 +139,26 @@ fun OctoShopScreen(
 
                             Spacer(modifier = Modifier.height(10.dp))
 
-                            Button(
-                                onClick = {},
-                                shape = RoundedCornerShape(14.dp),
-                                enabled = uiState.points >= item.price
-                            ) {
-                                Text("⭐ ${item.price}")
+                            if (item.isPurchased) {
+                                Button(
+                                    onClick = {},
+                                    shape = RoundedCornerShape(14.dp),
+                                    enabled = false,
+                                    colors = ButtonDefaults.buttonColors(
+                                        disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                        disabledContentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                    )
+                                ) {
+                                    Text("✓ Comprado")
+                                }
+                            } else {
+                                Button(
+                                    onClick = { viewModel.purchaseItem(item.id) },
+                                    shape = RoundedCornerShape(14.dp),
+                                    enabled = uiState.points >= item.price
+                                ) {
+                                    Text("⭐ ${item.price}")
+                                }
                             }
                         }
                     }
