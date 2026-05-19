@@ -26,6 +26,7 @@ import com.example.oktodo.ui.components.FriendCard
 import com.example.oktodo.ui.components.FriendsTabSwitcher
 import com.example.oktodo.ui.components.FriendsTopBar
 import com.example.oktodo.ui.components.GroupCard
+import com.example.oktodo.ui.components.SearchFriendBottomSheet
 import com.example.oktodo.ui.components.SharedEventCard
 import com.example.oktodo.ui.viewmodel.FriendsViewModel
 
@@ -62,10 +63,12 @@ private fun SocialContent(
     val friends by viewModel.friends.collectAsState()
     val groups by viewModel.groups.collectAsState()
     val events by viewModel.sharedEvents.collectAsState()
+    val searchResults by viewModel.searchResults.collectAsState()
 
     var selectedTab by remember { mutableStateOf(0) }
     var showCreateGroupSheet by remember { mutableStateOf(false) }
     var showCreateEventSheet by remember { mutableStateOf(false) }
+    var showSearchFriendSheet by remember { mutableStateOf(false) }
 
     val background = MaterialTheme.colorScheme.background
     val textMain = MaterialTheme.colorScheme.onBackground
@@ -99,9 +102,9 @@ private fun SocialContent(
                             Icon(Icons.Outlined.People, contentDescription = null, tint = textMain)
                         },
                         title = "Mis Amigos",
-                        action = "Crear grupo",
+                        action = "Buscar amigo",
                         actionColor = accent,
-                        onActionClick = { showCreateGroupSheet = true }
+                        onActionClick = { showSearchFriendSheet = true }
                     )
 
                     Spacer(modifier = Modifier.height(14.dp))
@@ -206,6 +209,18 @@ private fun SocialContent(
                     location = location
                 )
                 showCreateEventSheet = false
+            }
+        )
+    }
+
+    if (showSearchFriendSheet) {
+        SearchFriendBottomSheet(
+            searchResults = searchResults,
+            onQueryChange = { viewModel.setSearchQuery(it) },
+            onAddFriend = { /* TODO: enviar solicitud de amistad */ },
+            onDismiss = {
+                showSearchFriendSheet = false
+                viewModel.setSearchQuery("")
             }
         )
     }

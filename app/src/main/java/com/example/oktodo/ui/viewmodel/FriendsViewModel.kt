@@ -8,9 +8,13 @@ import com.example.oktodo.ui.model.Group
 import com.example.oktodo.ui.model.SharedEvent
 import com.example.oktodo.ui.model.UserProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -27,6 +31,7 @@ data class SocialState(
     val isRegistering: Boolean = false
 )
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class FriendsViewModel @Inject constructor(
     private val repository: FriendsRepository,
@@ -45,6 +50,18 @@ class FriendsViewModel @Inject constructor(
 
     private val _socialState = MutableStateFlow(SocialState())
     val socialState: StateFlow<SocialState> = _socialState
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery
+
+    val searchResults: StateFlow<List<UserProfile>> = _searchQuery
+        .flatMapLatest { query ->
+            if (query.isBlank()) flowOf(emptyList())
+            else repository.searchUsers(query)
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun setSearchQuery(query: String) { _searchQuery.value = query }
 
     init {
         viewModelScope.launch { repository.seedIfEmpty() }
