@@ -8,7 +8,7 @@ data class ProfileUiState(
     val avatarEmoji: String = "🐙",
     val points: Int = 0,
     val completedTasks: Int = 0,
-    val streakDays: Int = 5,
+    val streakDays: Int = 0,
     val weeklyGoal: Int = 10,
     val weeklyCompleted: Int = 0,
     val achievements: List<Achievement> = listOf(

@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,10 +19,11 @@ data class UserPreferences(
     val avatarEmoji: String = "🐙",
     val points: Int = 0,
     val completedTasks: Int = 0,
-    val streakDays: Int = 5,
+    val streakDays: Int = 0,
     val weeklyGoal: Int = 10,
     val weeklyCompleted: Int = 0,
-    val isDarkMode: Boolean = false
+    val isDarkMode: Boolean = false,
+    val lastActiveDate: String = ""
 )
 
 @Singleton
@@ -38,6 +40,7 @@ class UserPreferencesDataStore @Inject constructor(
         val WEEKLY_GOAL = intPreferencesKey("weekly_goal")
         val WEEKLY_COMPLETED = intPreferencesKey("weekly_completed")
         val DARK_MODE = booleanPreferencesKey("dark_mode")
+        val LAST_ACTIVE_DATE = stringPreferencesKey("last_active_date")
     }
 
     val preferences: Flow<UserPreferences> = context.dataStore.data.map { prefs ->
@@ -47,10 +50,11 @@ class UserPreferencesDataStore @Inject constructor(
             avatarEmoji = prefs[Keys.AVATAR] ?: "🐙",
             points = prefs[Keys.POINTS] ?: 0,
             completedTasks = prefs[Keys.COMPLETED_TASKS] ?: 0,
-            streakDays = prefs[Keys.STREAK] ?: 5,
+            streakDays = prefs[Keys.STREAK] ?: 0,
             weeklyGoal = prefs[Keys.WEEKLY_GOAL] ?: 10,
             weeklyCompleted = prefs[Keys.WEEKLY_COMPLETED] ?: 0,
-            isDarkMode = prefs[Keys.DARK_MODE] ?: false
+            isDarkMode = prefs[Keys.DARK_MODE] ?: false,
+            lastActiveDate = prefs[Keys.LAST_ACTIVE_DATE] ?: ""
         )
     }
 
@@ -79,6 +83,20 @@ class UserPreferencesDataStore @Inject constructor(
     suspend fun toggleDarkMode() {
         context.dataStore.edit { prefs ->
             prefs[Keys.DARK_MODE] = !(prefs[Keys.DARK_MODE] ?: false)
+        }
+    }
+
+    suspend fun updateStreak() {
+        val today = LocalDate.now().toString()
+        val yesterday = LocalDate.now().minusDays(1).toString()
+        context.dataStore.edit { prefs ->
+            val lastDate = prefs[Keys.LAST_ACTIVE_DATE] ?: ""
+            if (lastDate == today) return@edit
+            prefs[Keys.LAST_ACTIVE_DATE] = today
+            prefs[Keys.STREAK] = when (lastDate) {
+                yesterday -> (prefs[Keys.STREAK] ?: 0) + 1
+                else      -> 1
+            }
         }
     }
 

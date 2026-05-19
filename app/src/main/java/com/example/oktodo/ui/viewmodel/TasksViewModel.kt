@@ -62,8 +62,12 @@ class TasksViewModel @Inject constructor(
         viewModelScope.launch {
             val newState = !task.isCompleted
             repository.update(task.copy(isCompleted = newState))
-            if (newState) prefs.addPoints(task.pointsReward)
-            else prefs.addPoints(-task.pointsReward)
+            if (newState) {
+                prefs.addPoints(task.pointsReward)
+                prefs.updateStreak()
+            } else {
+                prefs.addPoints(-task.pointsReward)
+            }
         }
     }
 
