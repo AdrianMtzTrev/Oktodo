@@ -14,9 +14,10 @@ import com.example.oktodo.data.local.entity.*
         GroupEntity::class,
         SharedEventEntity::class,
         ShopItemEntity::class,
-        NotificationEntity::class
+        NotificationEntity::class,
+        UserProfileEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -28,4 +29,5 @@ abstract class OktodoDatabase : RoomDatabase() {
     abstract fun sharedEventDao(): SharedEventDao
     abstract fun shopItemDao(): ShopItemDao
     abstract fun notificationDao(): NotificationDao
+    abstract fun userProfileDao(): UserProfileDao
 }

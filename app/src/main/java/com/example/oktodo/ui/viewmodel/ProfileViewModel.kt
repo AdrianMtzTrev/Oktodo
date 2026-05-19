@@ -42,16 +42,17 @@ class ProfileViewModel @Inject constructor(
                 streakDays = p.streakDays,
                 weeklyGoal = p.weeklyGoal,
                 weeklyCompleted = p.weeklyCompleted,
-                achievements = listOf(
-                    Achievement("🏆", "Primera tarea",   p.completedTasks >= 1),
-                    Achievement("✅", "Dedicado",         p.completedTasks >= 10),
-                    Achievement("🚀", "Imparable",        p.completedTasks >= 50),
-                    Achievement("🔥", "Racha de 5 días",  p.streakDays >= 5),
-                    Achievement("🌟", "Racha de 14 días", p.streakDays >= 14),
-                    Achievement("⭐", "100 puntos",       p.points >= 100),
-                    Achievement("💎", "500 puntos",       p.points >= 500),
-                    Achievement("🎯", "Meta semanal",     p.weeklyCompleted >= p.weeklyGoal)
-                )
+                    achievements = listOf(
+                        Achievement("🏆", "Primera tarea",   p.completedTasks >= 1),
+                        Achievement("✅", "Dedicado",         p.completedTasks >= 10),
+                        Achievement("🚀", "Imparable",        p.completedTasks >= 50),
+                        Achievement("🔥", "Racha de 5 días",  p.streakDays >= 5),
+                        Achievement("🌟", "Racha de 14 días", p.streakDays >= 14),
+                        Achievement("⭐", "100 puntos",       p.points >= 100),
+                        Achievement("💎", "500 puntos",       p.points >= 500),
+                        Achievement("🎯", "Meta semanal",     p.weeklyCompleted >= p.weeklyGoal)
+                    ),
+                    isSocialRegistered = p.isSocialRegistered
             )
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ProfileUiState())

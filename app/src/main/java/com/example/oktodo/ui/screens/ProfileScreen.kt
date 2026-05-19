@@ -111,7 +111,8 @@ fun ProfileScreen(
                 username = uiState.username,
                 avatarEmoji = uiState.avatarEmoji,
                 bannerBrush = bannerBrush,
-                equippedEmoji = equippedItem?.emoji
+                equippedEmoji = equippedItem?.emoji,
+                showUsername = uiState.isSocialRegistered
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -438,7 +439,8 @@ private fun ProfileHeader(
     username: String,
     avatarEmoji: String,
     bannerBrush: Brush,
-    equippedEmoji: String? = null
+    equippedEmoji: String? = null,
+    showUsername: Boolean = false
 ) {
     Box(
         modifier = Modifier.fillMaxWidth()
@@ -522,11 +524,13 @@ private fun ProfileHeader(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = "@$username",
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-                    style = MaterialTheme.typography.bodySmall
-                )
+                if (showUsername && username.isNotBlank()) {
+                    Text(
+                        text = "@$username",
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
         }
     }

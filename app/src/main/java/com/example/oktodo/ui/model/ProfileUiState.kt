@@ -4,14 +4,15 @@ package com.example.oktodo.ui.model
 
 data class ProfileUiState(
     val displayName: String = "Usuario OKTodo",
-    val username: String = "usuario_oktodo",
+    val username: String = "",
     val avatarEmoji: String = "🐙",
     val points: Int = 0,
     val completedTasks: Int = 0,
     val streakDays: Int = 0,
     val weeklyGoal: Int = 10,
     val weeklyCompleted: Int = 0,
-    val achievements: List<Achievement> = emptyList()
+    val achievements: List<Achievement> = emptyList(),
+    val isSocialRegistered: Boolean = false
 )
 
 data class Achievement(

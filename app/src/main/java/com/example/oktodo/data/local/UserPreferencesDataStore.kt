@@ -15,7 +15,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 
 data class UserPreferences(
     val displayName: String = "Usuario OKTodo",
-    val username: String = "usuario_oktodo",
+    val username: String = "",
     val avatarEmoji: String = "🐙",
     val points: Int = 0,
     val completedTasks: Int = 0,
@@ -23,7 +23,9 @@ data class UserPreferences(
     val weeklyGoal: Int = 10,
     val weeklyCompleted: Int = 0,
     val isDarkMode: Boolean = false,
-    val lastActiveDate: String = ""
+    val lastActiveDate: String = "",
+    val isSocialRegistered: Boolean = false,
+    val userId: String = ""
 )
 
 @Singleton
@@ -42,12 +44,14 @@ class UserPreferencesDataStore @Inject constructor(
         val DARK_MODE = booleanPreferencesKey("dark_mode")
         val LAST_ACTIVE_DATE = stringPreferencesKey("last_active_date")
         val NOTIFIED_ACHIEVEMENTS = stringPreferencesKey("notified_achievements")
+        val IS_SOCIAL_REGISTERED = booleanPreferencesKey("is_social_registered")
+        val USER_ID = stringPreferencesKey("user_id")
     }
 
     val preferences: Flow<UserPreferences> = context.dataStore.data.map { prefs ->
         UserPreferences(
-            displayName = prefs[Keys.DISPLAY_NAME] ?: prefs[Keys.USERNAME] ?: "Usuario OKTodo",
-            username = prefs[Keys.USERNAME] ?: "usuario_oktodo",
+            displayName = prefs[Keys.DISPLAY_NAME] ?: "Usuario OKTodo",
+            username = prefs[Keys.USERNAME] ?: "",
             avatarEmoji = prefs[Keys.AVATAR] ?: "🐙",
             points = prefs[Keys.POINTS] ?: 0,
             completedTasks = prefs[Keys.COMPLETED_TASKS] ?: 0,
@@ -55,7 +59,9 @@ class UserPreferencesDataStore @Inject constructor(
             weeklyGoal = prefs[Keys.WEEKLY_GOAL] ?: 10,
             weeklyCompleted = prefs[Keys.WEEKLY_COMPLETED] ?: 0,
             isDarkMode = prefs[Keys.DARK_MODE] ?: false,
-            lastActiveDate = prefs[Keys.LAST_ACTIVE_DATE] ?: ""
+            lastActiveDate = prefs[Keys.LAST_ACTIVE_DATE] ?: "",
+            isSocialRegistered = prefs[Keys.IS_SOCIAL_REGISTERED] ?: false,
+            userId = prefs[Keys.USER_ID] ?: ""
         )
     }
 
@@ -64,6 +70,21 @@ class UserPreferencesDataStore @Inject constructor(
             prefs[Keys.DISPLAY_NAME] = displayName
             prefs[Keys.USERNAME] = username
             prefs[Keys.AVATAR] = avatarEmoji
+        }
+    }
+
+    suspend fun registerSocial(
+        userId: String,
+        displayName: String,
+        username: String,
+        avatarEmoji: String
+    ) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.USER_ID] = userId
+            prefs[Keys.DISPLAY_NAME] = displayName
+            prefs[Keys.USERNAME] = username
+            prefs[Keys.AVATAR] = avatarEmoji
+            prefs[Keys.IS_SOCIAL_REGISTERED] = true
         }
     }
 

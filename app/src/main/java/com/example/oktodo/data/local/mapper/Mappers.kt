@@ -117,6 +117,22 @@ fun NotificationEntity.toDomain() = Notification(
     createdAt = createdAt
 )
 
+// ── UserProfile ───────────────────────────────────────
+fun UserProfileEntity.toDomain() = UserProfile(
+    id = id,
+    displayName = displayName,
+    username = username,
+    avatarEmoji = avatarEmoji,
+    createdAt = createdAt
+)
+fun UserProfile.toEntity() = UserProfileEntity(
+    id = id,
+    displayName = displayName,
+    username = username,
+    avatarEmoji = avatarEmoji,
+    createdAt = createdAt
+)
+
 // ── ShopItem ──────────────────────────────────────────
 fun ShopItemEntity.toDomain() = ShopItem(
     id = id,
