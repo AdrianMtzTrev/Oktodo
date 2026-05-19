@@ -1,34 +1,14 @@
 package com.example.oktodo.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,12 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.oktodo.ui.viewmodel.ProfileViewModel
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 
 @Composable
-fun EditProfileScreen(
+fun SettingsScreen(
     navController: NavController,
     viewModel: ProfileViewModel
 ) {
@@ -51,18 +28,16 @@ fun EditProfileScreen(
     var displayName by remember { mutableStateOf(uiState.displayName) }
     var username by remember { mutableStateOf(uiState.username) }
     var selectedAvatar by remember { mutableStateOf(uiState.avatarEmoji) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
-    val avatarOptions = listOf("🐙","🐱","🐶","🦊","🐼","🐸","🦄","🐻")
+    val avatarOptions = listOf("🐙", "🐱", "🐶", "🦊", "🐼", "🐸", "🦄", "🐻")
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            EditProfileHeader(
-                onBackClick = { navController.popBackStack() }
-            )
+            SettingsHeader(onBackClick = { navController.popBackStack() })
         }
     ) { innerPadding ->
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -70,7 +45,6 @@ fun EditProfileScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-
             Text(
                 text = "Foto de perfil",
                 fontWeight = FontWeight.Bold,
@@ -79,20 +53,10 @@ fun EditProfileScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 avatarOptions.chunked(4).forEach { rowItems ->
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         rowItems.forEach { avatar ->
-
                             FilterChip(
                                 selected = selectedAvatar == avatar,
                                 onClick = { selectedAvatar = avatar },
@@ -147,27 +111,20 @@ fun EditProfileScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
-
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
                     Surface(
                         modifier = Modifier.size(100.dp),
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.primaryContainer
                     ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                             Text(
                                 text = selectedAvatar,
                                 style = MaterialTheme.typography.displayMedium
@@ -199,7 +156,6 @@ fun EditProfileScreen(
                         username = username.ifBlank { "usuario_oktodo" },
                         avatarEmoji = selectedAvatar
                     )
-
                     navController.popBackStack()
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -211,29 +167,88 @@ fun EditProfileScreen(
             ) {
                 Text("Guardar cambios")
             }
+
+            if (uiState.isSocialRegistered) {
+                Spacer(modifier = Modifier.height(32.dp))
+
+                HorizontalDivider()
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "Cuenta social",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Conectado como @${uiState.username}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedButton(
+                    onClick = { showLogoutDialog = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Cerrar sesión", fontWeight = FontWeight.Bold)
+                }
+            }
         }
+    }
+
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Cerrar sesión") },
+            text = {
+                Text("Perderás acceso a amigos, grupos y eventos compartidos. Tu progreso local (tareas, puntos, racha) se conservará.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.logoutSocial()
+                        showLogoutDialog = false
+                        navController.popBackStack()
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Cerrar sesión")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
 
 @Composable
-fun EditProfileHeader(
-    onBackClick: () -> Unit
-) {
-
+fun SettingsHeader(onBackClick: () -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.background
     ) {
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             IconButton(onClick = onBackClick) {
-
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                     contentDescription = "Volver",
@@ -244,7 +259,7 @@ fun EditProfileHeader(
             Spacer(modifier = Modifier.width(8.dp))
 
             Text(
-                text = "Editar perfil",
+                text = "Configuración",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground

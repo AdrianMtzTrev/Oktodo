@@ -141,4 +141,10 @@ class UserPreferencesDataStore @Inject constructor(
             if (current >= cost) prefs[Keys.POINTS] = current - cost
         }
     }
+
+    suspend fun logoutSocial() {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.IS_SOCIAL_REGISTERED] = false
+        }
+    }
 }

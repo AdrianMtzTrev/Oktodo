@@ -79,7 +79,7 @@ fun ProfileScreen(
         topBar = {
             ProfileHeaderBar(
                 points = uiState.points,
-                onEditClick = { navController?.navigate("edit_profile") },
+                onEditClick = { navController?.navigate("settings") },
                 onNotificationsClick = { navController?.navigate("notifications") }
             )
         }

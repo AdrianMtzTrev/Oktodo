@@ -121,4 +121,8 @@ class ProfileViewModel @Inject constructor(
     fun unequipItem(itemId: String) {
         viewModelScope.launch { shopItemRepository.unequip(itemId) }
     }
+
+    fun logoutSocial() {
+        viewModelScope.launch { prefs.logoutSocial() }
+    }
 }

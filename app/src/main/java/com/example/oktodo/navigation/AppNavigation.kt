@@ -27,13 +27,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.oktodo.ui.screens.CalendarScreen
 import com.example.oktodo.ui.screens.DashboardScreen
-import com.example.oktodo.ui.screens.EditProfileScreen
 import com.example.oktodo.ui.screens.FocusScreen
 import com.example.oktodo.ui.screens.FriendsScreen
 import com.example.oktodo.ui.screens.GroupDetailScreen
 import com.example.oktodo.ui.screens.NotificationsScreen
 import com.example.oktodo.ui.screens.OctoShopScreen
 import com.example.oktodo.ui.screens.ProfileScreen
+import com.example.oktodo.ui.screens.SettingsScreen
 import com.example.oktodo.ui.viewmodel.CalendarViewModel
 import com.example.oktodo.ui.viewmodel.FriendsViewModel
 import com.example.oktodo.ui.viewmodel.NotificationViewModel
@@ -97,8 +97,8 @@ fun AppNavigation(themeViewModel: ThemeViewModel) {
                     onBack = { navController.popBackStack() }
                 )
             }
-            composable("edit_profile") {
-                EditProfileScreen(
+            composable("settings") {
+                SettingsScreen(
                     navController = navController,
                     viewModel = profileViewModel
                 )
@@ -135,7 +135,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                 destination.route == item.route ||
                     (item.route == "friends" && destination.route?.startsWith("group_detail") == true) ||
                     (item.route == "profile" && (
-                        destination.route == "edit_profile" || destination.route == "octo_shop"
+                        destination.route == "settings" || destination.route == "octo_shop"
                     ))
             } == true
 
