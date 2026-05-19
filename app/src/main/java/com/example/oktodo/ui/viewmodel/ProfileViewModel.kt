@@ -3,11 +3,14 @@ package com.example.oktodo.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.oktodo.data.local.UserPreferencesDataStore
+import com.example.oktodo.data.repository.NotificationRepository
 import com.example.oktodo.data.repository.ShopItemRepository
 import com.example.oktodo.ui.model.Achievement
+import com.example.oktodo.ui.model.Notification
 import com.example.oktodo.ui.model.ProfileUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -16,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val prefs: UserPreferencesDataStore,
-    private val shopItemRepository: ShopItemRepository
+    private val shopItemRepository: ShopItemRepository,
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
     val uiState = prefs.preferences
@@ -49,6 +53,30 @@ class ProfileViewModel @Inject constructor(
 
     init {
         viewModelScope.launch { shopItemRepository.seedIfEmpty() }
+        observeNewAchievements()
+    }
+
+    private fun observeNewAchievements() {
+        viewModelScope.launch {
+            combine(
+                uiState.map { it.achievements.filter { a -> a.isUnlocked }.map { a -> a.title } },
+                prefs.notifiedAchievements
+            ) { unlockedTitles, notified ->
+                unlockedTitles - notified
+            }.collect { newTitles ->
+                for (title in newTitles) {
+                    val achievement = uiState.value.achievements.find { it.title == title } ?: continue
+                    notificationRepository.add(
+                        Notification(
+                            title = "Logro desbloqueado",
+                            message = "Has desbloqueado el logro \"${achievement.title}\"",
+                            icon = achievement.icon
+                        )
+                    )
+                    prefs.markAchievementNotified(title)
+                }
+            }
+        }
     }
 
     fun updateProfile(displayName: String, username: String, avatarEmoji: String) {

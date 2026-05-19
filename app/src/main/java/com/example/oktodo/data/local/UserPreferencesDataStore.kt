@@ -41,6 +41,7 @@ class UserPreferencesDataStore @Inject constructor(
         val WEEKLY_COMPLETED = intPreferencesKey("weekly_completed")
         val DARK_MODE = booleanPreferencesKey("dark_mode")
         val LAST_ACTIVE_DATE = stringPreferencesKey("last_active_date")
+        val NOTIFIED_ACHIEVEMENTS = stringPreferencesKey("notified_achievements")
     }
 
     val preferences: Flow<UserPreferences> = context.dataStore.data.map { prefs ->
@@ -97,6 +98,19 @@ class UserPreferencesDataStore @Inject constructor(
                 yesterday -> (prefs[Keys.STREAK] ?: 0) + 1
                 else      -> 1
             }
+        }
+    }
+
+    val notifiedAchievements: Flow<Set<String>> = context.dataStore.data.map { prefs ->
+        val raw = prefs[Keys.NOTIFIED_ACHIEVEMENTS] ?: ""
+        if (raw.isBlank()) emptySet() else raw.split(",").toSet()
+    }
+
+    suspend fun markAchievementNotified(title: String) {
+        context.dataStore.edit { prefs ->
+            val current = prefs[Keys.NOTIFIED_ACHIEVEMENTS] ?: ""
+            val titles = if (current.isBlank()) emptySet() else current.split(",").toSet()
+            prefs[Keys.NOTIFIED_ACHIEVEMENTS] = (titles + title).joinToString(",")
         }
     }
 
