@@ -31,10 +31,12 @@ import com.example.oktodo.ui.screens.EditProfileScreen
 import com.example.oktodo.ui.screens.FocusScreen
 import com.example.oktodo.ui.screens.FriendsScreen
 import com.example.oktodo.ui.screens.GroupDetailScreen
+import com.example.oktodo.ui.screens.NotificationsScreen
 import com.example.oktodo.ui.screens.OctoShopScreen
 import com.example.oktodo.ui.screens.ProfileScreen
 import com.example.oktodo.ui.viewmodel.CalendarViewModel
 import com.example.oktodo.ui.viewmodel.FriendsViewModel
+import com.example.oktodo.ui.viewmodel.NotificationViewModel
 import com.example.oktodo.ui.viewmodel.ProfileViewModel
 import com.example.oktodo.ui.viewmodel.TasksViewModel
 import com.example.oktodo.ui.viewmodel.ThemeViewModel
@@ -46,6 +48,7 @@ fun AppNavigation(themeViewModel: ThemeViewModel) {
     val calendarViewModel: CalendarViewModel = hiltViewModel()
     val friendsViewModel: FriendsViewModel = hiltViewModel()
     val profileViewModel: ProfileViewModel = hiltViewModel()
+    val notificationViewModel: NotificationViewModel = hiltViewModel()
 
     Scaffold(
         bottomBar = { BottomNavigationBar(navController = navController) }
@@ -59,7 +62,8 @@ fun AppNavigation(themeViewModel: ThemeViewModel) {
                 DashboardScreen(
                     navController = navController,
                     themeViewModel = themeViewModel,
-                    tasksViewModel = tasksViewModel
+                    tasksViewModel = tasksViewModel,
+                    notificationViewModel = notificationViewModel
                 )
             }
             composable("calendario") {
@@ -86,6 +90,11 @@ fun AppNavigation(themeViewModel: ThemeViewModel) {
                 ProfileScreen(
                     navController = navController,
                     viewModel = profileViewModel
+                )
+            }
+            composable("notifications") {
+                NotificationsScreen(
+                    onBack = { navController.popBackStack() }
                 )
             }
             composable("edit_profile") {

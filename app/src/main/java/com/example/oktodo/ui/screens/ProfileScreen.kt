@@ -17,12 +17,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -75,7 +77,8 @@ fun ProfileScreen(
         topBar = {
             ProfileHeaderBar(
                 points = uiState.points,
-                onEditClick = { navController?.navigate("edit_profile") }
+                onEditClick = { navController?.navigate("edit_profile") },
+                onNotificationsClick = { navController?.navigate("notifications") }
             )
         }
     ) { innerPadding ->
@@ -384,7 +387,8 @@ fun ProfileScreen(
 @Composable
 fun ProfileHeaderBar(
     points: Int,
-    onEditClick: () -> Unit
+    onEditClick: () -> Unit,
+    onNotificationsClick: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -399,17 +403,27 @@ fun ProfileHeaderBar(
         ) {
             RewardPill(points = points)
 
-            FilledIconButton(
-                onClick = onEditClick,
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Edit,
-                    contentDescription = "Editar perfil"
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onNotificationsClick) {
+                    Icon(
+                        imageVector = Icons.Outlined.Notifications,
+                        contentDescription = "Notificaciones",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                FilledIconButton(
+                    onClick = onEditClick,
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Edit,
+                        contentDescription = "Editar perfil"
+                    )
+                }
             }
         }
     }

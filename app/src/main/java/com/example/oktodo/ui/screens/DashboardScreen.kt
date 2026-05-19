@@ -58,6 +58,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.oktodo.ui.components.CreateTaskBottomSheet
 import com.example.oktodo.ui.model.Task
+import com.example.oktodo.ui.viewmodel.NotificationViewModel
 import com.example.oktodo.ui.viewmodel.TasksViewModel
 import com.example.oktodo.ui.viewmodel.ThemeViewModel
 import java.util.Calendar
@@ -66,13 +67,15 @@ import java.util.Calendar
 fun DashboardScreen(
     navController: NavController,
     themeViewModel: ThemeViewModel,
-    tasksViewModel: TasksViewModel
+    tasksViewModel: TasksViewModel,
+    notificationViewModel: NotificationViewModel
 ) {
     val tasks by tasksViewModel.tasks.collectAsState()
     val showBottomSheet by tasksViewModel.showBottomSheet.collectAsState()
     val points by tasksViewModel.points.collectAsState()
     val userName by tasksViewModel.displayName.collectAsState()
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
+    val unreadNotifications by notificationViewModel.unreadCount.collectAsState()
     val pendingCount = tasks.count { !it.isCompleted }
 
     Scaffold(
@@ -81,7 +84,8 @@ fun DashboardScreen(
                 onThemeToggle = { themeViewModel.toggleTheme() },
                 isDarkMode = isDarkMode,
                 points = points,
-                pendingCount = pendingCount
+                notificationCount = unreadNotifications,
+                onNotificationsClick = { navController.navigate("notifications") }
             )
         },
         floatingActionButton = {
@@ -116,7 +120,8 @@ fun DashboardHeader(
     onThemeToggle: () -> Unit,
     isDarkMode: Boolean,
     points: Int,
-    pendingCount: Int = 0
+    notificationCount: Int = 0,
+    onNotificationsClick: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -150,11 +155,11 @@ fun DashboardHeader(
                     )
                 }
 
-                IconButton(onClick = {}) {
+                IconButton(onClick = onNotificationsClick) {
                     BadgedBox(
                         badge = {
-                            if (pendingCount > 0) {
-                                Badge { Text(pendingCount.toString()) }
+                            if (notificationCount > 0) {
+                                Badge { Text(notificationCount.toString()) }
                             }
                         }
                     ) {

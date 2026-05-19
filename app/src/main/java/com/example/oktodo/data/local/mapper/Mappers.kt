@@ -107,6 +107,16 @@ fun SharedEvent.toEntity() = SharedEventEntity(
     participantsJoined = participants.joinToString(",")
 )
 
+// ── Notification ──────────────────────────────────────
+fun NotificationEntity.toDomain() = Notification(
+    id = id,
+    title = title,
+    message = message,
+    icon = icon,
+    isRead = isRead,
+    createdAt = createdAt
+)
+
 // ── ShopItem ──────────────────────────────────────────
 fun ShopItemEntity.toDomain() = ShopItem(
     id = id,
