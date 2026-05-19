@@ -17,6 +17,8 @@ class ShopItemRepository @Inject constructor(
 ) {
     val items: Flow<List<ShopItem>> = dao.getAllItems().map { list -> list.map { it.toDomain() } }
 
+    val equippedItem: Flow<ShopItem?> = items.map { list -> list.find { it.isEquipped } }
+
     suspend fun purchase(item: ShopItem, userPoints: Int): Boolean {
         if (userPoints < item.price) return false
         dao.markPurchased(item.id)
@@ -24,15 +26,24 @@ class ShopItemRepository @Inject constructor(
         return true
     }
 
+    suspend fun equip(id: String) {
+        dao.unequipAll()
+        dao.equip(id)
+    }
+
+    suspend fun unequip(id: String) {
+        dao.unequip(id)
+    }
+
     suspend fun seedIfEmpty() {
         if (dao.count() > 0) return
         listOf(
-            ShopItemEntity("s1", "Sombrero mágico", "🎩", 40, "Accesorio", false),
-            ShopItemEntity("s2", "Lentes cool", "🕶️", 25, "Accesorio", false),
-            ShopItemEntity("s3", "Bufanda morada", "🧣", 30, "Ropa", false),
-            ShopItemEntity("s4", "Corona mini", "👑", 60, "Premium", false),
-            ShopItemEntity("s5", "Moño elegante", "🎀", 20, "Accesorio", false),
-            ShopItemEntity("s6", "Traje espacial", "🧑‍🚀", 90, "Skin", false)
+            ShopItemEntity("s1", "Sombrero mágico", "🎩", 40, "Accesorio", false, false),
+            ShopItemEntity("s2", "Lentes cool", "🕶️", 25, "Accesorio", false, false),
+            ShopItemEntity("s3", "Bufanda morada", "🧣", 30, "Ropa", false, false),
+            ShopItemEntity("s4", "Corona mini", "👑", 60, "Premium", false, false),
+            ShopItemEntity("s5", "Moño elegante", "🎀", 20, "Accesorio", false, false),
+            ShopItemEntity("s6", "Traje espacial", "🧑‍🚀", 90, "Skin", false, false)
         ).forEach { dao.insert(it) }
     }
 }

@@ -8,13 +8,21 @@ import com.example.oktodo.data.repository.ShopItemRepository
 import com.example.oktodo.ui.model.Achievement
 import com.example.oktodo.ui.model.Notification
 import com.example.oktodo.ui.model.ProfileUiState
+import com.example.oktodo.ui.model.ShopItem
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+sealed class PurchaseEvent {
+    data class Success(val itemName: String) : PurchaseEvent()
+    data object InsufficientPoints : PurchaseEvent()
+}
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
@@ -50,6 +58,12 @@ class ProfileViewModel @Inject constructor(
 
     val shopItems = shopItemRepository.items
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val equippedItem = shopItemRepository.equippedItem
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    private val _purchaseEvent = Channel<PurchaseEvent>(Channel.BUFFERED)
+    val purchaseEvent = _purchaseEvent.receiveAsFlow()
 
     init {
         viewModelScope.launch { shopItemRepository.seedIfEmpty() }
@@ -90,7 +104,20 @@ class ProfileViewModel @Inject constructor(
     fun purchaseItem(itemId: String) {
         viewModelScope.launch {
             val item = shopItems.value.find { it.id == itemId } ?: return@launch
-            shopItemRepository.purchase(item, uiState.value.points)
+            val success = shopItemRepository.purchase(item, uiState.value.points)
+            if (success) {
+                _purchaseEvent.send(PurchaseEvent.Success(item.title))
+            } else {
+                _purchaseEvent.send(PurchaseEvent.InsufficientPoints)
+            }
         }
+    }
+
+    fun equipItem(itemId: String) {
+        viewModelScope.launch { shopItemRepository.equip(itemId) }
+    }
+
+    fun unequipItem(itemId: String) {
+        viewModelScope.launch { shopItemRepository.unequip(itemId) }
     }
 }

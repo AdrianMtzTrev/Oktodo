@@ -43,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.oktodo.ui.viewmodel.ProfileViewModel
@@ -53,6 +54,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val equippedItem by viewModel.equippedItem.collectAsState()
 
     val background = MaterialTheme.colorScheme.background
     val surface = MaterialTheme.colorScheme.surface
@@ -108,7 +110,8 @@ fun ProfileScreen(
                 displayName = uiState.displayName,
                 username = uiState.username,
                 avatarEmoji = uiState.avatarEmoji,
-                bannerBrush = bannerBrush
+                bannerBrush = bannerBrush,
+                equippedEmoji = equippedItem?.emoji
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -434,7 +437,8 @@ private fun ProfileHeader(
     displayName: String,
     username: String,
     avatarEmoji: String,
-    bannerBrush: Brush
+    bannerBrush: Brush,
+    equippedEmoji: String? = null
 ) {
     Box(
         modifier = Modifier.fillMaxWidth()
@@ -489,6 +493,22 @@ private fun ProfileHeader(
                         text = avatarEmoji,
                         style = MaterialTheme.typography.headlineLarge
                     )
+                }
+
+                if (equippedEmoji != null) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = equippedEmoji,
+                            fontSize = 16.sp
+                        )
+                    }
                 }
             }
 

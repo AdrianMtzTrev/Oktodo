@@ -10,5 +10,6 @@ data class ShopItemEntity(
     val emoji: String,
     val price: Int,
     val category: String,
-    val isPurchased: Boolean
+    val isPurchased: Boolean,
+    val isEquipped: Boolean = false
 )

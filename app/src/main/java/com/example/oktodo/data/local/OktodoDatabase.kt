@@ -16,7 +16,7 @@ import com.example.oktodo.data.local.entity.*
         ShopItemEntity::class,
         NotificationEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
