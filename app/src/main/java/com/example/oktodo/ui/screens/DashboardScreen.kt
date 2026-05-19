@@ -71,6 +71,7 @@ fun DashboardScreen(
     val tasks by tasksViewModel.tasks.collectAsState()
     val showBottomSheet by tasksViewModel.showBottomSheet.collectAsState()
     val points by tasksViewModel.points.collectAsState()
+    val userName by tasksViewModel.username.collectAsState()
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
     val pendingCount = tasks.count { !it.isCompleted }
 
@@ -94,6 +95,7 @@ fun DashboardScreen(
             modifier = Modifier.padding(paddingValues),
             tasks = tasks,
             points = points,
+            userName = userName,
             onTaskToggle = { tasksViewModel.toggleTaskCompletion(it) },
             onTaskDelete = { tasksViewModel.deleteTask(it) }
         )
@@ -224,11 +226,11 @@ fun DashboardContent(
     modifier: Modifier = Modifier,
     tasks: List<Task>,
     points: Int,
+    userName: String,
     onTaskToggle: (Task) -> Unit,
     onTaskDelete: (Task) -> Unit
 ) {
     val greeting = remember { getGreeting() }
-    val userName = "Usuario"
 
     val pendingTasks = tasks.filter { !it.isCompleted }
     val completedTasks = tasks.filter { it.isCompleted }
