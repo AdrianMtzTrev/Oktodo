@@ -3,7 +3,8 @@
 package com.example.oktodo.ui.model
 
 data class ProfileUiState(
-    val username: String = "Usuario OKTodo",
+    val displayName: String = "Usuario OKTodo",
+    val username: String = "usuario_oktodo",
     val avatarEmoji: String = "🐙",
     val points: Int = 0,
     val completedTasks: Int = 0,

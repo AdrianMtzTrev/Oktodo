@@ -71,7 +71,7 @@ fun DashboardScreen(
     val tasks by tasksViewModel.tasks.collectAsState()
     val showBottomSheet by tasksViewModel.showBottomSheet.collectAsState()
     val points by tasksViewModel.points.collectAsState()
-    val userName by tasksViewModel.username.collectAsState()
+    val userName by tasksViewModel.displayName.collectAsState()
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
     val pendingCount = tasks.count { !it.isCompleted }
 

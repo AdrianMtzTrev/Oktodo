@@ -22,6 +22,7 @@ class ProfileViewModel @Inject constructor(
     val uiState = prefs.preferences
         .map { p ->
             ProfileUiState(
+                displayName = p.displayName,
                 username = p.username,
                 avatarEmoji = p.avatarEmoji,
                 points = p.points,
@@ -45,8 +46,8 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch { shopItemRepository.seedIfEmpty() }
     }
 
-    fun updateProfile(username: String, avatarEmoji: String) {
-        viewModelScope.launch { prefs.updateProfile(username, avatarEmoji) }
+    fun updateProfile(displayName: String, username: String, avatarEmoji: String) {
+        viewModelScope.launch { prefs.updateProfile(displayName, username, avatarEmoji) }
     }
 
     fun addPoints(points: Int) {

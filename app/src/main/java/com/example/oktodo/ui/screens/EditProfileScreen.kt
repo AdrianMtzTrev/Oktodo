@@ -48,6 +48,7 @@ fun EditProfileScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    var displayName by remember { mutableStateOf(uiState.displayName) }
     var username by remember { mutableStateOf(uiState.username) }
     var selectedAvatar by remember { mutableStateOf(uiState.avatarEmoji) }
 
@@ -105,7 +106,26 @@ fun EditProfileScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = "Nombre de usuario",
+                text = "Nombre",
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            OutlinedTextField(
+                value = displayName,
+                onValueChange = { displayName = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Tu nombre completo") },
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                text = "Usuario (@handle)",
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -114,9 +134,10 @@ fun EditProfileScreen(
 
             OutlinedTextField(
                 value = username,
-                onValueChange = { username = it },
+                onValueChange = { username = it.lowercase().replace(" ", "_") },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Escribe tu nombre") },
+                placeholder = { Text("tu_usuario") },
+                prefix = { Text("@") },
                 singleLine = true,
                 shape = RoundedCornerShape(16.dp)
             )
@@ -157,9 +178,14 @@ fun EditProfileScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
-                        text = username.ifBlank { "Usuario OKTodo" },
+                        text = displayName.ifBlank { "Usuario OKTodo" },
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleLarge
+                    )
+                    Text(
+                        text = "@${username.ifBlank { "usuario_oktodo" }}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -169,7 +195,8 @@ fun EditProfileScreen(
             Button(
                 onClick = {
                     viewModel.updateProfile(
-                        username = username.ifBlank { "Usuario OKTodo" },
+                        displayName = displayName.ifBlank { "Usuario OKTodo" },
+                        username = username.ifBlank { "usuario_oktodo" },
                         avatarEmoji = selectedAvatar
                     )
 

@@ -85,6 +85,7 @@ fun ProfileScreen(
                 .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
             ProfileHeader(
+                displayName = uiState.displayName,
                 username = uiState.username,
                 avatarEmoji = uiState.avatarEmoji,
                 bannerBrush = bannerBrush
@@ -135,7 +136,7 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.height(14.dp))
 
                     Text(
-                        text = uiState.username,
+                        text = uiState.displayName,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = onSurface
@@ -383,6 +384,7 @@ fun ProfileHeaderBar(
 
 @Composable
 private fun ProfileHeader(
+    displayName: String,
     username: String,
     avatarEmoji: String,
     bannerBrush: Brush
@@ -447,14 +449,14 @@ private fun ProfileHeader(
 
             Column {
                 Text(
-                    text = username,
+                    text = displayName,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "@${username.lowercase().replace(" ", "_")}",
+                    text = "@$username",
                     color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
                     style = MaterialTheme.typography.bodySmall
                 )

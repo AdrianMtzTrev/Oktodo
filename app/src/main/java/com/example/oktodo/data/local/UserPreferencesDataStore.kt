@@ -13,7 +13,8 @@ import javax.inject.Singleton
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_prefs")
 
 data class UserPreferences(
-    val username: String = "Usuario OKTodo",
+    val displayName: String = "Usuario OKTodo",
+    val username: String = "usuario_oktodo",
     val avatarEmoji: String = "🐙",
     val points: Int = 0,
     val completedTasks: Int = 0,
@@ -28,6 +29,7 @@ class UserPreferencesDataStore @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     private object Keys {
+        val DISPLAY_NAME = stringPreferencesKey("display_name")
         val USERNAME = stringPreferencesKey("username")
         val AVATAR = stringPreferencesKey("avatar_emoji")
         val POINTS = intPreferencesKey("points")
@@ -40,7 +42,8 @@ class UserPreferencesDataStore @Inject constructor(
 
     val preferences: Flow<UserPreferences> = context.dataStore.data.map { prefs ->
         UserPreferences(
-            username = prefs[Keys.USERNAME] ?: "Usuario OKTodo",
+            displayName = prefs[Keys.DISPLAY_NAME] ?: prefs[Keys.USERNAME] ?: "Usuario OKTodo",
+            username = prefs[Keys.USERNAME] ?: "usuario_oktodo",
             avatarEmoji = prefs[Keys.AVATAR] ?: "🐙",
             points = prefs[Keys.POINTS] ?: 0,
             completedTasks = prefs[Keys.COMPLETED_TASKS] ?: 0,
@@ -51,8 +54,9 @@ class UserPreferencesDataStore @Inject constructor(
         )
     }
 
-    suspend fun updateProfile(username: String, avatarEmoji: String) {
+    suspend fun updateProfile(displayName: String, username: String, avatarEmoji: String) {
         context.dataStore.edit { prefs ->
+            prefs[Keys.DISPLAY_NAME] = displayName
             prefs[Keys.USERNAME] = username
             prefs[Keys.AVATAR] = avatarEmoji
         }

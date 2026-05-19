@@ -32,8 +32,8 @@ class TasksViewModel @Inject constructor(
         .map { it.points }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
-    val username: StateFlow<String> = prefs.preferences
-        .map { it.username }
+    val displayName: StateFlow<String> = prefs.preferences
+        .map { it.displayName }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Usuario")
 
     fun addTask(title: String, time: String, priority: String = "Media") {
