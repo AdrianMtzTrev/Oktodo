@@ -135,6 +135,30 @@ fun UserProfile.toEntity() = UserProfileEntity(
     createdAt = createdAt
 )
 
+// ── FriendRequest ─────────────────────────────────────
+fun FriendRequestEntity.toDomain() = FriendRequest(
+    id = id,
+    fromUserId = fromUserId,
+    toUserId = toUserId,
+    fromDisplayName = fromDisplayName,
+    fromAvatarEmoji = fromAvatarEmoji,
+    toDisplayName = toDisplayName,
+    toAvatarEmoji = toAvatarEmoji,
+    status = status,
+    createdAt = createdAt
+)
+fun FriendRequest.toEntity() = FriendRequestEntity(
+    id = id,
+    fromUserId = fromUserId,
+    toUserId = toUserId,
+    fromDisplayName = fromDisplayName,
+    fromAvatarEmoji = fromAvatarEmoji,
+    toDisplayName = toDisplayName,
+    toAvatarEmoji = toAvatarEmoji,
+    status = status,
+    createdAt = createdAt
+)
+
 // ── ShopItem ──────────────────────────────────────────
 fun ShopItemEntity.toDomain() = ShopItem(
     id = id,

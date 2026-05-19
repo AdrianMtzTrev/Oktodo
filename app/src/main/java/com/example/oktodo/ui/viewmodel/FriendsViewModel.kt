@@ -4,7 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.oktodo.data.local.UserPreferencesDataStore
 import com.example.oktodo.data.repository.FriendsRepository
+import com.example.oktodo.data.repository.NotificationRepository
+import com.example.oktodo.ui.model.FriendRequest
 import com.example.oktodo.ui.model.Group
+import com.example.oktodo.ui.model.Notification
 import com.example.oktodo.ui.model.SharedEvent
 import com.example.oktodo.ui.model.UserProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +26,7 @@ import javax.inject.Inject
 
 data class SocialState(
     val isRegistered: Boolean = false,
+    val userId: String = "",
     val displayName: String = "Usuario OKTodo",
     val avatarEmoji: String = "🐙",
     val authError: String? = null,
@@ -34,7 +38,8 @@ data class SocialState(
 @HiltViewModel
 class FriendsViewModel @Inject constructor(
     private val repository: FriendsRepository,
-    private val prefs: UserPreferencesDataStore
+    private val prefs: UserPreferencesDataStore,
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
     val friends = repository.friends
@@ -49,6 +54,24 @@ class FriendsViewModel @Inject constructor(
 
     private val _socialState = MutableStateFlow(SocialState())
     val socialState: StateFlow<SocialState> = _socialState
+
+    val pendingIncoming: StateFlow<List<FriendRequest>> = _socialState
+        .flatMapLatest { state ->
+            if (state.isRegistered && state.userId.isNotBlank())
+                repository.getPendingIncoming(state.userId)
+            else
+                flowOf(emptyList())
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val pendingOutgoing: StateFlow<List<FriendRequest>> = _socialState
+        .flatMapLatest { state ->
+            if (state.isRegistered && state.userId.isNotBlank())
+                repository.getOutgoing(state.userId)
+            else
+                flowOf(emptyList())
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
@@ -68,10 +91,47 @@ class FriendsViewModel @Inject constructor(
             prefs.preferences.collect { prefs ->
                 _socialState.value = _socialState.value.copy(
                     isRegistered = prefs.isSocialRegistered,
+                    userId = prefs.userId,
                     displayName = prefs.displayName,
                     avatarEmoji = prefs.avatarEmoji
                 )
             }
+        }
+    }
+
+    fun sendFriendRequest(target: UserProfile) {
+        viewModelScope.launch {
+            val state = _socialState.value
+            if (!state.isRegistered || state.userId.isBlank()) return@launch
+            try {
+                repository.sendFriendRequest(
+                    fromUserId = state.userId,
+                    toUserId = target.id,
+                    fromDisplayName = state.displayName,
+                    fromAvatarEmoji = state.avatarEmoji,
+                    toDisplayName = target.displayName,
+                    toAvatarEmoji = target.avatarEmoji
+                )
+                notificationRepository.add(
+                    Notification(
+                        title = "Solicitud de amistad",
+                        message = "Solicitud enviada a @${target.username}",
+                        icon = "👤"
+                    )
+                )
+            } catch (_: Exception) { }
+        }
+    }
+
+    fun acceptFriendRequest(request: FriendRequest) {
+        viewModelScope.launch {
+            repository.acceptFriendRequest(request)
+        }
+    }
+
+    fun declineFriendRequest(request: FriendRequest) {
+        viewModelScope.launch {
+            repository.declineFriendRequest(request.id)
         }
     }
 
@@ -135,6 +195,21 @@ class FriendsViewModel @Inject constructor(
                 avatarEmoji = avatarEmoji
             )
             repository.registerUser(profile, password)
+            repository.seedDemoFriendRequests(userId)
+            notificationRepository.add(
+                Notification(
+                    title = "Solicitud de amistad",
+                    message = "María García quiere ser tu amigo",
+                    icon = "👩"
+                )
+            )
+            notificationRepository.add(
+                Notification(
+                    title = "Solicitud de amistad",
+                    message = "Sofía Torres quiere ser tu amigo",
+                    icon = "👧"
+                )
+            )
             prefs.registerSocial(userId, cleanName, profile.username, profile.avatarEmoji)
             _socialState.value = _socialState.value.copy(isAuthLoading = false)
         }

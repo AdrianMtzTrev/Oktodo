@@ -29,4 +29,5 @@ object DatabaseModule {
     @Provides fun provideShopItemDao(db: OktodoDatabase) = db.shopItemDao()
     @Provides fun provideNotificationDao(db: OktodoDatabase) = db.notificationDao()
     @Provides fun provideUserProfileDao(db: OktodoDatabase) = db.userProfileDao()
+    @Provides fun provideFriendRequestDao(db: OktodoDatabase) = db.friendRequestDao()
 }

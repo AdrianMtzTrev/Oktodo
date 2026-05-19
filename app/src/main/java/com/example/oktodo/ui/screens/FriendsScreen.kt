@@ -29,6 +29,8 @@ import com.example.oktodo.ui.components.FriendCard
 import com.example.oktodo.ui.components.FriendsTabSwitcher
 import com.example.oktodo.ui.components.FriendsTopBar
 import com.example.oktodo.ui.components.GroupCard
+import com.example.oktodo.ui.components.OutgoingRequestCard
+import com.example.oktodo.ui.components.PendingRequestCard
 import com.example.oktodo.ui.components.SearchFriendBottomSheet
 import com.example.oktodo.ui.components.SharedEventCard
 import com.example.oktodo.ui.viewmodel.FriendsViewModel
@@ -72,6 +74,8 @@ private fun SocialContent(
     val groups by viewModel.groups.collectAsState()
     val events by viewModel.sharedEvents.collectAsState()
     val searchResults by viewModel.searchResults.collectAsState()
+    val pendingIncoming by viewModel.pendingIncoming.collectAsState()
+    val pendingOutgoing by viewModel.pendingOutgoing.collectAsState()
 
     var selectedTab by remember { mutableStateOf(0) }
     var showCreateGroupSheet by remember { mutableStateOf(false) }
@@ -104,7 +108,7 @@ private fun SocialContent(
             Spacer(modifier = Modifier.height(18.dp))
 
             when (selectedTab) {
-                0 -> {
+                 0 -> {
                     SectionHeader(
                         icon = {
                             Icon(Icons.Outlined.People, contentDescription = null, tint = textMain)
@@ -116,6 +120,40 @@ private fun SocialContent(
                     )
 
                     Spacer(modifier = Modifier.height(14.dp))
+
+                    if (pendingIncoming.isNotEmpty()) {
+                        Text(
+                            text = "Solicitudes entrantes",
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        pendingIncoming.forEach { request ->
+                            PendingRequestCard(
+                                request = request,
+                                onAccept = { viewModel.acceptFriendRequest(request) },
+                                onDecline = { viewModel.declineFriendRequest(request) }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    if (pendingOutgoing.isNotEmpty()) {
+                        Text(
+                            text = "Solicitudes enviadas",
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        pendingOutgoing.forEach { request ->
+                            OutgoingRequestCard(request = request)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
 
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -225,7 +263,7 @@ private fun SocialContent(
         SearchFriendBottomSheet(
             searchResults = searchResults,
             onQueryChange = { viewModel.setSearchQuery(it) },
-            onAddFriend = { /* TODO: enviar solicitud de amistad */ },
+            onAddFriend = { profile -> viewModel.sendFriendRequest(profile) },
             onDismiss = {
                 showSearchFriendSheet = false
                 viewModel.setSearchQuery("")

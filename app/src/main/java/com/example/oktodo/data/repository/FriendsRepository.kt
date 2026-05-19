@@ -2,22 +2,26 @@ package com.example.oktodo.data.repository
 
 import androidx.compose.ui.graphics.Color
 import com.example.oktodo.data.local.dao.FriendDao
+import com.example.oktodo.data.local.dao.FriendRequestDao
 import com.example.oktodo.data.local.dao.GroupDao
 import com.example.oktodo.data.local.dao.SharedEventDao
 import com.example.oktodo.data.local.dao.UserProfileDao
 import com.example.oktodo.data.local.entity.FriendEntity
+import com.example.oktodo.data.local.entity.FriendRequestEntity
 import com.example.oktodo.data.local.entity.GroupEntity
 import com.example.oktodo.data.local.entity.SharedEventEntity
 import com.example.oktodo.data.local.entity.UserProfileEntity
 import com.example.oktodo.data.local.mapper.toDomain
 import com.example.oktodo.data.local.mapper.toEntity
 import com.example.oktodo.ui.model.Friend
+import com.example.oktodo.ui.model.FriendRequest
 import com.example.oktodo.ui.model.Group
 import com.example.oktodo.ui.model.SharedEvent
 import com.example.oktodo.ui.model.UserProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.security.MessageDigest
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,7 +30,8 @@ class FriendsRepository @Inject constructor(
     private val friendDao: FriendDao,
     private val groupDao: GroupDao,
     private val sharedEventDao: SharedEventDao,
-    private val userProfileDao: UserProfileDao
+    private val userProfileDao: UserProfileDao,
+    private val friendRequestDao: FriendRequestDao
 ) {
     private val salt = "OktodoSalt2026"
     val friends: Flow<List<Friend>> = friendDao.getAllFriends().map { list -> list.map { it.toDomain() } }
@@ -60,6 +65,78 @@ class FriendsRepository @Inject constructor(
         val entity = userProfileDao.findByUsername(username.lowercase().replace(" ", "_")) ?: return null
         return if (entity.passwordHash == hashPassword(password)) entity.toDomain() else null
     }
+
+    // ── Friend requests ─────────────────────────────────
+
+    fun getPendingIncoming(userId: String): Flow<List<FriendRequest>> =
+        friendRequestDao.getPendingIncoming(userId).map { list -> list.map { it.toDomain() } }
+
+    fun getOutgoing(userId: String): Flow<List<FriendRequest>> =
+        friendRequestDao.getOutgoing(userId).map { list -> list.map { it.toDomain() } }
+
+    suspend fun sendFriendRequest(
+        fromUserId: String, toUserId: String,
+        fromDisplayName: String, fromAvatarEmoji: String,
+        toDisplayName: String, toAvatarEmoji: String
+    ) {
+        friendRequestDao.insert(
+            FriendRequestEntity(
+                id = UUID.randomUUID().toString(),
+                fromUserId = fromUserId,
+                toUserId = toUserId,
+                fromDisplayName = fromDisplayName,
+                fromAvatarEmoji = fromAvatarEmoji,
+                toDisplayName = toDisplayName,
+                toAvatarEmoji = toAvatarEmoji,
+                status = "pending"
+            )
+        )
+    }
+
+    suspend fun acceptFriendRequest(request: FriendRequest) {
+        friendRequestDao.updateStatus(request.id, "accepted")
+        friendDao.insert(
+            FriendEntity(
+                id = request.fromUserId,
+                name = request.fromDisplayName,
+                points = 0,
+                events = 0,
+                avatar = request.fromAvatarEmoji,
+                avatarColorArgb = Color(0xFFC4B5FD).value.toLong()
+            )
+        )
+    }
+
+    suspend fun declineFriendRequest(requestId: String) {
+        friendRequestDao.updateStatus(requestId, "declined")
+    }
+
+    suspend fun seedDemoFriendRequests(currentUserId: String) {
+        listOf(
+            FriendRequestEntity(
+                id = UUID.randomUUID().toString(),
+                fromUserId = "u1",
+                toUserId = currentUserId,
+                fromDisplayName = "María García",
+                fromAvatarEmoji = "👩",
+                toDisplayName = "",
+                toAvatarEmoji = "",
+                status = "pending"
+            ),
+            FriendRequestEntity(
+                id = UUID.randomUUID().toString(),
+                fromUserId = "u5",
+                toUserId = currentUserId,
+                fromDisplayName = "Sofía Torres",
+                fromAvatarEmoji = "👧",
+                toDisplayName = "",
+                toAvatarEmoji = "",
+                status = "pending"
+            )
+        ).forEach { friendRequestDao.insert(it) }
+    }
+
+    // ── Seed ────────────────────────────────────────────
 
     suspend fun seedIfEmpty() {
         if (userProfileDao.count() > 0) return
