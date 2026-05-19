@@ -77,7 +77,10 @@ fun FocusScreen() {
                     )
                     .padding(top = 24.dp, bottom = 16.dp)
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Text(
                         text = "Modo Enfoque",
                         style = MaterialTheme.typography.headlineLarge,

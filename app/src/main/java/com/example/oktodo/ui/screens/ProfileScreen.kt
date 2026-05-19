@@ -84,15 +84,6 @@ fun ProfileScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
-            ProfileHeader(
-                displayName = uiState.displayName,
-                username = uiState.username,
-                avatarEmoji = uiState.avatarEmoji,
-                bannerBrush = bannerBrush
-            )
-
-            Spacer(modifier = Modifier.height(18.dp))
-
             Text(
                 text = "Mi Perfil",
                 style = MaterialTheme.typography.headlineSmall,
@@ -104,6 +95,15 @@ fun ProfileScreen(
                 text = "Tu progreso y logros",
                 style = MaterialTheme.typography.bodyMedium,
                 color = onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            ProfileHeader(
+                displayName = uiState.displayName,
+                username = uiState.username,
+                avatarEmoji = uiState.avatarEmoji,
+                bannerBrush = bannerBrush
             )
 
             Spacer(modifier = Modifier.height(16.dp))
