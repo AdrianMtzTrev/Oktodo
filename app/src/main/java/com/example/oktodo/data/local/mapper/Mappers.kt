@@ -110,6 +110,7 @@ fun SharedEvent.toEntity() = SharedEventEntity(
 // ── Notification ──────────────────────────────────────
 fun NotificationEntity.toDomain() = Notification(
     id = id,
+    userId = userId,
     title = title,
     message = message,
     icon = icon,
