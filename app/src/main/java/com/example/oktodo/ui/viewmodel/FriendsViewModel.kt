@@ -82,7 +82,13 @@ class FriendsViewModel @Inject constructor(
         )
     }
 
-    fun signup(username: String, password: String, confirmPassword: String) {
+    fun signup(
+        displayName: String,
+        avatarEmoji: String,
+        username: String,
+        password: String,
+        confirmPassword: String
+    ) {
         viewModelScope.launch {
             _socialState.value = _socialState.value.copy(isAuthLoading = true, authError = null)
 
@@ -121,14 +127,15 @@ class FriendsViewModel @Inject constructor(
             }
 
             val userId = UUID.randomUUID().toString()
+            val cleanName = displayName.ifBlank { cleanUsername }
             val profile = UserProfile(
                 id = userId,
-                displayName = _socialState.value.displayName,
+                displayName = cleanName,
                 username = cleanUsername,
-                avatarEmoji = _socialState.value.avatarEmoji
+                avatarEmoji = avatarEmoji
             )
             repository.registerUser(profile, password)
-            prefs.registerSocial(userId, profile.displayName, profile.username, profile.avatarEmoji)
+            prefs.registerSocial(userId, cleanName, profile.username, profile.avatarEmoji)
             _socialState.value = _socialState.value.copy(isAuthLoading = false)
         }
     }

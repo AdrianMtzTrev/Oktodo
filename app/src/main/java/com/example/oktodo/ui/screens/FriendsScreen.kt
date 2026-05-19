@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -49,8 +50,10 @@ fun FriendsScreen(
             isSignupMode = socialState.isSignupMode,
             authError = socialState.authError,
             isLoading = socialState.isAuthLoading,
-            onSignup = { username, password, confirm ->
-                viewModel.signup(username, password, confirm)
+            initialDisplayName = socialState.displayName,
+            initialAvatarEmoji = socialState.avatarEmoji,
+            onSignup = { name, avatar, username, password, confirm ->
+                viewModel.signup(name, avatar, username, password, confirm)
             },
             onLogin = { username, password ->
                 viewModel.login(username, password)
@@ -236,14 +239,20 @@ private fun AuthContent(
     isSignupMode: Boolean,
     authError: String?,
     isLoading: Boolean,
-    onSignup: (username: String, password: String, confirmPassword: String) -> Unit,
+    initialDisplayName: String,
+    initialAvatarEmoji: String,
+    onSignup: (displayName: String, avatarEmoji: String, username: String, password: String, confirmPassword: String) -> Unit,
     onLogin: (username: String, password: String) -> Unit,
     onToggleMode: () -> Unit
 ) {
+    var displayName by remember { mutableStateOf(initialDisplayName) }
+    var selectedAvatar by remember { mutableStateOf(initialAvatarEmoji) }
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
+
+    val avatarOptions = listOf("🐙", "🐱", "🐶", "🦊", "🐼", "🐸", "🦄", "🐻")
 
     Column(
         modifier = Modifier
@@ -253,7 +262,7 @@ private fun AuthContent(
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(60.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
         Text(
             text = if (isSignupMode) "Crear cuenta" else "Iniciar sesión",
@@ -273,13 +282,53 @@ private fun AuthContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(32.dp))
+
+        if (isSignupMode) {
+            Surface(
+                modifier = Modifier.size(80.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(text = selectedAvatar, style = MaterialTheme.typography.displayMedium)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                avatarOptions.chunked(4).forEach { rowItems ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        rowItems.forEach { avatar ->
+                            FilterChip(
+                                selected = selectedAvatar == avatar,
+                                onClick = { selectedAvatar = avatar },
+                                label = { Text(avatar) }
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            OutlinedTextField(
+                value = displayName,
+                onValueChange = { displayName = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Nombre") },
+                placeholder = { Text("Tu nombre") },
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+        }
 
         OutlinedTextField(
             value = username,
-            onValueChange = {
-                username = it.lowercase().replace(" ", "_")
-            },
+            onValueChange = { username = it.lowercase().replace(" ", "_") },
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Usuario") },
             placeholder = { Text("tu_usuario") },
@@ -288,7 +337,7 @@ private fun AuthContent(
             shape = RoundedCornerShape(16.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         OutlinedTextField(
             value = password,
@@ -302,7 +351,7 @@ private fun AuthContent(
         )
 
         if (isSignupMode) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             OutlinedTextField(
                 value = confirmPassword,
@@ -312,7 +361,6 @@ private fun AuthContent(
                 singleLine = true,
                 visualTransformation = if (showPassword) VisualTransformation.None
                     else PasswordVisualTransformation(),
-                isError = authError != null,
                 shape = RoundedCornerShape(16.dp)
             )
         }
@@ -328,11 +376,11 @@ private fun AuthContent(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Button(
             onClick = {
-                if (isSignupMode) onSignup(username, password, confirmPassword)
+                if (isSignupMode) onSignup(displayName, selectedAvatar, username, password, confirmPassword)
                 else onLogin(username, password)
             },
             modifier = Modifier
