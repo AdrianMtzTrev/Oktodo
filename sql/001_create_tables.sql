@@ -214,3 +214,13 @@ CREATE TABLE notifications (
 
 CREATE INDEX idx_notifications_user ON notifications (user_id);
 CREATE INDEX idx_notifications_created ON notifications (created_at DESC);
+
+-- ── local_credentials (SOLO offline, no se usa en Supabase Cloud) ──
+-- En cloud la autenticación la maneja auth.users (Supabase Auth).
+-- En la app offline se almacena el hash SHA-256 de la contraseña
+-- junto con un salt fijo. Esta tabla NO existe en el schema cloud.
+-- user_id referencia auth.users.id o un UUID local según el contexto.
+CREATE TABLE local_credentials (
+  user_id       UUID PRIMARY KEY,
+  password_hash TEXT NOT NULL
+);
