@@ -123,6 +123,7 @@ fun UserProfileEntity.toDomain() = UserProfile(
     displayName = displayName,
     username = username,
     avatarEmoji = avatarEmoji,
+    passwordHash = passwordHash,
     createdAt = createdAt
 )
 fun UserProfile.toEntity() = UserProfileEntity(
@@ -130,6 +131,7 @@ fun UserProfile.toEntity() = UserProfileEntity(
     displayName = displayName,
     username = username,
     avatarEmoji = avatarEmoji,
+    passwordHash = passwordHash,
     createdAt = createdAt
 )
 

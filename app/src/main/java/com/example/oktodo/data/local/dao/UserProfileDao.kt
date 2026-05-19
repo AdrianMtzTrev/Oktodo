@@ -18,6 +18,9 @@ interface UserProfileDao {
     @Query("SELECT * FROM user_profiles WHERE displayName LIKE '%' || :query || '%' OR username LIKE '%' || :query || '%' ORDER BY displayName ASC")
     fun search(query: String): Flow<List<UserProfileEntity>>
 
+    @Query("SELECT * FROM user_profiles WHERE username = :username LIMIT 1")
+    suspend fun findByUsername(username: String): UserProfileEntity?
+
     @Query("SELECT COUNT(*) FROM user_profiles WHERE username = :username")
     suspend fun isUsernameTaken(username: String): Boolean
 

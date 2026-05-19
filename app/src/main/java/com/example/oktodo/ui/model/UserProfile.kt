@@ -5,5 +5,6 @@ data class UserProfile(
     val displayName: String,
     val username: String,
     val avatarEmoji: String,
+    val passwordHash: String = "",
     val createdAt: Long = 0L
 )

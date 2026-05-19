@@ -9,13 +9,11 @@ import com.example.oktodo.ui.model.SharedEvent
 import com.example.oktodo.ui.model.UserProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -27,8 +25,9 @@ data class SocialState(
     val isRegistered: Boolean = false,
     val displayName: String = "Usuario OKTodo",
     val avatarEmoji: String = "🐙",
-    val usernameError: String? = null,
-    val isRegistering: Boolean = false
+    val authError: String? = null,
+    val isAuthLoading: Boolean = false,
+    val isSignupMode: Boolean = true
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -76,23 +75,47 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
-    fun register(displayName: String, username: String, avatarEmoji: String) {
+    fun toggleMode() {
+        _socialState.value = _socialState.value.copy(
+            isSignupMode = !_socialState.value.isSignupMode,
+            authError = null
+        )
+    }
+
+    fun signup(username: String, password: String, confirmPassword: String) {
         viewModelScope.launch {
-            _socialState.value = _socialState.value.copy(isRegistering = true, usernameError = null)
+            _socialState.value = _socialState.value.copy(isAuthLoading = true, authError = null)
 
             val cleanUsername = username.trim().lowercase().replace(" ", "_")
+
             if (cleanUsername.isBlank()) {
                 _socialState.value = _socialState.value.copy(
-                    usernameError = "El nombre de usuario no puede estar vacío",
-                    isRegistering = false
+                    authError = "El nombre de usuario no puede estar vacío",
+                    isAuthLoading = false
+                )
+                return@launch
+            }
+
+            if (password.length < 4) {
+                _socialState.value = _socialState.value.copy(
+                    authError = "La contraseña debe tener al menos 4 caracteres",
+                    isAuthLoading = false
+                )
+                return@launch
+            }
+
+            if (password != confirmPassword) {
+                _socialState.value = _socialState.value.copy(
+                    authError = "Las contraseñas no coinciden",
+                    isAuthLoading = false
                 )
                 return@launch
             }
 
             if (repository.isUsernameTaken(cleanUsername)) {
                 _socialState.value = _socialState.value.copy(
-                    usernameError = "Ese nombre de usuario ya está en uso",
-                    isRegistering = false
+                    authError = "Ese nombre de usuario ya está en uso",
+                    isAuthLoading = false
                 )
                 return@launch
             }
@@ -100,13 +123,49 @@ class FriendsViewModel @Inject constructor(
             val userId = UUID.randomUUID().toString()
             val profile = UserProfile(
                 id = userId,
-                displayName = displayName.ifBlank { "Usuario OKTodo" },
+                displayName = _socialState.value.displayName,
                 username = cleanUsername,
-                avatarEmoji = avatarEmoji
+                avatarEmoji = _socialState.value.avatarEmoji
             )
-            repository.registerUser(profile)
+            repository.registerUser(profile, password)
             prefs.registerSocial(userId, profile.displayName, profile.username, profile.avatarEmoji)
-            _socialState.value = _socialState.value.copy(isRegistering = false)
+            _socialState.value = _socialState.value.copy(isAuthLoading = false)
+        }
+    }
+
+    fun login(username: String, password: String) {
+        viewModelScope.launch {
+            _socialState.value = _socialState.value.copy(isAuthLoading = true, authError = null)
+
+            val cleanUsername = username.trim().lowercase().replace(" ", "_")
+
+            if (cleanUsername.isBlank()) {
+                _socialState.value = _socialState.value.copy(
+                    authError = "Ingresa tu nombre de usuario",
+                    isAuthLoading = false
+                )
+                return@launch
+            }
+
+            if (password.isBlank()) {
+                _socialState.value = _socialState.value.copy(
+                    authError = "Ingresa tu contraseña",
+                    isAuthLoading = false
+                )
+                return@launch
+            }
+
+            val profile = repository.loginUser(cleanUsername, password)
+            if (profile != null) {
+                prefs.registerSocial(
+                    profile.id, profile.displayName, profile.username, profile.avatarEmoji
+                )
+            } else {
+                _socialState.value = _socialState.value.copy(
+                    authError = "Usuario o contraseña incorrectos",
+                    isAuthLoading = false
+                )
+            }
         }
     }
 

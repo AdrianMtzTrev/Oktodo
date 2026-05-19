@@ -13,5 +13,6 @@ data class UserProfileEntity(
     val displayName: String,
     val username: String,
     val avatarEmoji: String,
+    val passwordHash: String,
     val createdAt: Long = System.currentTimeMillis()
 )

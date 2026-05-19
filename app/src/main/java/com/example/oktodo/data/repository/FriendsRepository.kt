@@ -17,6 +17,7 @@ import com.example.oktodo.ui.model.SharedEvent
 import com.example.oktodo.ui.model.UserProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,6 +28,7 @@ class FriendsRepository @Inject constructor(
     private val sharedEventDao: SharedEventDao,
     private val userProfileDao: UserProfileDao
 ) {
+    private val salt = "OktodoSalt2026"
     val friends: Flow<List<Friend>> = friendDao.getAllFriends().map { list -> list.map { it.toDomain() } }
     val groups: Flow<List<Group>> = groupDao.getAllGroups().map { list -> list.map { it.toDomain() } }
     val sharedEvents: Flow<List<SharedEvent>> = sharedEventDao.getAllEvents().map { list -> list.map { it.toDomain() } }
@@ -43,21 +45,36 @@ class FriendsRepository @Inject constructor(
     suspend fun isUsernameTaken(username: String): Boolean =
         userProfileDao.isUsernameTaken(username)
 
-    suspend fun registerUser(profile: UserProfile) =
-        userProfileDao.insert(profile.toEntity())
+    private fun hashPassword(password: String): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val hash = digest.digest("$salt:$password".toByteArray())
+        return hash.joinToString("") { "%02x".format(it) }
+    }
+
+    suspend fun registerUser(profile: UserProfile, password: String) {
+        val entity = profile.toEntity().copy(passwordHash = hashPassword(password))
+        userProfileDao.insert(entity)
+    }
+
+    suspend fun loginUser(username: String, password: String): UserProfile? {
+        val entity = userProfileDao.findByUsername(username.lowercase().replace(" ", "_")) ?: return null
+        return if (entity.passwordHash == hashPassword(password)) entity.toDomain() else null
+    }
 
     suspend fun seedIfEmpty() {
         if (userProfileDao.count() > 0) return
 
+        val seedHash = hashPassword("oktodo123")
+
         listOf(
-            UserProfileEntity("u1", "María García", "mariagarcia", "👩"),
-            UserProfileEntity("u2", "Carlos López", "carloslopez", "👱"),
-            UserProfileEntity("u3", "Ana Martínez", "anamartinez", "👩‍🦰"),
-            UserProfileEntity("u4", "Luis Rodríguez", "luisrodriguez", "👦"),
-            UserProfileEntity("u5", "Sofía Torres", "sofiatorres", "👧"),
-            UserProfileEntity("u6", "Diego Ramírez", "diegoramirez", "🧑"),
-            UserProfileEntity("u7", "Valentina Cruz", "valentinacruz", "👩‍🦱"),
-            UserProfileEntity("u8", "Mateo Hernández", "mateohernandez", "👨")
+            UserProfileEntity("u1", "María García", "mariagarcia", "👩", seedHash),
+            UserProfileEntity("u2", "Carlos López", "carloslopez", "👱", seedHash),
+            UserProfileEntity("u3", "Ana Martínez", "anamartinez", "👩‍🦰", seedHash),
+            UserProfileEntity("u4", "Luis Rodríguez", "luisrodriguez", "👦", seedHash),
+            UserProfileEntity("u5", "Sofía Torres", "sofiatorres", "👧", seedHash),
+            UserProfileEntity("u6", "Diego Ramírez", "diegoramirez", "🧑", seedHash),
+            UserProfileEntity("u7", "Valentina Cruz", "valentinacruz", "👩‍🦱", seedHash),
+            UserProfileEntity("u8", "Mateo Hernández", "mateohernandez", "👨", seedHash)
         ).forEach { userProfileDao.insert(it) }
 
         if (friendDao.count() > 0) return
