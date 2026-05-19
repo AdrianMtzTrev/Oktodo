@@ -56,22 +56,47 @@ CREATE TABLE calendar_events (
 CREATE INDEX idx_calendar_events_user ON calendar_events (user_id);
 CREATE INDEX idx_calendar_events_updated ON calendar_events (updated_at);
 
--- ── friends ────────────────────────────────────────────
-CREATE TABLE friends (
-  id                TEXT PRIMARY KEY,
-  user_id           UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  name              TEXT NOT NULL,
-  points            INT NOT NULL DEFAULT 0,
-  events            INT NOT NULL DEFAULT 0,
-  avatar            TEXT,
-  avatar_color_argb BIGINT NOT NULL,
-  created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
-  is_deleted        BOOLEAN NOT NULL DEFAULT false
+-- ── friend_requests ────────────────────────────────────
+CREATE TABLE friend_requests (
+  id           TEXT PRIMARY KEY,
+  from_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  to_user_id   UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  status       TEXT NOT NULL DEFAULT 'pending'
+               CHECK (status IN ('pending', 'accepted', 'declined')),
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (from_user_id, to_user_id)
 );
 
-CREATE INDEX idx_friends_user ON friends (user_id);
-CREATE INDEX idx_friends_updated ON friends (updated_at);
+CREATE INDEX idx_friend_requests_to ON friend_requests (to_user_id, status);
+
+-- ── friends (solo relaciones aceptadas) ────────────────
+CREATE TABLE friends (
+  user_id_1 UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id_2 UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (user_id_1, user_id_2),
+  CHECK (user_id_1 < user_id_2)
+);
+
+-- Auto-insert into friends when friend request is accepted
+CREATE OR REPLACE FUNCTION accept_friend_request()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO friends (user_id_1, user_id_2)
+  VALUES (
+    LEAST(NEW.from_user_id, NEW.to_user_id),
+    GREATEST(NEW.from_user_id, NEW.to_user_id)
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_friend_requests_accept
+  AFTER UPDATE ON friend_requests
+  FOR EACH ROW
+  WHEN (NEW.status = 'accepted' AND OLD.status = 'pending')
+  EXECUTE FUNCTION accept_friend_request();
 
 -- ── groups ─────────────────────────────────────────────
 CREATE TABLE groups (

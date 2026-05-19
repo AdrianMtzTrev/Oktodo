@@ -22,8 +22,8 @@ CREATE TRIGGER trg_calendar_events_updated
   BEFORE UPDATE ON calendar_events
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-CREATE TRIGGER trg_friends_updated
-  BEFORE UPDATE ON friends
+CREATE TRIGGER trg_friend_requests_updated
+  BEFORE UPDATE ON friend_requests
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 CREATE TRIGGER trg_groups_updated

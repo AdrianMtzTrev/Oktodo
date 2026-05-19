@@ -8,6 +8,7 @@ ALTER TABLE calendar_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE friends ENABLE ROW LEVEL SECURITY;
 ALTER TABLE groups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE group_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE friend_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE group_invitations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE shared_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE shop_catalog ENABLE ROW LEVEL SECURITY;
@@ -65,22 +66,27 @@ CREATE POLICY "users can delete own calendar_events"
   ON calendar_events FOR DELETE
   USING (auth.uid() = user_id);
 
--- ── friends ────────────────────────────────────────────
+-- ── friend_requests ────────────────────────────────────
+CREATE POLICY "users can read own requests"
+  ON friend_requests FOR SELECT
+  USING (from_user_id = auth.uid() OR to_user_id = auth.uid());
+
+CREATE POLICY "users can send requests"
+  ON friend_requests FOR INSERT
+  WITH CHECK (from_user_id = auth.uid());
+
+CREATE POLICY "recipient can accept or decline"
+  ON friend_requests FOR UPDATE
+  USING (to_user_id = auth.uid() AND status = 'pending')
+  WITH CHECK (to_user_id = auth.uid() AND status IN ('accepted', 'declined'));
+
+-- ── friends (relaciones aceptadas) ─────────────────────
 CREATE POLICY "users can read own friends"
   ON friends FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (user_id_1 = auth.uid() OR user_id_2 = auth.uid());
 
-CREATE POLICY "users can insert own friends"
-  ON friends FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "users can update own friends"
-  ON friends FOR UPDATE
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "users can delete own friends"
-  ON friends FOR DELETE
-  USING (auth.uid() = user_id);
+-- friends INSERT solo via trigger de friend_requests accept
+-- (no hay policy de INSERT)
 
 -- ── groups ─────────────────────────────────────────────
 CREATE POLICY "members can read groups"
