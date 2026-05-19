@@ -11,16 +11,13 @@ data class ProfileUiState(
     val streakDays: Int = 0,
     val weeklyGoal: Int = 10,
     val weeklyCompleted: Int = 0,
-    val achievements: List<Achievement> = listOf(
-        Achievement("🏆", "Primera tarea"),
-        Achievement("🔥", "5 días racha"),
-        Achievement("⭐", "100 puntos")
-    )
+    val achievements: List<Achievement> = emptyList()
 )
 
 data class Achievement(
     val icon: String,
-    val title: String
+    val title: String,
+    val isUnlocked: Boolean = false
 )
 
 data class ShopItem(

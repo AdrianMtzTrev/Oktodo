@@ -31,9 +31,14 @@ class ProfileViewModel @Inject constructor(
                 weeklyGoal = p.weeklyGoal,
                 weeklyCompleted = p.weeklyCompleted,
                 achievements = listOf(
-                    Achievement("🏆", "Primera tarea"),
-                    Achievement("🔥", "5 días racha"),
-                    Achievement("⭐", "100 puntos")
+                    Achievement("🏆", "Primera tarea",   p.completedTasks >= 1),
+                    Achievement("✅", "Dedicado",         p.completedTasks >= 10),
+                    Achievement("🚀", "Imparable",        p.completedTasks >= 50),
+                    Achievement("🔥", "Racha de 5 días",  p.streakDays >= 5),
+                    Achievement("🌟", "Racha de 14 días", p.streakDays >= 14),
+                    Achievement("⭐", "100 puntos",       p.points >= 100),
+                    Achievement("💎", "500 puntos",       p.points >= 500),
+                    Achievement("🎯", "Meta semanal",     p.weeklyCompleted >= p.weeklyGoal)
                 )
             )
         }

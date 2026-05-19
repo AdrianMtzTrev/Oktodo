@@ -34,8 +34,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -250,32 +252,63 @@ fun ProfileScreen(
                 colors = CardDefaults.cardColors(containerColor = surface)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "🏆 Logros Desbloqueados",
-                        fontWeight = FontWeight.Bold,
-                        color = onSurface
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "🏆 Logros",
+                            fontWeight = FontWeight.Bold,
+                            color = onSurface
+                        )
+                        Text(
+                            text = "${uiState.achievements.count { it.isUnlocked }}/${uiState.achievements.size}",
+                            color = primary,
+                            fontWeight = FontWeight.SemiBold,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceAround
-                    ) {
-                        uiState.achievements.forEach { achievement ->
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(
-                                    text = achievement.icon,
-                                    style = MaterialTheme.typography.headlineMedium
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = achievement.title,
-                                    color = onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
+                    uiState.achievements.chunked(4).forEach { rowItems ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceAround
+                        ) {
+                            rowItems.forEach { achievement ->
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .alpha(if (achievement.isUnlocked) 1f else 0.3f)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text(
+                                            text = achievement.icon,
+                                            style = MaterialTheme.typography.headlineMedium
+                                        )
+                                        if (!achievement.isUnlocked) {
+                                            Text(
+                                                text = "🔒",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                modifier = Modifier.align(Alignment.BottomEnd)
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = achievement.title,
+                                        color = onSurfaceVariant,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        textAlign = TextAlign.Center,
+                                        maxLines = 2
+                                    )
+                                }
                             }
                         }
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
                 }
             }
