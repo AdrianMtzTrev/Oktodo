@@ -21,8 +21,8 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 ## Current Status
 
 - **Active branch:** `develop` (ahead of `main`)
-- **Last activity:** 19 May 2026 — notifications, achievements, OctoShop purchase flow
-- **Working tree:** clean (only untracked files are CLAUDE.md and STATUS.md)
+- **Last activity:** 19 May 2026 — social features (signup/login, friend requests, search, notifications per user)
+- **Working tree:** clean
 
 ### Branches
 
@@ -36,7 +36,7 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 
 ## What's Implemented
 
-### Screens (9)
+### Screens (10)
 
 | Screen | Route | ViewModel |
 |---|---|---|
@@ -46,8 +46,9 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 | Friends | `friends` | FriendsViewModel |
 | Group Detail | `group_detail/{groupId}` | FriendsViewModel |
 | Profile | `profile` | ProfileViewModel |
-| Edit Profile | `edit_profile` | ProfileViewModel |
+| Settings | `settings` | ProfileViewModel |
 | Octo Shop | `octo_shop` | ProfileViewModel |
+| Notifications | `notifications` | NotificationViewModel |
 | Notifications | `notifications` | NotificationViewModel |
 
 ### Data Layer
@@ -56,17 +57,17 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 |---|---|
 | TaskRepository | `tasks` |
 | CalendarEventRepository | `calendar_events` |
-| FriendsRepository | `friends`, `groups`, `shared_events` |
+| FriendsRepository | `friends`, `groups`, `shared_events`, `user_profiles`, `friend_requests` |
 | ShopItemRepository | `shop_items` |
 | NotificationRepository | `notifications` |
 
 ### Components
 
-- Bottom sheets: `CreateTaskBottomSheet`, `AddEventBottomSheet`, `AddEventDialog`, `CreateSharedEventBottomSheet`, `CreateGroupBottomSheet`
+- Bottom sheets: `CreateTaskBottomSheet`, `AddEventBottomSheet`, `AddEventDialog`, `CreateSharedEventBottomSheet`, `CreateGroupBottomSheet`, `SearchFriendBottomSheet`
 - Calendar views: `MonthlyCalendar`, `WeekCalendar`, `DayCalendar`, `YearCalendar`
-- Cards: `FriendCard`, `GroupCard`, `SharedEventCard`
+- Cards: `FriendCard`, `GroupCard`, `SharedEventCard`, `PendingRequestCard`, `OutgoingRequestCard`
 - Friends chrome: `FriendsTabSwitcher`, `FriendsTopBar`
-- Misc: `ColorPicker`, `DurationPickerDialog`
+- Misc: `ColorPicker`, `DurationPickerDialog`, `PurchaseConfirmDialog`
 
 ### Key Features
 
@@ -80,37 +81,54 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 - Points system + shop (local items)
 - Completed tasks collapsed in animated dropdown
 - Notifications CRUD with Room + badge on Dashboard bell icon
+- Notifications **filtered per user** (each user sees only their own notifications)
 - Achievement unlock detection → auto-generates notification (persisted)
 - OctoShop purchase flow (confirm dialog + snackbar feedback)
 - Equip/unequip system for purchased items (shown on profile avatar)
-- DB version 3 (destructive migration for dev)
 - SQL schema for Supabase sync (`sql/` — 4 files: tables, RLS, triggers, seed)
+- **Social registration** — signup with displayName, avatar, @username, password
+- **Social login** — username + password with SHA-256 hash verification
+- **Password hashing** — SHA-256 with fixed salt (`OktodoSalt2026`)
+- **Friend search** — live search by displayName/username in SearchFriendBottomSheet
+- **Friend requests** — send, accept, decline, pending incoming/outgoing sections
+- **Request notifications** — sender sees "Solicitud enviada a @target"; receiver sees "{name} quiere ser tu amigo"
+- **Demo requests** — 2 seed requests from María García + Sofía Torres on signup
+- **Settings screen** — replaces EditProfileScreen; includes logout with confirmation dialog
+- **UserProfiles** — Room entity + DAO (findByUsername, search, unique username)
+- DB version 7 (destructive migration for dev)
 
 ---
 
 ## Recent Commits (19 May 2026)
 
 ```
-feat: notifications system with full CRUD (Room entity, DAO, repository, ViewModel, screen)
-feat: achievement unlock detection → auto-generates notification
-feat: notification bell with unread badge on Dashboard + Profile header
-feat: click to mark as read, mark all as read, clear read notifications
-feat: OctoShop purchase flow with confirmation dialog + snackbar feedback
-feat: equip/unequip items system (avatar shows equipped item)
-feat: isEquipped field in ShopItemEntity (DB v2→3)
-fix: hiltViewModel() in NotificationsScreen (fix crash)
+2d1dedc fix: per-user notification filtering with userId
+c6d123d feat: friend requests with notifications
+307a29a feat: signup ahora pide nombre + avatar + username + contraseña
+358f931 feat: SettingsScreen replaces EditProfileScreen with logout
+9c313df fix: bump DB version to 5 (passwordHash column added to user_profiles)
+4ffce66 feat: password-based signup/login for social features
+eefb21e feat: add local_credentials table (password hash) to SQL schema
+6012efd feat: search friends UI with SearchFriendBottomSheet
+ab1c0b4 feat: social registration flow (local login/signup in FriendsScreen)
+df29ac8 feat: friend_requests table + friends as relationships (same pattern as group_invitations)
+8f6588e feat: Supabase SQL schema with 11 tables and invitations system
+81cf37b feat: OctoShop purchase flow with confirm dialog, snackbar and equip system
+9befe0c feat: auto-generate notifications when achievements unlock
+38c76fe feat: notifications system with CRUD, screen and bell icon
 ```
 
 ---
 
 ## What's Missing / Next Up
 
-- **Social / Multiplayer** — share tasks, compete with friends, real-time interaction (Friends screen exists but data is fully local)
 - **Cloud sync / Backend** — SQL schema ready (`sql/` folder), pending client implementation
   - Supabase: 12 tables + 1 VIEW + RLS + triggers + seed catalog
-  - `friend_requests` → `friends` (mismo patrón que `group_invitations` → `group_members`)
-  - `group_invitations` system: creator invites, user accepts/declines, auto-join via trigger
+  - `user_profiles` + `local_credentials` ready in SQL; cloud auth uses Supabase Auth
+- **Group invitations from UI** — same pattern as friend requests (`GroupInvitationEntity` → accept trigger)
+- **Real purchase flow** — deduct points from DataStore on purchase (currently placeholder)
 - **Tests** — only placeholder tests exist (`ExampleUnitTest`, `ExampleInstrumentedTest`)
+  - Turbine, MockK, Room in-memory planned
 
 ---
 
