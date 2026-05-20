@@ -66,199 +66,200 @@ fun GroupDetailScreen(
         viewModel.getEventsForGroupOnDate(groupId, selectedDate)
     }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(0.dp),
+        contentPadding = PaddingValues(bottom = 24.dp)
     ) {
-        Spacer(modifier = Modifier.height(10.dp))
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Volver")
-            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Volver")
+                }
 
-            Text(text = group.icon)
-            Spacer(modifier = Modifier.width(10.dp))
+                Text(text = group.icon)
+                Spacer(modifier = Modifier.width(10.dp))
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = group.name,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "${group.members.size} miembros",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            IconButton(onClick = { groupNameInput = group.name; showSettings = true }) {
-                Icon(Icons.Outlined.Settings, contentDescription = "Configurar grupo")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Miembros",
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f)
-            )
-            TextButton(onClick = { showInviteSheet = true }) {
-                Text("+ Invitar amigo")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            group.members.forEach { member ->
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = if (member == socialState.displayName || member == "Tú") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
-                ) {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (member == socialState.displayName || member == "Tú") "Tú" else member,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
-                        color = if (member == socialState.displayName || member == "Tú") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                        text = group.name,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "${group.members.size} miembros",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+
+                IconButton(onClick = { groupNameInput = group.name; showSettings = true }) {
+                    Icon(Icons.Outlined.Settings, contentDescription = "Configurar grupo")
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
-            text = "Calendario",
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleMedium
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    text = "${visibleMonth.month.getDisplayName(TextStyle.FULL, Locale("es"))} ${visibleMonth.year}",
-                    style = MaterialTheme.typography.titleMedium,
+                    text = "Miembros",
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f)
                 )
-
-                DaysOfWeekTitle(firstDayOfWeek = firstDayOfWeek)
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                HorizontalCalendar(
-                    state = calendarState,
-                    dayContent = { day ->
-                        val isSelected = day.date == selectedDate
-                        val isCurrentMonth = day.position == DayPosition.MonthDate
-                        val hasEvents = viewModel.getEventsForGroupOnDate(groupId, day.date).isNotEmpty()
-
-                        Box(
-                            modifier = Modifier
-                                .aspectRatio(1f)
-                                .padding(4.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(top = 8.dp)
-                            ) {
-                                TextButton(
-                                    onClick = {
-                                        if (isCurrentMonth) {
-                                            selectedDate = day.date
-                                        }
-                                    },
-                                    contentPadding = PaddingValues(0.dp)
-                                ) {
-                                    Text(
-                                        text = day.date.dayOfMonth.toString(),
-                                        color = when {
-                                            !isCurrentMonth -> MaterialTheme.colorScheme.onSurfaceVariant
-                                            isSelected -> MaterialTheme.colorScheme.onPrimary
-                                            else -> MaterialTheme.colorScheme.onSurface
-                                        }
-                                    )
-                                }
-
-                                if (hasEvents && isCurrentMonth) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(6.dp)
-                                            .clip(CircleShape)
-                                            .background(
-                                                if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
-                                            )
-                                    )
-                                }
-                            }
-                        }
-                    },
-                    monthHeader = {}
-                )
+                TextButton(onClick = { showInviteSheet = true }) {
+                    Text("+ Invitar amigo")
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        Text(
-            text = "Eventos - ${viewModel.getFormattedDateLabel(selectedDate.toString())}",
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleMedium
-        )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                group.members.forEach { member ->
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = if (member == socialState.displayName || member == "Tú") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+                    ) {
+                        Text(
+                            text = if (member == socialState.displayName || member == "Tú") "Tú" else member,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                            color = if (member == socialState.displayName || member == "Tú") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        if (dayEvents.isEmpty()) {
+            Text(
+                text = "Calendario",
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(28.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+                Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "No hay eventos este día",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = "${visibleMonth.month.getDisplayName(TextStyle.FULL, Locale("es"))} ${visibleMonth.year}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+
+                    DaysOfWeekTitle(firstDayOfWeek = firstDayOfWeek)
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    HorizontalCalendar(
+                        state = calendarState,
+                        dayContent = { day ->
+                            val isSelected = day.date == selectedDate
+                            val isCurrentMonth = day.position == DayPosition.MonthDate
+                            val hasEvents = viewModel.getEventsForGroupOnDate(groupId, day.date).isNotEmpty()
+
+                            Box(
+                                modifier = Modifier
+                                    .aspectRatio(1f)
+                                    .padding(4.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(top = 8.dp)
+                                ) {
+                                    TextButton(
+                                        onClick = {
+                                            if (isCurrentMonth) {
+                                                selectedDate = day.date
+                                            }
+                                        },
+                                        contentPadding = PaddingValues(0.dp)
+                                    ) {
+                                        Text(
+                                            text = day.date.dayOfMonth.toString(),
+                                            color = when {
+                                                !isCurrentMonth -> MaterialTheme.colorScheme.onSurfaceVariant
+                                                isSelected -> MaterialTheme.colorScheme.onPrimary
+                                                else -> MaterialTheme.colorScheme.onSurface
+                                            }
+                                        )
+                                    }
+
+                                    if (hasEvents && isCurrentMonth) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(6.dp)
+                                                .clip(CircleShape)
+                                                .background(
+                                                    if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
+                                                )
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                        monthHeader = {}
                     )
                 }
             }
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(bottom = 24.dp)
-            ) {
-                items(dayEvents) { event ->
-                    SharedEventCard(event = event)
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Eventos - ${viewModel.getFormattedDateLabel(selectedDate.toString())}",
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        if (dayEvents.isEmpty()) {
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(28.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No hay eventos este día",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
+            }
+        } else {
+            items(dayEvents) { event ->
+                SharedEventCard(event = event)
             }
         }
     }
