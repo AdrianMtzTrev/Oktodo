@@ -68,6 +68,7 @@ class ProfileViewModel @Inject constructor(
 
     init {
         viewModelScope.launch { shopItemRepository.seedIfEmpty() }
+        viewModelScope.launch { prefs.checkWeeklyReset() }
         observeNewAchievements()
     }
 
@@ -99,6 +100,10 @@ class ProfileViewModel @Inject constructor(
 
     fun updateProfile(displayName: String, username: String, avatarEmoji: String) {
         viewModelScope.launch { prefs.updateProfile(displayName, username, avatarEmoji) }
+    }
+
+    fun setWeeklyGoal(goal: Int) {
+        viewModelScope.launch { prefs.setWeeklyGoal(goal) }
     }
 
     fun addPoints(points: Int) {

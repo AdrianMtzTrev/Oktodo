@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
+import java.time.temporal.WeekFields
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,7 +27,8 @@ data class UserPreferences(
     val isDarkMode: Boolean = false,
     val lastActiveDate: String = "",
     val isSocialRegistered: Boolean = false,
-    val userId: String = ""
+    val userId: String = "",
+    val lastWeekReset: String = ""
 )
 
 @Singleton
@@ -47,6 +49,7 @@ class UserPreferencesDataStore @Inject constructor(
         val NOTIFIED_ACHIEVEMENTS = stringPreferencesKey("notified_achievements")
         val IS_SOCIAL_REGISTERED = booleanPreferencesKey("is_social_registered")
         val USER_ID = stringPreferencesKey("user_id")
+        val LAST_WEEK_RESET = stringPreferencesKey("last_week_reset")
     }
 
     val preferences: Flow<UserPreferences> = context.dataStore.data.map { prefs ->
@@ -62,7 +65,8 @@ class UserPreferencesDataStore @Inject constructor(
             isDarkMode = prefs[Keys.DARK_MODE] ?: false,
             lastActiveDate = prefs[Keys.LAST_ACTIVE_DATE] ?: "",
             isSocialRegistered = prefs[Keys.IS_SOCIAL_REGISTERED] ?: false,
-            userId = prefs[Keys.USER_ID] ?: ""
+            userId = prefs[Keys.USER_ID] ?: "",
+            lastWeekReset = prefs[Keys.LAST_WEEK_RESET] ?: ""
         )
     }
 
@@ -152,6 +156,25 @@ class UserPreferencesDataStore @Inject constructor(
             }
         }
         return success
+    }
+
+    suspend fun setWeeklyGoal(goal: Int) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.WEEKLY_GOAL] = goal.coerceIn(1, 30)
+        }
+    }
+
+    suspend fun checkWeeklyReset() {
+        val currentWeek = LocalDate.now().let {
+            "${it.year}-W${it.get(WeekFields.ISO.weekOfWeekBasedYear())}"
+        }
+        context.dataStore.edit { prefs ->
+            val lastReset = prefs[Keys.LAST_WEEK_RESET] ?: ""
+            if (lastReset != currentWeek) {
+                prefs[Keys.WEEKLY_COMPLETED] = 0
+                prefs[Keys.LAST_WEEK_RESET] = currentWeek
+            }
+        }
     }
 
     suspend fun logoutSocial() {

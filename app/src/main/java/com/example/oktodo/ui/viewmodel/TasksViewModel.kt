@@ -36,6 +36,10 @@ class TasksViewModel @Inject constructor(
         .map { it.displayName }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Usuario")
 
+    init {
+        viewModelScope.launch { prefs.checkWeeklyReset() }
+    }
+
     fun addTask(title: String, time: String, priority: String = "Media") {
         if (title.isBlank() || time.isBlank()) return
         val color = when (priority) {
