@@ -34,7 +34,7 @@ data class SocialState(
     val avatarEmoji: String = "🐙",
     val authError: String? = null,
     val isAuthLoading: Boolean = false,
-    val isSignupMode: Boolean = true
+    val isSignupMode: Boolean = false
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
