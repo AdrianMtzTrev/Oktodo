@@ -21,8 +21,9 @@ class ShopItemRepository @Inject constructor(
 
     suspend fun purchase(item: ShopItem, userPoints: Int): Boolean {
         if (userPoints < item.price) return false
+        val deducted = prefs.purchaseItem(item.price)
+        if (!deducted) return false
         dao.markPurchased(item.id)
-        prefs.purchaseItem(item.price)
         return true
     }
 

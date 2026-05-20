@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.oktodo.ui.components.InviteToGroupBottomSheet
 import com.example.oktodo.ui.components.SharedEventCard
 import com.example.oktodo.ui.viewmodel.FriendsViewModel
 import com.kizitonwose.calendar.compose.HorizontalCalendar
@@ -28,13 +30,21 @@ import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupDetailScreen(
     navController: NavController,
     groupId: String,
     viewModel: FriendsViewModel
 ) {
-    val group = viewModel.getGroupById(groupId) ?: return
+    val groups by viewModel.groups.collectAsState()
+    val group = groups.find { it.id == groupId } ?: return
+    val friends by viewModel.friends.collectAsState()
+
+    var showInviteSheet by remember { mutableStateOf(false) }
+    var showSettings by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    var groupNameInput by remember(group.id) { mutableStateOf(group.name) }
 
     val currentMonth = remember { YearMonth.now() }
     val startMonth = remember { currentMonth.minusMonths(12) }
@@ -63,7 +73,10 @@ fun GroupDetailScreen(
     ) {
         Spacer(modifier = Modifier.height(10.dp))
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Volver")
             }
@@ -71,7 +84,7 @@ fun GroupDetailScreen(
             Text(text = group.icon)
             Spacer(modifier = Modifier.width(10.dp))
 
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = group.name,
                     style = MaterialTheme.typography.titleLarge,
@@ -82,15 +95,28 @@ fun GroupDetailScreen(
                     color = Color(0xFF6B7280)
                 )
             }
+
+            IconButton(onClick = { groupNameInput = group.name; showSettings = true }) {
+                Icon(Icons.Outlined.Settings, contentDescription = "Configurar grupo")
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
-            text = "Miembros",
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleMedium
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Miembros",
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f)
+            )
+            TextButton(onClick = { showInviteSheet = true }) {
+                Text("+ Invitar amigo")
+            }
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -234,6 +260,109 @@ fun GroupDetailScreen(
                 }
             }
         }
+    }
+
+    if (showInviteSheet) {
+        InviteToGroupBottomSheet(
+            friends = friends,
+            groupMembers = group.members,
+            onInvite = { friend ->
+                viewModel.sendGroupInvitation(friend, group)
+                showInviteSheet = false
+            },
+            onDismiss = { showInviteSheet = false }
+        )
+    }
+
+    if (showSettings) {
+        ModalBottomSheet(
+            onDismissRequest = { showSettings = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+                Text(
+                    text = "Configurar grupo",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                OutlinedTextField(
+                    value = groupNameInput,
+                    onValueChange = { groupNameInput = it },
+                    label = { Text("Nombre del grupo") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = {
+                        viewModel.renameGroup(group.id, groupNameInput)
+                        showSettings = false
+                    },
+                    enabled = groupNameInput.isNotBlank() && groupNameInput.trim() != group.name,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text("Guardar cambios")
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                HorizontalDivider()
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                TextButton(
+                    onClick = { showDeleteConfirm = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Eliminar grupo",
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("¿Eliminar grupo?") },
+            text = { Text("Se eliminará \"${group.name}\" permanentemente. Esta acción no se puede deshacer.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.deleteGroup(group.id)
+                        showDeleteConfirm = false
+                        showSettings = false
+                        navController.popBackStack()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
 

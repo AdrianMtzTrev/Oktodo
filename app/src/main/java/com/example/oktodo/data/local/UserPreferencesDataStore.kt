@@ -142,11 +142,16 @@ class UserPreferencesDataStore @Inject constructor(
         }
     }
 
-    suspend fun purchaseItem(cost: Int) {
+    suspend fun purchaseItem(cost: Int): Boolean {
+        var success = false
         context.dataStore.edit { prefs ->
             val current = prefs[Keys.POINTS] ?: 0
-            if (current >= cost) prefs[Keys.POINTS] = current - cost
+            if (current >= cost) {
+                prefs[Keys.POINTS] = current - cost
+                success = true
+            }
         }
+        return success
     }
 
     suspend fun logoutSocial() {

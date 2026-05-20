@@ -29,6 +29,7 @@ import com.example.oktodo.ui.components.FriendCard
 import com.example.oktodo.ui.components.FriendsTabSwitcher
 import com.example.oktodo.ui.components.FriendsTopBar
 import com.example.oktodo.ui.components.GroupCard
+import com.example.oktodo.ui.components.GroupInvitationCard
 import com.example.oktodo.ui.components.OutgoingRequestCard
 import com.example.oktodo.ui.components.PendingRequestCard
 import com.example.oktodo.ui.components.SearchFriendBottomSheet
@@ -76,6 +77,7 @@ private fun SocialContent(
     val searchResults by viewModel.searchResults.collectAsState()
     val pendingIncoming by viewModel.pendingIncoming.collectAsState()
     val pendingOutgoing by viewModel.pendingOutgoing.collectAsState()
+    val pendingGroupInvitations by viewModel.pendingGroupInvitations.collectAsState()
 
     var selectedTab by remember { mutableStateOf(0) }
     var showCreateGroupSheet by remember { mutableStateOf(false) }
@@ -182,6 +184,25 @@ private fun SocialContent(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         contentPadding = PaddingValues(bottom = 100.dp)
                     ) {
+                        if (pendingGroupInvitations.isNotEmpty()) {
+                            item {
+                                Text(
+                                    text = "Invitaciones a grupos",
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                            }
+                            items(pendingGroupInvitations) { invitation ->
+                                GroupInvitationCard(
+                                    invitation = invitation,
+                                    onAccept = { viewModel.acceptGroupInvitation(invitation) },
+                                    onDecline = { viewModel.declineGroupInvitation(invitation) }
+                                )
+                            }
+                            item { Spacer(modifier = Modifier.height(16.dp)) }
+                        }
                         items(groups) { group ->
                             GroupCard(
                                 group = group,

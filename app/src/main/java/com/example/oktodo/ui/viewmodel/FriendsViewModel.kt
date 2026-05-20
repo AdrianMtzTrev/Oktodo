@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.oktodo.data.local.UserPreferencesDataStore
 import com.example.oktodo.data.repository.FriendsRepository
 import com.example.oktodo.data.repository.NotificationRepository
+import com.example.oktodo.ui.model.Friend
 import com.example.oktodo.ui.model.FriendRequest
 import com.example.oktodo.ui.model.Group
+import com.example.oktodo.ui.model.GroupInvitation
 import com.example.oktodo.ui.model.Notification
 import com.example.oktodo.ui.model.SharedEvent
 import com.example.oktodo.ui.model.UserProfile
@@ -15,6 +17,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
@@ -44,8 +47,15 @@ class FriendsViewModel @Inject constructor(
 
     val friends = repository.friends
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-    val groups = repository.groups
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val groups: StateFlow<List<Group>> = combine(
+        repository.groups,
+        prefs.preferences
+    ) { allGroups, p ->
+        allGroups.filter { group ->
+            group.members.contains("Tú") || group.members.contains(p.displayName)
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     val sharedEvents = repository.sharedEvents
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -68,6 +78,15 @@ class FriendsViewModel @Inject constructor(
         .flatMapLatest { state ->
             if (state.isRegistered && state.userId.isNotBlank())
                 repository.getOutgoing(state.userId)
+            else
+                flowOf(emptyList())
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val pendingGroupInvitations: StateFlow<List<GroupInvitation>> = _socialState
+        .flatMapLatest { state ->
+            if (state.isRegistered && state.userId.isNotBlank())
+                repository.getPendingGroupInvitations(state.userId)
             else
                 flowOf(emptyList())
         }
@@ -142,6 +161,62 @@ class FriendsViewModel @Inject constructor(
         viewModelScope.launch {
             repository.declineFriendRequest(request.id)
         }
+    }
+
+    fun sendGroupInvitation(friend: Friend, group: Group) {
+        viewModelScope.launch {
+            val state = _socialState.value
+            val fromId = state.userId.ifBlank { "local" }
+            if (group.members.contains(friend.name)) return@launch
+            try {
+                repository.sendGroupInvitation(
+                    fromUserId = fromId,
+                    fromDisplayName = state.displayName,
+                    toUserId = friend.id,
+                    toDisplayName = friend.name,
+                    group = group
+                )
+                if (state.userId.isNotBlank()) {
+                    notificationRepository.add(
+                        Notification(
+                            userId = state.userId,
+                            title = "Invitación enviada",
+                            message = "Invitaste a ${friend.name} al grupo ${group.name}",
+                            icon = group.icon
+                        )
+                    )
+                }
+                notificationRepository.add(
+                    Notification(
+                        userId = friend.id,
+                        title = "Invitación a grupo",
+                        message = "${state.displayName} te invitó al grupo ${group.name}",
+                        icon = group.icon
+                    )
+                )
+            } catch (_: Exception) { }
+        }
+    }
+
+    fun acceptGroupInvitation(invitation: GroupInvitation) {
+        viewModelScope.launch {
+            repository.acceptGroupInvitation(invitation)
+        }
+    }
+
+    fun declineGroupInvitation(invitation: GroupInvitation) {
+        viewModelScope.launch {
+            repository.declineGroupInvitation(invitation.id)
+        }
+    }
+
+    fun renameGroup(groupId: String, newName: String) {
+        if (newName.isBlank()) return
+        viewModelScope.launch { repository.renameGroup(groupId, newName.trim()) }
+    }
+
+    fun deleteGroup(groupId: String) {
+        viewModelScope.launch { repository.deleteGroup(groupId) }
     }
 
     fun toggleMode() {
@@ -262,17 +337,38 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
-    fun createGroup(name: String, members: List<String>) {
+    fun createGroup(name: String, selectedFriendNames: List<String>) {
         viewModelScope.launch {
-            repository.addGroup(
-                Group(
-                    id = "g${System.currentTimeMillis()}",
-                    name = name,
-                    icon = "👥",
-                    members = members + "Tú",
-                    eventCount = 0
-                )
+            val state = _socialState.value
+            val fromId = state.userId.ifBlank { "local" }
+            val group = Group(
+                id = "g${System.currentTimeMillis()}",
+                name = name,
+                icon = "👥",
+                members = listOf("Tú"),
+                eventCount = 0
             )
+            repository.addGroup(group)
+            val friendsToInvite = friends.value.filter { it.name in selectedFriendNames }
+            for (friend in friendsToInvite) {
+                try {
+                    repository.sendGroupInvitation(
+                        fromUserId = fromId,
+                        fromDisplayName = state.displayName,
+                        toUserId = friend.id,
+                        toDisplayName = friend.name,
+                        group = group
+                    )
+                    notificationRepository.add(
+                        Notification(
+                            userId = friend.id,
+                            title = "Invitación a grupo",
+                            message = "${state.displayName} te invitó al grupo ${group.name}",
+                            icon = group.icon
+                        )
+                    )
+                } catch (_: Exception) { }
+            }
         }
     }
 

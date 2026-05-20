@@ -9,6 +9,9 @@ interface GroupDao {
     @Query("SELECT * FROM groups ORDER BY name ASC")
     fun getAllGroups(): Flow<List<GroupEntity>>
 
+    @Query("SELECT * FROM groups WHERE id = :id LIMIT 1")
+    suspend fun getGroupById(id: String): GroupEntity?
+
     @Query("SELECT COUNT(*) FROM groups")
     suspend fun count(): Int
 

@@ -160,6 +160,32 @@ fun FriendRequest.toEntity() = FriendRequestEntity(
     createdAt = createdAt
 )
 
+// ── GroupInvitation ───────────────────────────────────
+fun GroupInvitationEntity.toDomain() = GroupInvitation(
+    id = id,
+    fromUserId = fromUserId,
+    fromDisplayName = fromDisplayName,
+    toUserId = toUserId,
+    toDisplayName = toDisplayName,
+    groupId = groupId,
+    groupName = groupName,
+    groupIcon = groupIcon,
+    status = status,
+    createdAt = createdAt
+)
+fun GroupInvitation.toEntity() = GroupInvitationEntity(
+    id = id,
+    fromUserId = fromUserId,
+    fromDisplayName = fromDisplayName,
+    toUserId = toUserId,
+    toDisplayName = toDisplayName,
+    groupId = groupId,
+    groupName = groupName,
+    groupIcon = groupIcon,
+    status = status,
+    createdAt = createdAt
+)
+
 // ── ShopItem ──────────────────────────────────────────
 fun ShopItemEntity.toDomain() = ShopItem(
     id = id,

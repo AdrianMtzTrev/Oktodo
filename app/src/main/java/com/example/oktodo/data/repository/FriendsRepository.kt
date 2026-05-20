@@ -4,11 +4,13 @@ import androidx.compose.ui.graphics.Color
 import com.example.oktodo.data.local.dao.FriendDao
 import com.example.oktodo.data.local.dao.FriendRequestDao
 import com.example.oktodo.data.local.dao.GroupDao
+import com.example.oktodo.data.local.dao.GroupInvitationDao
 import com.example.oktodo.data.local.dao.SharedEventDao
 import com.example.oktodo.data.local.dao.UserProfileDao
 import com.example.oktodo.data.local.entity.FriendEntity
 import com.example.oktodo.data.local.entity.FriendRequestEntity
 import com.example.oktodo.data.local.entity.GroupEntity
+import com.example.oktodo.data.local.entity.GroupInvitationEntity
 import com.example.oktodo.data.local.entity.SharedEventEntity
 import com.example.oktodo.data.local.entity.UserProfileEntity
 import com.example.oktodo.data.local.mapper.toDomain
@@ -16,6 +18,7 @@ import com.example.oktodo.data.local.mapper.toEntity
 import com.example.oktodo.ui.model.Friend
 import com.example.oktodo.ui.model.FriendRequest
 import com.example.oktodo.ui.model.Group
+import com.example.oktodo.ui.model.GroupInvitation
 import com.example.oktodo.ui.model.SharedEvent
 import com.example.oktodo.ui.model.UserProfile
 import kotlinx.coroutines.flow.Flow
@@ -31,7 +34,8 @@ class FriendsRepository @Inject constructor(
     private val groupDao: GroupDao,
     private val sharedEventDao: SharedEventDao,
     private val userProfileDao: UserProfileDao,
-    private val friendRequestDao: FriendRequestDao
+    private val friendRequestDao: FriendRequestDao,
+    private val groupInvitationDao: GroupInvitationDao
 ) {
     private val salt = "OktodoSalt2026"
     val friends: Flow<List<Friend>> = friendDao.getAllFriends().map { list -> list.map { it.toDomain() } }
@@ -136,6 +140,55 @@ class FriendsRepository @Inject constructor(
         ).forEach { friendRequestDao.insert(it) }
     }
 
+    // ── Group invitations ────────────────────────────────
+
+    fun getPendingGroupInvitations(userId: String): Flow<List<GroupInvitation>> =
+        groupInvitationDao.getPendingForUser(userId).map { list -> list.map { it.toDomain() } }
+
+    suspend fun sendGroupInvitation(
+        fromUserId: String,
+        fromDisplayName: String,
+        toUserId: String,
+        toDisplayName: String,
+        group: Group
+    ) {
+        val existing = groupInvitationDao.findExisting(toUserId, group.id)
+        if (existing != null) return
+        groupInvitationDao.insert(
+            GroupInvitationEntity(
+                id = UUID.randomUUID().toString(),
+                fromUserId = fromUserId,
+                fromDisplayName = fromDisplayName,
+                toUserId = toUserId,
+                toDisplayName = toDisplayName,
+                groupId = group.id,
+                groupName = group.name,
+                groupIcon = group.icon,
+                status = "pending"
+            )
+        )
+    }
+
+    suspend fun acceptGroupInvitation(invitation: GroupInvitation) {
+        groupInvitationDao.updateStatus(invitation.id, "accepted")
+        val group = groupDao.getGroupById(invitation.groupId) ?: return
+        groupDao.update(group.copy(membersJoined = "${group.membersJoined},${invitation.toDisplayName}"))
+    }
+
+    suspend fun declineGroupInvitation(invitationId: String) {
+        groupInvitationDao.updateStatus(invitationId, "declined")
+    }
+
+    suspend fun renameGroup(groupId: String, newName: String) {
+        val entity = groupDao.getGroupById(groupId) ?: return
+        groupDao.update(entity.copy(name = newName))
+    }
+
+    suspend fun deleteGroup(groupId: String) {
+        val entity = groupDao.getGroupById(groupId) ?: return
+        groupDao.delete(entity)
+    }
+
     // ── Seed ────────────────────────────────────────────
 
     suspend fun seedIfEmpty() {
@@ -153,25 +206,5 @@ class FriendsRepository @Inject constructor(
             UserProfileEntity("u7", "Valentina Cruz", "valentinacruz", "👩‍🦱", seedHash),
             UserProfileEntity("u8", "Mateo Hernández", "mateohernandez", "👨", seedHash)
         ).forEach { userProfileDao.insert(it) }
-
-        if (friendDao.count() > 0) return
-
-        listOf(
-            FriendEntity("1", "María García", 280, 3, "👩", Color(0xFFC4B5FD).value.toLong()),
-            FriendEntity("2", "Carlos López", 195, 2, "👱", Color(0xFFDDD6FE).value.toLong()),
-            FriendEntity("3", "Ana Martínez", 340, 5, "👩‍🦰", Color(0xFFE9D5FF).value.toLong()),
-            FriendEntity("4", "Luis Rodríguez", 150, 1, "👦", Color(0xFFD8B4FE).value.toLong())
-        ).forEach { friendDao.insert(it) }
-
-        listOf(
-            GroupEntity("g1", "Equipo Estudio", "📚", "María García,Ana Martínez,Tú", 2),
-            GroupEntity("g2", "Deportistas", "⚽", "Carlos López,Luis Rodríguez,Tú", 1)
-        ).forEach { groupDao.insert(it) }
-
-        listOf(
-            SharedEventEntity("e1", "Cine con amigos", "María García", "g1", "2026-03-16", "19:00", "Cinépolis Centro", "María García,Carlos López,Tú"),
-            SharedEventEntity("e2", "Estudio grupal", "Ana Martínez", "g1", "2026-03-18", "15:00", "Biblioteca Universidad", "Ana Martínez,Luis Rodríguez,Tú"),
-            SharedEventEntity("e3", "Entrenamiento", "Carlos López", "g2", "2026-03-20", "07:00", "Unidad Deportiva", "Carlos López,Luis Rodríguez,Tú")
-        ).forEach { sharedEventDao.insert(it) }
     }
 }
