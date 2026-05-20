@@ -68,7 +68,7 @@ fun GroupDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F5FF))
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
         Spacer(modifier = Modifier.height(10.dp))
@@ -92,7 +92,7 @@ fun GroupDetailScreen(
                 )
                 Text(
                     text = "${group.members.size} miembros",
-                    color = Color(0xFF6B7280)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -124,12 +124,12 @@ fun GroupDetailScreen(
             group.members.forEach { member ->
                 Surface(
                     shape = RoundedCornerShape(50),
-                    color = if (member == "Tú") Color(0xFF7C3AED) else Color(0xFFF3F4F6)
+                    color = if (member == "Tú") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
                 ) {
                     Text(
                         text = member,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
-                        color = if (member == "Tú") Color.White else Color(0xFF374151)
+                        color = if (member == "Tú") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -148,14 +148,14 @@ fun GroupDetailScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = "${visibleMonth.month.getDisplayName(TextStyle.FULL, Locale("es"))} ${visibleMonth.year}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1F2937),
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
 
@@ -176,7 +176,7 @@ fun GroupDetailScreen(
                                 .padding(4.dp)
                                 .clip(CircleShape)
                                 .background(
-                                    if (isSelected) Color(0xFF7C3AED) else Color.Transparent
+                                    if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
@@ -197,9 +197,9 @@ fun GroupDetailScreen(
                                     Text(
                                         text = day.date.dayOfMonth.toString(),
                                         color = when {
-                                            !isCurrentMonth -> Color.LightGray
-                                            isSelected -> Color.White
-                                            else -> Color(0xFF111827)
+                                            !isCurrentMonth -> MaterialTheme.colorScheme.onSurfaceVariant
+                                            isSelected -> MaterialTheme.colorScheme.onPrimary
+                                            else -> MaterialTheme.colorScheme.onSurface
                                         }
                                     )
                                 }
@@ -210,7 +210,7 @@ fun GroupDetailScreen(
                                             .size(6.dp)
                                             .clip(CircleShape)
                                             .background(
-                                                if (isSelected) Color.White else Color(0xFF7C3AED)
+                                                if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
                                             )
                                     )
                                 }
@@ -236,7 +236,7 @@ fun GroupDetailScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Box(
                     modifier = Modifier
@@ -246,7 +246,7 @@ fun GroupDetailScreen(
                 ) {
                     Text(
                         text = "No hay eventos este día",
-                        color = Color(0xFF9CA3AF)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -378,7 +378,7 @@ private fun DaysOfWeekTitle(firstDayOfWeek: DayOfWeek) {
             Text(
                 text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale("es")),
                 modifier = Modifier.weight(1f),
-                color = Color(0xFF6B7280)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
