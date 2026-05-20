@@ -68,7 +68,6 @@ class ProfileViewModel @Inject constructor(
 
     init {
         viewModelScope.launch { shopItemRepository.seedIfEmpty() }
-        viewModelScope.launch { prefs.checkWeeklyReset() }
         observeNewAchievements()
     }
 

@@ -111,79 +111,79 @@ private fun SocialContent(
 
             when (selectedTab) {
                  0 -> {
-                    SectionHeader(
-                        icon = {
-                            Icon(Icons.Outlined.People, contentDescription = null, tint = textMain)
-                        },
-                        title = "Mis Amigos",
-                        action = "Buscar amigo",
-                        actionColor = accent,
-                        onActionClick = { showSearchFriendSheet = true }
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    if (pendingIncoming.isNotEmpty()) {
-                        Text(
-                            text = "Solicitudes entrantes",
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        pendingIncoming.forEach { request ->
-                            PendingRequestCard(
-                                request = request,
-                                onAccept = { viewModel.acceptFriendRequest(request) },
-                                onDecline = { viewModel.declineFriendRequest(request) }
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-
-                    if (pendingOutgoing.isNotEmpty()) {
-                        Text(
-                            text = "Solicitudes enviadas",
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        pendingOutgoing.forEach { request ->
-                            OutgoingRequestCard(request = request)
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         contentPadding = PaddingValues(bottom = 100.dp)
                     ) {
+                        item {
+                            SectionHeader(
+                                icon = {
+                                    Icon(Icons.Outlined.People, contentDescription = null, tint = textMain)
+                                },
+                                title = "Mis Amigos",
+                                action = "Buscar amigo",
+                                actionColor = accent,
+                                onActionClick = { showSearchFriendSheet = true }
+                            )
+                        }
+
+                        if (pendingIncoming.isNotEmpty()) {
+                            item {
+                                Text(
+                                    text = "Solicitudes entrantes",
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                            }
+                            items(pendingIncoming) { request ->
+                                PendingRequestCard(
+                                    request = request,
+                                    onAccept = { viewModel.acceptFriendRequest(request) },
+                                    onDecline = { viewModel.declineFriendRequest(request) }
+                                )
+                            }
+                        }
+
+                        if (pendingOutgoing.isNotEmpty()) {
+                            item {
+                                Text(
+                                    text = "Solicitudes enviadas",
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                            }
+                            items(pendingOutgoing) { request ->
+                                OutgoingRequestCard(request = request)
+                            }
+                        }
+
                         items(friends) { friend ->
                             FriendCard(friend = friend)
                         }
                     }
                 }
 
-                1 -> {
-                    SectionHeader(
-                        icon = {
-                            Icon(Icons.Outlined.Group, contentDescription = null, tint = textMain)
-                        },
-                        title = "Mis Grupos",
-                        action = "Crear grupo",
-                        actionColor = accent,
-                        onActionClick = { showCreateGroupSheet = true }
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
+                 1 -> {
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         contentPadding = PaddingValues(bottom = 100.dp)
                     ) {
+                        item {
+                            SectionHeader(
+                                icon = {
+                                    Icon(Icons.Outlined.Group, contentDescription = null, tint = textMain)
+                                },
+                                title = "Mis Grupos",
+                                action = "Crear grupo",
+                                actionColor = accent,
+                                onActionClick = { showCreateGroupSheet = true }
+                            )
+                        }
+
                         if (pendingGroupInvitations.isNotEmpty()) {
                             item {
                                 Text(
@@ -214,25 +214,25 @@ private fun SocialContent(
                     }
                 }
 
-                2 -> {
-                    SectionHeader(
-                        icon = {
-                            Icon(Icons.Outlined.Event, contentDescription = null, tint = textMain)
-                        },
-                        title = "Eventos Compartidos",
-                        action = "",
-                        actionColor = accent,
-                        onActionClick = { }
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
+                 2 -> {
                     val grouped = events.groupBy { viewModel.getFormattedDateLabel(it.date) }
 
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(14.dp),
                         contentPadding = PaddingValues(bottom = 100.dp)
                     ) {
+                        item {
+                            SectionHeader(
+                                icon = {
+                                    Icon(Icons.Outlined.Event, contentDescription = null, tint = textMain)
+                                },
+                                title = "Eventos Compartidos",
+                                action = "",
+                                actionColor = accent,
+                                onActionClick = { }
+                            )
+                        }
+
                         grouped.forEach { (date, dateEvents) ->
                             item {
                                 Text(

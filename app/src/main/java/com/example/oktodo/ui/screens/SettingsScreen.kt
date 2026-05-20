@@ -25,15 +25,11 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    var displayName by remember { mutableStateOf(uiState.displayName) }
-    var username by remember { mutableStateOf(uiState.username) }
-    var selectedAvatar by remember { mutableStateOf(uiState.avatarEmoji) }
+    var displayName by remember(uiState.displayName) { mutableStateOf(uiState.displayName) }
+    var username by remember(uiState.username) { mutableStateOf(uiState.username) }
+    var selectedAvatar by remember(uiState.avatarEmoji) { mutableStateOf(uiState.avatarEmoji) }
     var showLogoutDialog by remember { mutableStateOf(false) }
     var goalValue by remember(uiState.weeklyGoal) { mutableStateOf(uiState.weeklyGoal) }
-
-    LaunchedEffect(goalValue) {
-        viewModel.setWeeklyGoal(goalValue)
-    }
 
     val avatarOptions = listOf("🐙", "🐱", "🐶", "🦊", "🐼", "🐸", "🦄", "🐻")
 
@@ -225,7 +221,12 @@ fun SettingsScreen(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         FilledTonalIconButton(
-                            onClick = { if (goalValue > 1) goalValue-- }
+                            onClick = {
+                                if (goalValue > 1) {
+                                    goalValue--
+                                    viewModel.setWeeklyGoal(goalValue)
+                                }
+                            }
                         ) {
                             Text("−", style = MaterialTheme.typography.titleLarge)
                         }
@@ -249,7 +250,12 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(28.dp))
 
                         FilledTonalIconButton(
-                            onClick = { if (goalValue < 30) goalValue++ }
+                            onClick = {
+                                if (goalValue < 30) {
+                                    goalValue++
+                                    viewModel.setWeeklyGoal(goalValue)
+                                }
+                            }
                         ) {
                             Text("+", style = MaterialTheme.typography.titleLarge)
                         }
@@ -307,7 +313,10 @@ fun SettingsScreen(
                     onClick = {
                         viewModel.logoutSocial()
                         showLogoutDialog = false
-                        navController.popBackStack()
+                        navController.navigate("friends") {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
                     },
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = MaterialTheme.colorScheme.error

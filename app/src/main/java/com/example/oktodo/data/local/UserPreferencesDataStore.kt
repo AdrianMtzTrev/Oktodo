@@ -8,6 +8,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
 import java.time.temporal.WeekFields
 import javax.inject.Inject
@@ -35,6 +37,8 @@ data class UserPreferences(
 class UserPreferencesDataStore @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
+    private val dataStoreMutex = Mutex()
+
     private object Keys {
         val DISPLAY_NAME = stringPreferencesKey("display_name")
         val USERNAME = stringPreferencesKey("username")
@@ -84,12 +88,14 @@ class UserPreferencesDataStore @Inject constructor(
         username: String,
         avatarEmoji: String
     ) {
-        context.dataStore.edit { prefs ->
-            prefs[Keys.USER_ID] = userId
-            prefs[Keys.DISPLAY_NAME] = displayName
-            prefs[Keys.USERNAME] = username
-            prefs[Keys.AVATAR] = avatarEmoji
-            prefs[Keys.IS_SOCIAL_REGISTERED] = true
+        dataStoreMutex.withLock {
+            context.dataStore.edit { prefs ->
+                prefs[Keys.USER_ID] = userId
+                prefs[Keys.DISPLAY_NAME] = displayName
+                prefs[Keys.USERNAME] = username
+                prefs[Keys.AVATAR] = avatarEmoji
+                prefs[Keys.IS_SOCIAL_REGISTERED] = true
+            }
         }
     }
 
@@ -159,27 +165,33 @@ class UserPreferencesDataStore @Inject constructor(
     }
 
     suspend fun setWeeklyGoal(goal: Int) {
-        context.dataStore.edit { prefs ->
-            prefs[Keys.WEEKLY_GOAL] = goal.coerceIn(1, 30)
+        dataStoreMutex.withLock {
+            context.dataStore.edit { prefs ->
+                prefs[Keys.WEEKLY_GOAL] = goal.coerceIn(1, 30)
+            }
         }
     }
 
     suspend fun checkWeeklyReset() {
-        val currentWeek = LocalDate.now().let {
-            "${it.year}-W${it.get(WeekFields.ISO.weekOfWeekBasedYear())}"
-        }
-        context.dataStore.edit { prefs ->
-            val lastReset = prefs[Keys.LAST_WEEK_RESET] ?: ""
-            if (lastReset != currentWeek) {
-                prefs[Keys.WEEKLY_COMPLETED] = 0
-                prefs[Keys.LAST_WEEK_RESET] = currentWeek
+        dataStoreMutex.withLock {
+            val currentWeek = LocalDate.now().let {
+                "${it.year}-W${it.get(WeekFields.ISO.weekOfWeekBasedYear())}"
+            }
+            context.dataStore.edit { prefs ->
+                val lastReset = prefs[Keys.LAST_WEEK_RESET] ?: ""
+                if (lastReset != currentWeek) {
+                    prefs[Keys.WEEKLY_COMPLETED] = 0
+                    prefs[Keys.LAST_WEEK_RESET] = currentWeek
+                }
             }
         }
     }
 
     suspend fun logoutSocial() {
-        context.dataStore.edit { prefs ->
-            prefs[Keys.IS_SOCIAL_REGISTERED] = false
+        dataStoreMutex.withLock {
+            context.dataStore.edit { prefs ->
+                prefs[Keys.IS_SOCIAL_REGISTERED] = false
+            }
         }
     }
 }
