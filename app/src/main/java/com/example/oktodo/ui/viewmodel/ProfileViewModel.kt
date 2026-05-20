@@ -79,10 +79,13 @@ class ProfileViewModel @Inject constructor(
             ) { unlockedTitles, notified ->
                 unlockedTitles - notified
             }.collect { newTitles ->
+                val userId = prefs.getUserId()
+                if (userId == null) return@collect
                 for (title in newTitles) {
                     val achievement = uiState.value.achievements.find { it.title == title } ?: continue
                     notificationRepository.add(
                         Notification(
+                            userId = userId,
                             title = "Logro desbloqueado",
                             message = "Has desbloqueado el logro \"${achievement.title}\"",
                             icon = achievement.icon

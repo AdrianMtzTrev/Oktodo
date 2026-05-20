@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import javax.inject.Inject
@@ -125,6 +126,12 @@ class UserPreferencesDataStore @Inject constructor(
     val notifiedAchievements: Flow<Set<String>> = context.dataStore.data.map { prefs ->
         val raw = prefs[Keys.NOTIFIED_ACHIEVEMENTS] ?: ""
         if (raw.isBlank()) emptySet() else raw.split(",").toSet()
+    }
+
+    val userId: Flow<String> = preferences.map { it.userId }
+
+    suspend fun getUserId(): String? {
+        return context.dataStore.data.first()[Keys.USER_ID]
     }
 
     suspend fun markAchievementNotified(title: String) {

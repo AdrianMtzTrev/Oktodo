@@ -13,15 +13,16 @@ import javax.inject.Singleton
 class NotificationRepository @Inject constructor(
     private val dao: NotificationDao
 ) {
-    val notifications: Flow<List<Notification>> =
-        dao.getAllNotifications().map { list -> list.map { it.toDomain() } }
+    fun getNotificationsForUser(userId: String): Flow<List<Notification>> =
+        dao.getNotificationsForUser(userId).map { list -> list.map { it.toDomain() } }
 
-    val unreadCount: Flow<Int> = dao.getUnreadCount()
+    fun getUnreadCount(userId: String): Flow<Int> = dao.getUnreadCount(userId)
 
     suspend fun add(notification: Notification) {
         dao.insert(
             NotificationEntity(
                 id = notification.id,
+                userId = notification.userId,
                 title = notification.title,
                 message = notification.message,
                 icon = notification.icon,
@@ -33,12 +34,13 @@ class NotificationRepository @Inject constructor(
 
     suspend fun markAsRead(id: String) = dao.markAsRead(id)
 
-    suspend fun markAllAsRead() = dao.markAllAsRead()
+    suspend fun markAllAsRead(userId: String) = dao.markAllAsRead(userId)
 
     suspend fun delete(notification: Notification) {
         dao.delete(
             NotificationEntity(
                 id = notification.id,
+                userId = notification.userId,
                 title = notification.title,
                 message = notification.message,
                 icon = notification.icon,
@@ -48,5 +50,5 @@ class NotificationRepository @Inject constructor(
         )
     }
 
-    suspend fun clearRead() = dao.clearRead()
+    suspend fun clearRead(userId: String) = dao.clearRead(userId)
 }

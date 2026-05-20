@@ -114,8 +114,17 @@ class FriendsViewModel @Inject constructor(
                 )
                 notificationRepository.add(
                     Notification(
+                        userId = state.userId,
                         title = "Solicitud de amistad",
                         message = "Solicitud enviada a @${target.username}",
+                        icon = "👤"
+                    )
+                )
+                notificationRepository.add(
+                    Notification(
+                        userId = target.id,
+                        title = "Solicitud de amistad",
+                        message = "${state.displayName} quiere ser tu amigo",
                         icon = "👤"
                     )
                 )
@@ -198,6 +207,7 @@ class FriendsViewModel @Inject constructor(
             repository.seedDemoFriendRequests(userId)
             notificationRepository.add(
                 Notification(
+                    userId = userId,
                     title = "Solicitud de amistad",
                     message = "María García quiere ser tu amigo",
                     icon = "👩"
@@ -205,6 +215,7 @@ class FriendsViewModel @Inject constructor(
             )
             notificationRepository.add(
                 Notification(
+                    userId = userId,
                     title = "Solicitud de amistad",
                     message = "Sofía Torres quiere ser tu amigo",
                     icon = "👧"
