@@ -328,6 +328,7 @@ class FriendsViewModel @Inject constructor(
                 prefs.registerSocial(
                     profile.id, profile.displayName, profile.username, profile.avatarEmoji
                 )
+                _socialState.value = _socialState.value.copy(isAuthLoading = false)
             } else {
                 _socialState.value = _socialState.value.copy(
                     authError = "Usuario o contraseña incorrectos",
