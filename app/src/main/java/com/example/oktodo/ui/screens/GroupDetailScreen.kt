@@ -62,7 +62,7 @@ fun GroupDetailScreen(
     )
 
     val visibleMonth = calendarState.firstVisibleMonth.yearMonth
-    val dayEvents = remember(selectedDate) {
+    val dayEvents = remember(selectedDate, viewModel.sharedEvents) {
         viewModel.getEventsForGroupOnDate(groupId, selectedDate)
     }
 
@@ -259,7 +259,10 @@ fun GroupDetailScreen(
             }
         } else {
             items(dayEvents) { event ->
-                SharedEventCard(event = event)
+                SharedEventCard(
+                    event = event,
+                    onClick = { navController.navigate("shared_event_detail/$groupId/${event.id}") }
+                )
             }
         }
     }

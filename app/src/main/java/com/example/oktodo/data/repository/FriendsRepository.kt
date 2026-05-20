@@ -46,6 +46,10 @@ class FriendsRepository @Inject constructor(
     suspend fun addGroup(group: Group) = groupDao.insert(group.toEntity())
     suspend fun updateGroup(group: Group) = groupDao.update(group.toEntity())
     suspend fun addSharedEvent(event: SharedEvent) = sharedEventDao.insert(event.toEntity())
+    suspend fun updateSharedEvent(id: String, title: String, date: String, time: String, location: String) =
+        sharedEventDao.update(id, title, date, time, location)
+    suspend fun setEventEditors(eventId: String, editors: List<String>) =
+        sharedEventDao.setEditors(eventId, editors.joinToString(","))
     suspend fun deleteSharedEvent(id: String) = sharedEventDao.deleteById(id)
 
     fun searchUsers(query: String): Flow<List<UserProfile>> =

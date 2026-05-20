@@ -377,21 +377,38 @@ class FriendsViewModel @Inject constructor(
 
     fun createSharedEvent(title: String, groupId: String, date: String, time: String, location: String) {
         viewModelScope.launch {
+            val state = _socialState.value
             val group = groups.value.find { it.id == groupId } ?: return@launch
+            val displayName = state.displayName.ifBlank { "Tú" }
             val event = SharedEvent(
                 id = "e${System.currentTimeMillis()}",
                 title = title,
-                creator = "Tú",
+                creator = displayName,
                 groupId = groupId,
                 date = date,
                 time = time,
                 location = location,
-                participants = group.members
+                participants = group.members,
+                editors = listOf(displayName)
             )
             repository.addSharedEvent(event)
             repository.updateGroup(group.copy(eventCount = group.eventCount + 1))
         }
     }
+
+    fun updateSharedEvent(eventId: String, title: String, date: String, time: String, location: String) {
+        viewModelScope.launch {
+            repository.updateSharedEvent(eventId, title, date, time, location)
+        }
+    }
+
+    fun setSharedEventEditors(eventId: String, editors: List<String>) {
+        viewModelScope.launch {
+            repository.setEventEditors(eventId, editors)
+        }
+    }
+
+    fun getSharedEventById(eventId: String) = sharedEvents.value.find { it.id == eventId }
 
     fun getGroupById(groupId: String) = groups.value.find { it.id == groupId }
 

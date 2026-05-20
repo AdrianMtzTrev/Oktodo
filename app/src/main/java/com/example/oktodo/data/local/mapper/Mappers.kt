@@ -87,6 +87,16 @@ fun Group.toEntity() = GroupEntity(
 )
 
 // ── SharedEvent ───────────────────────────────────────
+fun SharedEvent.toCalendarEvent() = CalendarEvent(
+    id = "shared_$id",
+    title = "👥 $title",
+    date = LocalDate.parse(date),
+    time = try { LocalTime.parse(time) } catch (_: Exception) { null },
+    location = location.ifBlank { null },
+    color = Color(0xFF7C3AED),
+    description = "Creado por: $creator"
+)
+
 fun SharedEventEntity.toDomain() = SharedEvent(
     id = id,
     title = title,
@@ -95,7 +105,8 @@ fun SharedEventEntity.toDomain() = SharedEvent(
     date = date,
     time = time,
     location = location,
-    participants = participantsJoined.split(",").filter { it.isNotBlank() }
+    participants = participantsJoined.split(",").filter { it.isNotBlank() },
+    editors = canEditJoined.split(",").filter { it.isNotBlank() }
 )
 
 fun SharedEvent.toEntity() = SharedEventEntity(
@@ -106,7 +117,8 @@ fun SharedEvent.toEntity() = SharedEventEntity(
     date = date,
     time = time,
     location = location,
-    participantsJoined = participants.joinToString(",")
+    participantsJoined = participants.joinToString(","),
+    canEditJoined = editors.joinToString(",")
 )
 
 // ── Notification ──────────────────────────────────────
