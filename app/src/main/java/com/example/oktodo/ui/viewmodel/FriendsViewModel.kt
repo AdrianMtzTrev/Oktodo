@@ -53,7 +53,7 @@ class FriendsViewModel @Inject constructor(
         prefs.preferences
     ) { allGroups, p ->
         allGroups.filter { group ->
-            group.members.contains("Tú") || group.members.contains(p.displayName)
+            group.creatorId == p.userId || group.members.contains(p.displayName)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     val sharedEvents = repository.sharedEvents
@@ -341,12 +341,14 @@ class FriendsViewModel @Inject constructor(
         viewModelScope.launch {
             val state = _socialState.value
             val fromId = state.userId.ifBlank { "local" }
+            val displayName = state.displayName.ifBlank { "Tú" }
             val group = Group(
                 id = "g${System.currentTimeMillis()}",
                 name = name,
                 icon = "👥",
-                members = listOf("Tú"),
-                eventCount = 0
+                members = listOf(displayName),
+                eventCount = 0,
+                creatorId = state.userId
             )
             repository.addGroup(group)
             val friendsToInvite = friends.value.filter { it.name in selectedFriendNames }

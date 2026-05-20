@@ -19,7 +19,7 @@ import com.example.oktodo.data.local.entity.*
         FriendRequestEntity::class,
         GroupInvitationEntity::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

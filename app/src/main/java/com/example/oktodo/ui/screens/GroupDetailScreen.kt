@@ -40,6 +40,7 @@ fun GroupDetailScreen(
     val groups by viewModel.groups.collectAsState()
     val group = groups.find { it.id == groupId } ?: return
     val friends by viewModel.friends.collectAsState()
+    val socialState by viewModel.socialState.collectAsState()
 
     var showInviteSheet by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
@@ -124,12 +125,12 @@ fun GroupDetailScreen(
             group.members.forEach { member ->
                 Surface(
                     shape = RoundedCornerShape(50),
-                    color = if (member == "Tú") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+                    color = if (member == socialState.displayName || member == "Tú") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
                 ) {
                     Text(
-                        text = member,
+                        text = if (member == socialState.displayName || member == "Tú") "Tú" else member,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
-                        color = if (member == "Tú") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                        color = if (member == socialState.displayName || member == "Tú") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
