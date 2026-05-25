@@ -45,6 +45,7 @@ class FriendsRepository @Inject constructor(
 
     suspend fun addGroup(group: Group) = groupDao.insert(group.toEntity())
     suspend fun updateGroup(group: Group) = groupDao.update(group.toEntity())
+    suspend fun incrementGroupEventCount(groupId: String) = groupDao.incrementEventCount(groupId)
     suspend fun addSharedEvent(event: SharedEvent) = sharedEventDao.insert(event.toEntity())
     suspend fun updateSharedEvent(id: String, title: String, date: String, time: String, location: String) =
         sharedEventDao.update(id, title, date, time, location)

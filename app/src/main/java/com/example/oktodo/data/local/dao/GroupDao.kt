@@ -23,4 +23,7 @@ interface GroupDao {
 
     @Delete
     suspend fun delete(group: GroupEntity)
+
+    @Query("UPDATE groups SET eventCount = eventCount + 1 WHERE id = :groupId")
+    suspend fun incrementEventCount(groupId: String)
 }

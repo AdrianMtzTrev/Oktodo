@@ -392,7 +392,7 @@ class FriendsViewModel @Inject constructor(
                 editors = listOf(displayName)
             )
             repository.addSharedEvent(event)
-            repository.updateGroup(group.copy(eventCount = group.eventCount + 1))
+            repository.incrementGroupEventCount(groupId)
         }
     }
 
