@@ -99,8 +99,19 @@ class UserPreferencesDataStore @Inject constructor(
         }
     }
 
+    private fun currentWeekKey(): String {
+        val now = LocalDate.now()
+        return "${now.year}-W${now.get(WeekFields.ISO.weekOfWeekBasedYear())}"
+    }
+
     suspend fun completeTask(pointsReward: Int) {
         context.dataStore.edit { prefs ->
+            val lastReset = prefs[Keys.LAST_WEEK_RESET] ?: ""
+            val currentWeek = currentWeekKey()
+            if (lastReset != currentWeek) {
+                prefs[Keys.WEEKLY_COMPLETED] = 0
+                prefs[Keys.LAST_WEEK_RESET] = currentWeek
+            }
             prefs[Keys.POINTS] = (prefs[Keys.POINTS] ?: 0) + pointsReward
             prefs[Keys.COMPLETED_TASKS] = (prefs[Keys.COMPLETED_TASKS] ?: 0) + 1
             prefs[Keys.WEEKLY_COMPLETED] = (prefs[Keys.WEEKLY_COMPLETED] ?: 0) + 1
@@ -109,6 +120,12 @@ class UserPreferencesDataStore @Inject constructor(
 
     suspend fun uncompleteTask(pointsReward: Int) {
         context.dataStore.edit { prefs ->
+            val lastReset = prefs[Keys.LAST_WEEK_RESET] ?: ""
+            val currentWeek = currentWeekKey()
+            if (lastReset != currentWeek) {
+                prefs[Keys.WEEKLY_COMPLETED] = 0
+                prefs[Keys.LAST_WEEK_RESET] = currentWeek
+            }
             prefs[Keys.POINTS] = maxOf(0, (prefs[Keys.POINTS] ?: 0) - pointsReward)
             prefs[Keys.COMPLETED_TASKS] = maxOf(0, (prefs[Keys.COMPLETED_TASKS] ?: 0) - 1)
             prefs[Keys.WEEKLY_COMPLETED] = maxOf(0, (prefs[Keys.WEEKLY_COMPLETED] ?: 0) - 1)
@@ -176,11 +193,9 @@ class UserPreferencesDataStore @Inject constructor(
 
     suspend fun checkWeeklyReset() {
         dataStoreMutex.withLock {
-            val currentWeek = LocalDate.now().let {
-                "${it.year}-W${it.get(WeekFields.ISO.weekOfWeekBasedYear())}"
-            }
             context.dataStore.edit { prefs ->
                 val lastReset = prefs[Keys.LAST_WEEK_RESET] ?: ""
+                val currentWeek = currentWeekKey()
                 if (lastReset != currentWeek) {
                     prefs[Keys.WEEKLY_COMPLETED] = 0
                     prefs[Keys.LAST_WEEK_RESET] = currentWeek
