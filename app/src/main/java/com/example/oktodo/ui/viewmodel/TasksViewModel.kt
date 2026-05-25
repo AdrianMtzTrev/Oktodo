@@ -8,6 +8,8 @@ import com.example.oktodo.data.repository.CalendarEventRepository
 import com.example.oktodo.data.repository.TaskRepository
 import com.example.oktodo.ui.model.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -55,6 +57,11 @@ class TasksViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val taskMutex = Mutex()
+
+    private val _pendingDeletedTask = MutableStateFlow<Task?>(null)
+    val pendingDeletedTask: StateFlow<Task?> = _pendingDeletedTask.asStateFlow()
+
+    private var deleteJob: Job? = null
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -157,6 +164,22 @@ class TasksViewModel @Inject constructor(
                 if (current.isCompleted) prefs.uncompleteTask(current.pointsReward)
                 repository.delete(current)
             }
+            deleteJob?.cancel()
+            _pendingDeletedTask.value = task
+            deleteJob = viewModelScope.launch {
+                delay(5000)
+                _pendingDeletedTask.value = null
+            }
+        }
+    }
+
+    fun undoDelete() {
+        deleteJob?.cancel()
+        val task = _pendingDeletedTask.value ?: return
+        _pendingDeletedTask.value = null
+        viewModelScope.launch {
+            repository.add(task)
+            if (task.isCompleted) prefs.completeTask(task.pointsReward)
         }
     }
 
