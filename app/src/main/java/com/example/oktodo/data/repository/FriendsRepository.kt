@@ -23,8 +23,10 @@ import com.example.oktodo.ui.model.SharedEvent
 import com.example.oktodo.ui.model.UserProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import java.security.MessageDigest
+import java.security.SecureRandom
 import java.util.UUID
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.PBEKeySpec
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -37,7 +39,6 @@ class FriendsRepository @Inject constructor(
     private val friendRequestDao: FriendRequestDao,
     private val groupInvitationDao: GroupInvitationDao
 ) {
-    private val salt = "OktodoSalt2026"
     val friends: Flow<List<Friend>> = friendDao.getAllFriends().map { list -> list.map { it.toDomain() } }
     val groups: Flow<List<Group>> = groupDao.getAllGroups().map { list -> list.map { it.toDomain() } }
     val sharedEvents: Flow<List<SharedEvent>> = sharedEventDao.getAllEvents().map { list -> list.map { it.toDomain() } }
@@ -59,20 +60,32 @@ class FriendsRepository @Inject constructor(
     suspend fun isUsernameTaken(username: String): Boolean =
         userProfileDao.isUsernameTaken(username)
 
-    private fun hashPassword(password: String): String {
-        val digest = MessageDigest.getInstance("SHA-256")
-        val hash = digest.digest("$salt:$password".toByteArray())
+    private fun hashPassword(password: String, salt: String): String {
+        val spec = PBEKeySpec(password.toCharArray(), salt.toByteArray(), 600_000, 256)
+        val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
+        val hash = factory.generateSecret(spec).encoded
         return hash.joinToString("") { "%02x".format(it) }
     }
 
+    private fun generateSalt(): String {
+        val salt = ByteArray(32)
+        SecureRandom().nextBytes(salt)
+        return salt.joinToString("") { "%02x".format(it) }
+    }
+
     suspend fun registerUser(profile: UserProfile, password: String) {
-        val entity = profile.toEntity().copy(passwordHash = hashPassword(password))
+        val salt = generateSalt()
+        val hash = hashPassword(password, salt)
+        val entity = profile.toEntity().copy(passwordHash = "$salt:$hash")
         userProfileDao.insert(entity)
     }
 
     suspend fun loginUser(username: String, password: String): UserProfile? {
         val entity = userProfileDao.findByUsername(username.lowercase().replace(" ", "_")) ?: return null
-        return if (entity.passwordHash == hashPassword(password)) entity.toDomain() else null
+        val parts = entity.passwordHash.split(":")
+        if (parts.size != 2) return null
+        val (salt, storedHash) = parts
+        return if (hashPassword(password, salt) == storedHash) entity.toDomain() else null
     }
 
     // ── Friend requests ─────────────────────────────────
@@ -206,17 +219,19 @@ class FriendsRepository @Inject constructor(
     suspend fun seedIfEmpty() {
         if (userProfileDao.count() > 0) return
 
-        val seedHash = hashPassword("oktodo123")
+        val seedSalt = generateSalt()
+        val seedHash = hashPassword("oktodo123", seedSalt)
+        val stored = "$seedSalt:$seedHash"
 
         listOf(
-            UserProfileEntity("u1", "María García", "mariagarcia", "👩", seedHash),
-            UserProfileEntity("u2", "Carlos López", "carloslopez", "👱", seedHash),
-            UserProfileEntity("u3", "Ana Martínez", "anamartinez", "👩‍🦰", seedHash),
-            UserProfileEntity("u4", "Luis Rodríguez", "luisrodriguez", "👦", seedHash),
-            UserProfileEntity("u5", "Sofía Torres", "sofiatorres", "👧", seedHash),
-            UserProfileEntity("u6", "Diego Ramírez", "diegoramirez", "🧑", seedHash),
-            UserProfileEntity("u7", "Valentina Cruz", "valentinacruz", "👩‍🦱", seedHash),
-            UserProfileEntity("u8", "Mateo Hernández", "mateohernandez", "👨", seedHash)
+            UserProfileEntity("u1", "María García", "mariagarcia", "👩", stored),
+            UserProfileEntity("u2", "Carlos López", "carloslopez", "👱", stored),
+            UserProfileEntity("u3", "Ana Martínez", "anamartinez", "👩‍🦰", stored),
+            UserProfileEntity("u4", "Luis Rodríguez", "luisrodriguez", "👦", stored),
+            UserProfileEntity("u5", "Sofía Torres", "sofiatorres", "👧", stored),
+            UserProfileEntity("u6", "Diego Ramírez", "diegoramirez", "🧑", stored),
+            UserProfileEntity("u7", "Valentina Cruz", "valentinacruz", "👩‍🦱", stored),
+            UserProfileEntity("u8", "Mateo Hernández", "mateohernandez", "👨", stored)
         ).forEach { userProfileDao.insert(it) }
     }
 }
