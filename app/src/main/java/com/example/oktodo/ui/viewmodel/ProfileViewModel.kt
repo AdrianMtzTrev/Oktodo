@@ -108,6 +108,7 @@ class ProfileViewModel @Inject constructor(
 
     fun purchaseItem(itemId: String) {
         viewModelScope.launch {
+            shopItemRepository.awaitSeed()
             val item = shopItems.value.find { it.id == itemId } ?: return@launch
             val success = shopItemRepository.purchase(item, uiState.value.points)
             if (success) {
