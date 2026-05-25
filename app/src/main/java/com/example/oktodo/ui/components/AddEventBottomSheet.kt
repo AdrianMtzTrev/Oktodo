@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,7 +42,8 @@ fun AddEventBottomSheet(
     initialDate: LocalDate
 ) {
     var title by remember { mutableStateOf("") }
-    var dateText by remember { mutableStateOf(initialDate.toString()) }
+    var selectedDate by remember { mutableStateOf(initialDate) }
+    var showDatePicker by remember { mutableStateOf(false) }
     var timeText by remember { mutableStateOf("") }
     var showTimePicker by remember { mutableStateOf(false) }
     val timePickerState = rememberTimePickerState(initialHour = 12, initialMinute = 0)
@@ -126,18 +128,37 @@ fun AddEventBottomSheet(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            OutlinedTextField(
-                value = dateText,
-                onValueChange = { dateText = it },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Fecha") },
-                placeholder = { Text("YYYY-MM-DD") },
-                leadingIcon = {
-                    Icon(Icons.Outlined.CalendarMonth, contentDescription = null)
-                },
-                shape = RoundedCornerShape(16.dp),
-                singleLine = true
+            Text(
+                text = "Fecha",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showDatePicker = true }
+                    .background(
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        RoundedCornerShape(16.dp)
+                    )
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Icon(
+                    Icons.Outlined.CalendarMonth,
+                    contentDescription = "Seleccionar fecha",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
 
             Spacer(modifier = Modifier.height(14.dp))
 
@@ -235,17 +256,16 @@ fun AddEventBottomSheet(
                 onClick = {
                     keyboardController?.hide()
 
-                    val parsedDate = runCatching { LocalDate.parse(dateText) }.getOrNull()
                     val parsedTime = if (timeText.isBlank()) {
                         null
                     } else {
                         runCatching { LocalTime.parse(timeText) }.getOrNull()
                     }
 
-                    if (title.isNotBlank() && parsedDate != null) {
+                    if (title.isNotBlank()) {
                         onSave(
                             title.trim(),
-                            parsedDate,
+                            selectedDate,
                             parsedTime,
                             location.ifBlank { null },
                             description.ifBlank { null },
@@ -257,12 +277,35 @@ fun AddEventBottomSheet(
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                enabled = title.isNotBlank() && dateText.isNotBlank()
+                enabled = title.isNotBlank()
             ) {
                 Text("Guardar evento")
             }
 
             Spacer(modifier = Modifier.height(14.dp))
+        }
+    }
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = selectedDate.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val instant = java.time.Instant.ofEpochMilli(millis)
+                        selectedDate = instant.atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+                    }
+                    showDatePicker = false
+                }) { Text("Aceptar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancelar") }
+            }
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
 
