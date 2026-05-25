@@ -176,6 +176,10 @@ fun FocusScreen() {
                             isTimerRunning = false
                             timerJob?.cancel()
                         } else {
+                            if (timeLeft == 0) {
+                                timeLeft = sessionDurationSeconds
+                                progress = 0f
+                            }
                             isTimerRunning = true
                             timerJob?.cancel()
                             timerJob = coroutineScope.launch {
