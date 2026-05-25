@@ -57,7 +57,14 @@ class CalendarViewModel @Inject constructor(
     }
 
     fun deleteEvent(eventId: String) {
-        viewModelScope.launch { repository.deleteById(eventId) }
+        viewModelScope.launch {
+            if (eventId.startsWith("shared_")) {
+                val realId = eventId.removePrefix("shared_")
+                friendsRepository.deleteSharedEvent(realId)
+            } else {
+                repository.deleteById(eventId)
+            }
+        }
     }
 
     fun selectDate(date: LocalDate) {
