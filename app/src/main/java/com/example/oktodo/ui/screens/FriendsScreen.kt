@@ -94,6 +94,7 @@ private fun SocialContent(
             .background(background)
     ) {
         FriendsTopBar(
+            points = viewModel.points.collectAsState().value,
             onShareClick = { },
             onAddClick = { showCreateEventSheet = true }
         )
