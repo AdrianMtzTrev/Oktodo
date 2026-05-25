@@ -10,5 +10,8 @@ data class Task(
     val priority: String,
     val color: Color,
     val isCompleted: Boolean = false,
-    val pointsReward: Int = 10
+    val pointsReward: Int = 10,
+    val category: String = "",
+    val recurrenceType: String = "none",
+    val recurrenceInterval: Int = 1
 )

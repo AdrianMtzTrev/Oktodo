@@ -15,7 +15,10 @@ fun TaskEntity.toDomain() = Task(
     priority = priority,
     color = Color(colorArgb.toULong()),
     isCompleted = isCompleted,
-    pointsReward = pointsReward
+    pointsReward = pointsReward,
+    category = category,
+    recurrenceType = recurrenceType,
+    recurrenceInterval = recurrenceInterval
 )
 
 fun Task.toEntity() = TaskEntity(
@@ -25,7 +28,10 @@ fun Task.toEntity() = TaskEntity(
     priority = priority,
     colorArgb = color.value.toLong(),
     isCompleted = isCompleted,
-    pointsReward = pointsReward
+    pointsReward = pointsReward,
+    category = category,
+    recurrenceType = recurrenceType,
+    recurrenceInterval = recurrenceInterval
 )
 
 // ── CalendarEvent ─────────────────────────────────────
