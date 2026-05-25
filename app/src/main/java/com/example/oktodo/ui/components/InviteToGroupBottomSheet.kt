@@ -30,12 +30,12 @@ import com.example.oktodo.ui.model.Friend
 @Composable
 fun InviteToGroupBottomSheet(
     friends: List<Friend>,
-    groupMembers: List<String>,
+    groupMemberIds: List<String>,
     onInvite: (Friend) -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val invitableFriends = friends.filter { it.name !in groupMembers }
+    val invitableFriends = friends.filter { it.id !in groupMemberIds }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,

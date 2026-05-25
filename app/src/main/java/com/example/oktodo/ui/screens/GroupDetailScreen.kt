@@ -270,7 +270,7 @@ fun GroupDetailScreen(
     if (showInviteSheet) {
         InviteToGroupBottomSheet(
             friends = friends,
-            groupMembers = group.members,
+            groupMemberIds = group.memberIds,
             onInvite = { friend ->
                 viewModel.sendGroupInvitation(friend, group)
                 showInviteSheet = false

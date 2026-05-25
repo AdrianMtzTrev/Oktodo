@@ -74,6 +74,7 @@ fun GroupEntity.toDomain() = Group(
     name = name,
     icon = icon,
     members = membersJoined.split(",").filter { it.isNotBlank() },
+    memberIds = memberIdsJoined.split(",").filter { it.isNotBlank() },
     eventCount = eventCount,
     creatorId = creatorId
 )
@@ -83,6 +84,7 @@ fun Group.toEntity() = GroupEntity(
     name = name,
     icon = icon,
     membersJoined = members.joinToString(","),
+    memberIdsJoined = memberIds.joinToString(","),
     eventCount = eventCount,
     creatorId = creatorId
 )

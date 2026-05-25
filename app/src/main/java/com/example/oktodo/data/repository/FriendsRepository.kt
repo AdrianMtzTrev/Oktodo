@@ -177,7 +177,14 @@ class FriendsRepository @Inject constructor(
     suspend fun acceptGroupInvitation(invitation: GroupInvitation) {
         groupInvitationDao.updateStatus(invitation.id, "accepted")
         val group = groupDao.getGroupById(invitation.groupId) ?: return
-        groupDao.update(group.copy(membersJoined = "${group.membersJoined},${invitation.toDisplayName}"))
+        val currentMembers = group.membersJoined.split(",").filter { it.isNotBlank() }.toMutableList()
+        val currentIds = group.memberIdsJoined.split(",").filter { it.isNotBlank() }.toMutableList()
+        if (invitation.toDisplayName !in currentMembers) currentMembers.add(invitation.toDisplayName)
+        if (invitation.toUserId !in currentIds) currentIds.add(invitation.toUserId)
+        groupDao.update(group.copy(
+            membersJoined = currentMembers.joinToString(","),
+            memberIdsJoined = currentIds.joinToString(",")
+        ))
     }
 
     suspend fun declineGroupInvitation(invitationId: String) {

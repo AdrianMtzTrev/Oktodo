@@ -33,7 +33,7 @@ class CalendarViewModel @Inject constructor(
         prefs.preferences
     ) { calendarEvents, sharedEvents, allGroups, p ->
         val userGroupIds = allGroups
-            .filter { group -> group.creatorId == p.userId || group.members.contains(p.displayName) }
+            .filter { group -> group.creatorId == p.userId || group.memberIds.contains(p.userId) }
             .map { it.id }
             .toSet()
         val mappedShared = sharedEvents
