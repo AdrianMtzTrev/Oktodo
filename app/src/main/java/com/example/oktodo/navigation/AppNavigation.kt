@@ -105,7 +105,8 @@ fun AppNavigation(themeViewModel: ThemeViewModel) {
             }
             composable("notifications") {
                 NotificationsScreen(
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    viewModel = notificationViewModel
                 )
             }
             composable("settings") {

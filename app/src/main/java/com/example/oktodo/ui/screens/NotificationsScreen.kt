@@ -21,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.oktodo.ui.model.Notification
 import com.example.oktodo.ui.viewmodel.NotificationViewModel
 import java.text.SimpleDateFormat
@@ -31,7 +30,7 @@ import java.util.*
 @Composable
 fun NotificationsScreen(
     onBack: () -> Unit,
-    viewModel: NotificationViewModel = hiltViewModel()
+    viewModel: NotificationViewModel
 ) {
     val notifications by viewModel.notifications.collectAsState()
     val unreadCount by viewModel.unreadCount.collectAsState()
