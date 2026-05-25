@@ -349,7 +349,7 @@ class FriendsViewModel @Inject constructor(
             val fromId = state.userId.ifBlank { "local" }
             val displayName = state.displayName.ifBlank { "Tú" }
             val group = Group(
-                id = "g${System.currentTimeMillis()}",
+                id = UUID.randomUUID().toString(),
                 name = name,
                 icon = "👥",
                 members = listOf(displayName),
@@ -387,7 +387,7 @@ class FriendsViewModel @Inject constructor(
             val group = groups.value.find { it.id == groupId } ?: return@launch
             val displayName = state.displayName.ifBlank { "Tú" }
             val event = SharedEvent(
-                id = "e${System.currentTimeMillis()}",
+                id = UUID.randomUUID().toString(),
                 title = title,
                 creator = displayName,
                 groupId = groupId,
