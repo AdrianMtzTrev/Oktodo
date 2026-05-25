@@ -74,15 +74,16 @@ class ProfileViewModel @Inject constructor(
     private fun observeNewAchievements() {
         viewModelScope.launch {
             combine(
-                uiState.map { it.achievements.filter { a -> a.isUnlocked }.map { a -> a.title } },
+                uiState.map { s -> s.achievements },
                 prefs.notifiedAchievements
-            ) { unlockedTitles, notified ->
-                unlockedTitles - notified
-            }.collect { newTitles ->
+            ) { allAchievements, notified ->
+                val newTitles = allAchievements.filter { it.isUnlocked }.map { it.title } - notified
+                allAchievements to newTitles
+            }.collect { (allAchievements, newTitles) ->
                 val userId = prefs.getUserId()
                 if (userId == null) return@collect
                 for (title in newTitles) {
-                    val achievement = uiState.value.achievements.find { it.title == title } ?: continue
+                    val achievement = allAchievements.find { it.title == title } ?: continue
                     notificationRepository.add(
                         Notification(
                             userId = userId,
