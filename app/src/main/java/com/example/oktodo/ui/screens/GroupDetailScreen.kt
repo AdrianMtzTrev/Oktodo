@@ -38,7 +38,13 @@ fun GroupDetailScreen(
     viewModel: FriendsViewModel
 ) {
     val groups by viewModel.groups.collectAsState()
-    val group = groups.find { it.id == groupId } ?: return
+    val group = groups.find { it.id == groupId }
+    if (group == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Grupo no encontrado", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        return
+    }
     val friends by viewModel.friends.collectAsState()
     val socialState by viewModel.socialState.collectAsState()
 
