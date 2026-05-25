@@ -41,18 +41,23 @@ class ShopItemRepository @Inject constructor(
     }
 
     suspend fun seedIfEmpty() {
-        if (dao.count() > 0) {
+        try {
+            if (dao.count() > 0) {
+                seedCompleted.complete(Unit)
+                return
+            }
+            listOf(
+                ShopItemEntity("s1", "Sombrero mágico", "🎩", 40, "Accesorio", false, false),
+                ShopItemEntity("s2", "Lentes cool", "🕶️", 25, "Accesorio", false, false),
+                ShopItemEntity("s3", "Bufanda morada", "🧣", 30, "Ropa", false, false),
+                ShopItemEntity("s4", "Corona mini", "👑", 60, "Premium", false, false),
+                ShopItemEntity("s5", "Moño elegante", "🎀", 20, "Accesorio", false, false),
+                ShopItemEntity("s6", "Traje espacial", "🧑‍🚀", 90, "Skin", false, false)
+            ).forEach { dao.insert(it) }
             seedCompleted.complete(Unit)
-            return
+        } catch (e: Exception) {
+            seedCompleted.completeExceptionally(e)
+            throw e
         }
-        listOf(
-            ShopItemEntity("s1", "Sombrero mágico", "🎩", 40, "Accesorio", false, false),
-            ShopItemEntity("s2", "Lentes cool", "🕶️", 25, "Accesorio", false, false),
-            ShopItemEntity("s3", "Bufanda morada", "🧣", 30, "Ropa", false, false),
-            ShopItemEntity("s4", "Corona mini", "👑", 60, "Premium", false, false),
-            ShopItemEntity("s5", "Moño elegante", "🎀", 20, "Accesorio", false, false),
-            ShopItemEntity("s6", "Traje espacial", "🧑‍🚀", 90, "Skin", false, false)
-        ).forEach { dao.insert(it) }
-        seedCompleted.complete(Unit)
     }
 }
