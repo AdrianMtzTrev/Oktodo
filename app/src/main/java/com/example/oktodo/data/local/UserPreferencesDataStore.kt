@@ -138,7 +138,7 @@ class UserPreferencesDataStore @Inject constructor(
         if (raw.isBlank()) emptySet() else raw.split(",").toSet()
     }
 
-    val userId: Flow<String> = preferences.map { it.userId }
+    val userId: Flow<String?> = preferences.map { it.userId.ifBlank { null } }
 
     suspend fun getUserId(): String? {
         return context.dataStore.data.first()[Keys.USER_ID]
