@@ -2,6 +2,7 @@ package com.example.oktodo.data.repository
 
 import androidx.compose.ui.graphics.Color
 import androidx.room.Transaction
+import com.example.oktodo.data.local.entity.SharedEventEntity
 import com.example.oktodo.data.local.dao.FriendDao
 import com.example.oktodo.data.local.dao.FriendRequestDao
 import com.example.oktodo.data.local.dao.GroupDao
@@ -48,7 +49,12 @@ class FriendsRepository @Inject constructor(
     suspend fun addGroup(group: Group) = groupDao.insert(group.toEntity())
     suspend fun updateGroup(group: Group) = groupDao.update(group.toEntity())
     suspend fun incrementGroupEventCount(groupId: String) = groupDao.incrementEventCount(groupId)
-    suspend fun addSharedEvent(event: SharedEvent) = sharedEventDao.insert(event.toEntity())
+    @Transaction
+    suspend fun addSharedEventAndIncrementCount(event: SharedEvent) {
+        sharedEventDao.insert(event.toEntity())
+        groupDao.incrementEventCount(event.groupId)
+    }
+
     suspend fun updateSharedEvent(id: String, title: String, date: String, time: String, location: String) =
         sharedEventDao.update(id, title, date, time, location)
     suspend fun setEventEditors(eventId: String, editors: List<String>) =

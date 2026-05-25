@@ -157,6 +157,7 @@ fun SettingsScreen(
                         username = username.ifBlank { uiState.username },
                         avatarEmoji = selectedAvatar
                     )
+                    viewModel.setWeeklyGoal(goalValue)
                     navController.popBackStack()
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -224,7 +225,6 @@ fun SettingsScreen(
                             onClick = {
                                 if (goalValue > 1) {
                                     goalValue--
-                                    viewModel.setWeeklyGoal(goalValue)
                                 }
                             }
                         ) {
@@ -253,7 +253,6 @@ fun SettingsScreen(
                             onClick = {
                                 if (goalValue < 30) {
                                     goalValue++
-                                    viewModel.setWeeklyGoal(goalValue)
                                 }
                             }
                         ) {
