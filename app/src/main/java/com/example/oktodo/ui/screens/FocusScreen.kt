@@ -174,6 +174,7 @@ fun FocusScreen() {
                     onClick = {
                         if (isTimerRunning) {
                             isTimerRunning = false
+                            timerJob?.cancel()
                         } else {
                             isTimerRunning = true
                             timerJob?.cancel()

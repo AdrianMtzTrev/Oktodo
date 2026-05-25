@@ -141,7 +141,7 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.titleLarge
                     )
                     Text(
-                        text = "@${username.ifBlank { "usuario_oktodo" }}",
+                        text = "@${username.ifBlank { uiState.username }}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -154,7 +154,7 @@ fun SettingsScreen(
                 onClick = {
                     viewModel.updateProfile(
                         displayName = displayName.ifBlank { "Usuario OKTodo" },
-                        username = username.ifBlank { "usuario_oktodo" },
+                        username = username.ifBlank { uiState.username },
                         avatarEmoji = selectedAvatar
                     )
                     navController.popBackStack()

@@ -78,6 +78,7 @@ private fun SocialContent(
     val pendingIncoming by viewModel.pendingIncoming.collectAsState()
     val pendingOutgoing by viewModel.pendingOutgoing.collectAsState()
     val pendingGroupInvitations by viewModel.pendingGroupInvitations.collectAsState()
+    val points by viewModel.points.collectAsState()
 
     var selectedTab by remember { mutableStateOf(0) }
     var showCreateGroupSheet by remember { mutableStateOf(false) }
@@ -94,7 +95,7 @@ private fun SocialContent(
             .background(background)
     ) {
         FriendsTopBar(
-            points = viewModel.points.collectAsState().value,
+            points = points,
             onShareClick = { },
             onAddClick = { showCreateEventSheet = true }
         )
