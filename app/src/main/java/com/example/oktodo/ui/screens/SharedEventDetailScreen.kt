@@ -50,7 +50,8 @@ fun SharedEventDetailScreen(
     }
 
     val displayName = socialState.displayName
-    val isCreator = event.creator == displayName || (event.creator == "Tú" && displayName == "Usuario OKTodo")
+    val currentUserId = socialState.userId
+    val isCreator = event.creatorId == currentUserId || (event.creatorId.isBlank() && event.creator == displayName) || (event.creator == "Tú" && displayName == "Usuario OKTodo")
     val isEditor = isCreator || event.editors.contains(displayName) || event.editors.contains("Tú")
 
     var isEditing by remember { mutableStateOf(false) }

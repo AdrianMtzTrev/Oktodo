@@ -163,7 +163,7 @@ private fun NumberPickerColumn(
                                 isSnapping = true
                                 listState.scrollToItem(
                                     it.index,
-                                    -(center - it.size / 2)
+                                    center - it.size / 2
                                 )
                                 isSnapping = false
                             }

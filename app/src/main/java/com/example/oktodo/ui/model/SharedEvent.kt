@@ -4,6 +4,7 @@ data class SharedEvent(
     val id: String,
     val title: String,
     val creator: String,
+    val creatorId: String = "",
     val groupId: String,
     val date: String,      // formato: yyyy-MM-dd
     val time: String,

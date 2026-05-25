@@ -397,6 +397,7 @@ class FriendsViewModel @Inject constructor(
                 id = UUID.randomUUID().toString(),
                 title = title,
                 creator = displayName,
+                creatorId = state.userId,
                 groupId = groupId,
                 date = date,
                 time = time,

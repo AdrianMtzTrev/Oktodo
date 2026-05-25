@@ -101,7 +101,8 @@ class UserPreferencesDataStore @Inject constructor(
 
     private fun currentWeekKey(): String {
         val now = LocalDate.now()
-        return "${now.year}-W${now.get(WeekFields.ISO.weekOfWeekBasedYear())}"
+        val weekField = WeekFields.ISO
+        return "${now.get(weekField.weekBasedYear())}-W${now.get(weekField.weekOfWeekBasedYear())}"
     }
 
     suspend fun completeTask(pointsReward: Int) {
