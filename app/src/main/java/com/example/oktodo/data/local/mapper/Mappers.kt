@@ -135,6 +135,16 @@ fun NotificationEntity.toDomain() = Notification(
     createdAt = createdAt
 )
 
+fun Notification.toEntity() = NotificationEntity(
+    id = id,
+    userId = userId,
+    title = title,
+    message = message,
+    icon = icon,
+    isRead = isRead,
+    createdAt = createdAt
+)
+
 // ── UserProfile ───────────────────────────────────────
 fun UserProfileEntity.toDomain() = UserProfile(
     id = id,
