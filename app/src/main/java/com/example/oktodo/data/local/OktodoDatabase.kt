@@ -2,7 +2,6 @@ package com.example.oktodo.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
 import com.example.oktodo.data.local.dao.*
 import com.example.oktodo.data.local.entity.*
 
@@ -22,7 +21,6 @@ import com.example.oktodo.data.local.entity.*
     version = 11,
     exportSchema = false
 )
-@TypeConverters(Converters::class)
 abstract class OktodoDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao
     abstract fun calendarEventDao(): CalendarEventDao
