@@ -1,5 +1,6 @@
 package com.example.oktodo.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.oktodo.data.local.UserPreferencesDataStore
@@ -152,7 +153,9 @@ class FriendsViewModel @Inject constructor(
                         icon = "👤"
                     )
                 )
-            } catch (_: Exception) { }
+            } catch (e: Exception) {
+                    Log.e("FriendsVM", "Error sending friend request", e)
+                }
         }
     }
 
@@ -199,7 +202,9 @@ class FriendsViewModel @Inject constructor(
                         icon = group.icon
                     )
                 )
-            } catch (_: Exception) { }
+            } catch (e: Exception) {
+                    Log.e("FriendsVM", "Error sending group invitation", e)
+                }
         }
     }
 
@@ -376,7 +381,9 @@ class FriendsViewModel @Inject constructor(
                             icon = group.icon
                         )
                     )
-                } catch (_: Exception) { }
+                } catch (e: Exception) {
+                        Log.e("FriendsVM", "Error inviting friends to group", e)
+                    }
             }
         }
     }
