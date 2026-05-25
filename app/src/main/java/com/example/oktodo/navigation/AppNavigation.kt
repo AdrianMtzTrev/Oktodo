@@ -145,7 +145,7 @@ fun BottomNavigationBar(navController: NavHostController) {
         items.forEach { item ->
             val selected = currentDestination?.hierarchy?.any { destination ->
                 destination.route == item.route ||
-                    (item.route == "friends" && destination.route?.startsWith("group_detail") == true) ||
+                    (item.route == "friends" && (destination.route?.startsWith("group_detail") == true || destination.route?.startsWith("shared_event_detail") == true)) ||
                     (item.route == "profile" && (
                         destination.route == "settings" || destination.route == "octo_shop"
                     ))
