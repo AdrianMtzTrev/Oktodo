@@ -97,6 +97,14 @@ class TasksViewModel @Inject constructor(
                 if (newState) {
                     prefs.completeTask(current.pointsReward)
                     prefs.updateStreak()
+                    if (current.recurrenceType != "none") {
+                        repository.add(
+                            current.copy(
+                                id = java.util.UUID.randomUUID().toString(),
+                                isCompleted = false
+                            )
+                        )
+                    }
                 } else {
                     prefs.uncompleteTask(current.pointsReward)
                 }
