@@ -314,7 +314,7 @@ fun SettingsScreen(
                         viewModel.logoutSocial()
                         showLogoutDialog = false
                         navController.navigate("friends") {
-                            popUpTo(0) { inclusive = true }
+                            popUpTo("dashboard") { inclusive = true }
                             launchSingleTop = true
                         }
                     },
