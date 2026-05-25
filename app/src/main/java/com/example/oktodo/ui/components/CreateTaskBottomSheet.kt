@@ -34,7 +34,8 @@ fun CreateTaskBottomSheet(
     var selectedPriority by remember { mutableStateOf("Media") }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
-    val timePickerState = rememberTimePickerState(initialHour = 12, initialMinute = 0)
+    val now = java.time.LocalTime.now()
+    val timePickerState = rememberTimePickerState(initialHour = now.hour, initialMinute = now.minute)
 
     LaunchedEffect(Unit) {
         delay(100)

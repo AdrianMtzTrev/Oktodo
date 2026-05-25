@@ -315,16 +315,6 @@ fun FocusScreen() {
                         BlockedAppItem(appName = appName, icon = icon)
                     }
 
-                    // Botón para ver más apps
-                    TextButton(
-                        onClick = { /* Mostrar más apps bloqueadas */ },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "Ver más apps bloqueadas",
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
                 }
             }
         }

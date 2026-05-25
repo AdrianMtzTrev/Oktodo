@@ -23,8 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.oktodo.ui.model.Notification
 import com.example.oktodo.ui.viewmodel.NotificationViewModel
-import java.text.SimpleDateFormat
-import java.util.*
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -229,6 +231,6 @@ private fun formatTimestamp(millis: Long): String {
         diff < 60_000 -> "Ahora"
         diff < 3_600_000 -> "${diff / 60_000} min"
         diff < 86_400_000 -> "${diff / 3_600_000} h"
-        else -> SimpleDateFormat("dd/MM/yy", Locale.getDefault()).format(Date(millis))
+        else -> Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/yy"))
     }
 }

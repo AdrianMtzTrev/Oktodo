@@ -52,6 +52,10 @@ fun WeekCalendar(
         events.filter { it.date == selectedDate }
     }
 
+    val eventsCountByDate = remember(events) {
+        events.groupBy { it.date }.mapValues { it.value.size }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -95,7 +99,7 @@ fun WeekCalendar(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             weekDays.forEach { date ->
-                val count = events.count { it.date == date }
+                val count = eventsCountByDate[date] ?: 0
 
                 Box(
                     modifier = Modifier.weight(1f)
