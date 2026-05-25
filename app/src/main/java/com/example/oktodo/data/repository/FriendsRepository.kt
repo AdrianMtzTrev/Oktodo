@@ -1,6 +1,7 @@
 package com.example.oktodo.data.repository
 
 import androidx.compose.ui.graphics.Color
+import androidx.room.Transaction
 import com.example.oktodo.data.local.dao.FriendDao
 import com.example.oktodo.data.local.dao.FriendRequestDao
 import com.example.oktodo.data.local.dao.GroupDao
@@ -115,6 +116,9 @@ class FriendsRepository @Inject constructor(
         )
     }
 
+    suspend fun deleteSharedEventsByGroupId(groupId: String) = sharedEventDao.deleteByGroupId(groupId)
+
+    @Transaction
     suspend fun acceptFriendRequest(request: FriendRequest) {
         friendRequestDao.updateStatus(request.id, "accepted")
         friendDao.insert(
@@ -211,6 +215,7 @@ class FriendsRepository @Inject constructor(
 
     suspend fun deleteGroup(groupId: String) {
         val entity = groupDao.getGroupById(groupId) ?: return
+        sharedEventDao.deleteByGroupId(groupId)
         groupDao.delete(entity)
     }
 

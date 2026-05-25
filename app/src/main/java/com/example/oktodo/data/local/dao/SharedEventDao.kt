@@ -18,6 +18,9 @@ interface SharedEventDao {
     @Query("DELETE FROM shared_events WHERE id = :id")
     suspend fun deleteById(id: String)
 
+    @Query("DELETE FROM shared_events WHERE groupId = :groupId")
+    suspend fun deleteByGroupId(groupId: String)
+
     @Query("UPDATE shared_events SET title=:title, date=:date, time=:time, location=:location WHERE id=:id")
     suspend fun update(id: String, title: String, date: String, time: String, location: String)
 
