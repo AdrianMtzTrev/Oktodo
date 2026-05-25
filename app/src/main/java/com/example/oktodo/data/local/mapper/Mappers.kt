@@ -5,6 +5,7 @@ import com.example.oktodo.data.local.entity.*
 import com.example.oktodo.ui.model.*
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.format.DateTimeParseException
 
 // ── Task ──────────────────────────────────────────────
 fun TaskEntity.toDomain() = Task(
@@ -31,8 +32,8 @@ fun Task.toEntity() = TaskEntity(
 fun CalendarEventEntity.toDomain() = CalendarEvent(
     id = id,
     title = title,
-    date = LocalDate.parse(dateString),
-    time = timeString?.let { LocalTime.parse(it) },
+    date = try { LocalDate.parse(dateString) } catch (_: DateTimeParseException) { LocalDate.MIN },
+    time = timeString?.let { try { LocalTime.parse(it) } catch (_: DateTimeParseException) { null } },
     location = location,
     color = Color(colorArgb.toULong()),
     description = description
@@ -90,8 +91,8 @@ fun Group.toEntity() = GroupEntity(
 fun SharedEvent.toCalendarEvent() = CalendarEvent(
     id = "shared_$id",
     title = "👥 $title",
-    date = LocalDate.parse(date),
-    time = try { LocalTime.parse(time) } catch (_: Exception) { null },
+    date = try { LocalDate.parse(date) } catch (_: DateTimeParseException) { LocalDate.MIN },
+    time = try { LocalTime.parse(time) } catch (_: DateTimeParseException) { null },
     location = location.ifBlank { null },
     color = Color(0xFF7C3AED),
     description = "Creado por: $creator"
