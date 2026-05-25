@@ -3,6 +3,7 @@ package com.example.oktodo.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.oktodo.data.local.UserPreferencesDataStore
+import com.example.oktodo.data.repository.FriendsRepository
 import com.example.oktodo.data.repository.NotificationRepository
 import com.example.oktodo.data.repository.ShopItemRepository
 import com.example.oktodo.ui.model.Achievement
@@ -27,6 +28,7 @@ sealed class PurchaseEvent {
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val prefs: UserPreferencesDataStore,
+    private val friendsRepository: FriendsRepository,
     private val shopItemRepository: ShopItemRepository,
     private val notificationRepository: NotificationRepository
 ) : ViewModel() {
@@ -99,7 +101,13 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun updateProfile(displayName: String, username: String, avatarEmoji: String) {
-        viewModelScope.launch { prefs.updateProfile(displayName, username, avatarEmoji) }
+        viewModelScope.launch {
+            prefs.updateProfile(displayName, username, avatarEmoji)
+            val userId = prefs.getUserId()
+            if (userId != null) {
+                friendsRepository.updateUserProfile(userId, displayName, username, avatarEmoji)
+            }
+        }
     }
 
     fun setWeeklyGoal(goal: Int) {

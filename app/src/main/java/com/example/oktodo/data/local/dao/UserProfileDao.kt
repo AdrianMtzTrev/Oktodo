@@ -27,6 +27,9 @@ interface UserProfileDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(profile: UserProfileEntity)
 
+    @Update
+    suspend fun update(profile: UserProfileEntity)
+
     @Query("SELECT COUNT(*) FROM user_profiles")
     suspend fun count(): Int
 }

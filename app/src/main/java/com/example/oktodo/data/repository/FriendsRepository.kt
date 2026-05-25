@@ -64,6 +64,15 @@ class FriendsRepository @Inject constructor(
     fun searchUsers(query: String): Flow<List<UserProfile>> =
         userProfileDao.search(query).map { list -> list.map { it.toDomain() } }
 
+    suspend fun updateUserProfile(userId: String, displayName: String, username: String, avatarEmoji: String) {
+        val existing = userProfileDao.getById(userId) ?: return
+        userProfileDao.update(existing.copy(
+            displayName = displayName,
+            username = username,
+            avatarEmoji = avatarEmoji
+        ))
+    }
+
     suspend fun isUsernameTaken(username: String): Boolean =
         userProfileDao.isUsernameTaken(username)
 
