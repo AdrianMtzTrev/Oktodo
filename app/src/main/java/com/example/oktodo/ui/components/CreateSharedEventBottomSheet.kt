@@ -215,7 +215,9 @@ fun CreateSharedEventBottomSheet(
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     if (showDatePicker) {
-        val datePickerState = rememberDatePickerState()
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = java.time.LocalDate.now().atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+        )
         AlertDialog(
             onDismissRequest = { showDatePicker = false },
             title = { Text("Seleccionar fecha") },
