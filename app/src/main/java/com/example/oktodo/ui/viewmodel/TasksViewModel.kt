@@ -74,10 +74,10 @@ class TasksViewModel @Inject constructor(
                 val newState = !current.isCompleted
                 repository.update(current.copy(isCompleted = newState))
                 if (newState) {
-                    prefs.addPoints(current.pointsReward)
+                    prefs.completeTask(current.pointsReward)
                     prefs.updateStreak()
                 } else {
-                    prefs.addPoints(-current.pointsReward)
+                    prefs.uncompleteTask(current.pointsReward)
                 }
             }
         }
@@ -87,7 +87,7 @@ class TasksViewModel @Inject constructor(
         viewModelScope.launch {
             taskMutex.withLock {
                 val current = repository.getTaskById(task.id) ?: return@withLock
-                if (current.isCompleted) prefs.addPoints(-current.pointsReward)
+                if (current.isCompleted) prefs.uncompleteTask(current.pointsReward)
                 repository.delete(current)
             }
         }

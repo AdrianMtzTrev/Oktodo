@@ -106,10 +106,6 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch { prefs.setWeeklyGoal(goal) }
     }
 
-    fun addPoints(points: Int) {
-        viewModelScope.launch { prefs.addPoints(points) }
-    }
-
     fun purchaseItem(itemId: String) {
         viewModelScope.launch {
             val item = shopItems.value.find { it.id == itemId } ?: return@launch

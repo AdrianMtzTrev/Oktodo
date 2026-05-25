@@ -99,17 +99,19 @@ class UserPreferencesDataStore @Inject constructor(
         }
     }
 
-    suspend fun addPoints(delta: Int) {
+    suspend fun completeTask(pointsReward: Int) {
         context.dataStore.edit { prefs ->
-            val current = prefs[Keys.POINTS] ?: 0
-            prefs[Keys.POINTS] = maxOf(0, current + delta)
-            if (delta > 0) {
-                prefs[Keys.COMPLETED_TASKS] = (prefs[Keys.COMPLETED_TASKS] ?: 0) + 1
-                prefs[Keys.WEEKLY_COMPLETED] = (prefs[Keys.WEEKLY_COMPLETED] ?: 0) + 1
-            } else {
-                prefs[Keys.COMPLETED_TASKS] = maxOf(0, (prefs[Keys.COMPLETED_TASKS] ?: 0) - 1)
-                prefs[Keys.WEEKLY_COMPLETED] = maxOf(0, (prefs[Keys.WEEKLY_COMPLETED] ?: 0) - 1)
-            }
+            prefs[Keys.POINTS] = (prefs[Keys.POINTS] ?: 0) + pointsReward
+            prefs[Keys.COMPLETED_TASKS] = (prefs[Keys.COMPLETED_TASKS] ?: 0) + 1
+            prefs[Keys.WEEKLY_COMPLETED] = (prefs[Keys.WEEKLY_COMPLETED] ?: 0) + 1
+        }
+    }
+
+    suspend fun uncompleteTask(pointsReward: Int) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.POINTS] = maxOf(0, (prefs[Keys.POINTS] ?: 0) - pointsReward)
+            prefs[Keys.COMPLETED_TASKS] = maxOf(0, (prefs[Keys.COMPLETED_TASKS] ?: 0) - 1)
+            prefs[Keys.WEEKLY_COMPLETED] = maxOf(0, (prefs[Keys.WEEKLY_COMPLETED] ?: 0) - 1)
         }
     }
 
