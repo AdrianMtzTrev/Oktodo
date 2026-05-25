@@ -193,17 +193,10 @@ fun CreateSharedEventBottomSheet(
 
             Spacer(modifier = Modifier.height(18.dp))
 
+            val canCreate = title.isNotBlank() && selectedGroupId.isNotBlank() && date.isNotBlank() && time.isNotBlank()
             Button(
-                onClick = {
-                    if (
-                        title.isNotBlank() &&
-                        selectedGroupId.isNotBlank() &&
-                        date.isNotBlank() &&
-                        time.isNotBlank()
-                    ) {
-                        onCreateEvent(title, selectedGroupId, date, time, location)
-                    }
-                },
+                onClick = { onCreateEvent(title, selectedGroupId, date, time, location) },
+                enabled = canCreate,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(54.dp),
