@@ -8,5 +8,6 @@ data class SharedEvent(
     val date: String,      // formato: yyyy-MM-dd
     val time: String,
     val location: String,
-    val participants: List<String>
+    val participants: List<String>,
+    val editors: List<String> = emptyList()
 )

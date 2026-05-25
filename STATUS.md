@@ -21,7 +21,7 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 ## Current Status
 
 - **Active branch:** `develop` (ahead of `main`)
-- **Last activity:** 19 May 2026 — social features (signup/login, friend requests, search, notifications per user)
+- **Last activity:** 19 May 2026 — weekly goal UI + reset logic, group invitations, group settings, purchase flow fix, seed cleanup
 - **Working tree:** clean
 
 ### Branches
@@ -57,15 +57,17 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 |---|---|
 | TaskRepository | `tasks` |
 | CalendarEventRepository | `calendar_events` |
-| FriendsRepository | `friends`, `groups`, `shared_events`, `user_profiles`, `friend_requests` |
+| FriendsRepository | `friends`, `groups`, `shared_events`, `user_profiles`, `friend_requests`, `group_invitations` |
 | ShopItemRepository | `shop_items` |
 | NotificationRepository | `notifications` |
 
+- **Room DB version 8** (destructive migration for dev) — 10 entities total
+
 ### Components
 
-- Bottom sheets: `CreateTaskBottomSheet`, `AddEventBottomSheet`, `AddEventDialog`, `CreateSharedEventBottomSheet`, `CreateGroupBottomSheet`, `SearchFriendBottomSheet`
+- Bottom sheets: `CreateTaskBottomSheet`, `AddEventBottomSheet`, `AddEventDialog`, `CreateSharedEventBottomSheet`, `CreateGroupBottomSheet`, `SearchFriendBottomSheet`, `InviteToGroupBottomSheet`
 - Calendar views: `MonthlyCalendar`, `WeekCalendar`, `DayCalendar`, `YearCalendar`
-- Cards: `FriendCard`, `GroupCard`, `SharedEventCard`, `PendingRequestCard`, `OutgoingRequestCard`
+- Cards: `FriendCard`, `GroupCard`, `SharedEventCard`, `PendingRequestCard`, `OutgoingRequestCard`, `GroupInvitationCard`
 - Friends chrome: `FriendsTabSwitcher`, `FriendsTopBar`
 - Misc: `ColorPicker`, `DurationPickerDialog`, `PurchaseConfirmDialog`
 
@@ -81,37 +83,44 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 - Points system + shop (local items)
 - Completed tasks collapsed in animated dropdown
 - Notifications CRUD with Room + badge on Dashboard bell icon
-- Notifications **filtered per user** (each user sees only their own notifications)
+- Notifications filtered per `userId` (each user sees only their own)
 - Achievement unlock detection → auto-generates notification (persisted)
-- OctoShop purchase flow (confirm dialog + snackbar feedback)
+- OctoShop purchase flow (confirm dialog + snackbar); points deducted atomically before marking purchased
 - Equip/unequip system for purchased items (shown on profile avatar)
 - SQL schema for Supabase sync (`sql/` — 4 files: tables, RLS, triggers, seed)
 - **Social registration** — signup with displayName, avatar, @username, password
-- **Social login** — username + password with SHA-256 hash verification
-- **Password hashing** — SHA-256 with fixed salt (`OktodoSalt2026`)
-- **Friend search** — live search by displayName/username in SearchFriendBottomSheet
-- **Friend requests** — send, accept, decline, pending incoming/outgoing sections
-- **Request notifications** — sender sees "Solicitud enviada a @target"; receiver sees "{name} quiere ser tu amigo"
+- **Social login** — username + password with SHA-256 hash verification (`OktodoSalt2026`)
+- **Friend search** — live search by displayName/username in `SearchFriendBottomSheet`
+- **Friend requests** — send, accept, decline; pending incoming/outgoing sections in Amigos tab
+- **Request notifications** — both sides notified on send/receive
 - **Demo requests** — 2 seed requests from María García + Sofía Torres on signup
 - **Settings screen** — replaces EditProfileScreen; includes logout with confirmation dialog
-- **UserProfiles** — Room entity + DAO (findByUsername, search, unique username)
-- DB version 7 (destructive migration for dev)
+- **UserProfiles** — Room entity + DAO (findByUsername, search, unique username constraint)
+- **Group invitations** — invite friends to a group from GroupDetailScreen; accept/decline in Grupos tab
+  - `GroupInvitationEntity` with unique index on `(toUserId, groupId)`
+  - Creating a group only adds "Tú"; selected friends receive invitations (not auto-added)
+  - Accepting adds the invitee to the group's members list
+  - Both sender and recipient receive a notification
+- **Group settings** — rename or delete a group from a settings modal inside GroupDetailScreen
+- **Group visibility** — groups filtered by membership; only shows groups where current user is a member
+- **No hardcoded seed data** — friends, groups, and shared events start empty; 8 demo UserProfiles remain for social search
+- **Weekly goal UI** — SettingsScreen "Preferencias" card: progress bar + +/− buttons (range 1–30), saves immediately
+- **Weekly reset** — `checkWeeklyReset()` runs on app start; resets `weeklyCompleted` to 0 each new ISO week via `LAST_WEEK_RESET` key in DataStore
 
 ---
 
 ## Recent Commits (19 May 2026)
 
 ```
+5b9e839 feat: weekly goal UI with reset logic
+2a746df feat: group invitations, group settings, real purchase flow, remove seed data
 2d1dedc fix: per-user notification filtering with userId
 c6d123d feat: friend requests with notifications
 307a29a feat: signup ahora pide nombre + avatar + username + contraseña
 358f931 feat: SettingsScreen replaces EditProfileScreen with logout
-9c313df fix: bump DB version to 5 (passwordHash column added to user_profiles)
 4ffce66 feat: password-based signup/login for social features
-eefb21e feat: add local_credentials table (password hash) to SQL schema
 6012efd feat: search friends UI with SearchFriendBottomSheet
 ab1c0b4 feat: social registration flow (local login/signup in FriendsScreen)
-df29ac8 feat: friend_requests table + friends as relationships (same pattern as group_invitations)
 8f6588e feat: Supabase SQL schema with 11 tables and invitations system
 81cf37b feat: OctoShop purchase flow with confirm dialog, snackbar and equip system
 9befe0c feat: auto-generate notifications when achievements unlock
@@ -125,8 +134,6 @@ df29ac8 feat: friend_requests table + friends as relationships (same pattern as 
 - **Cloud sync / Backend** — SQL schema ready (`sql/` folder), pending client implementation
   - Supabase: 12 tables + 1 VIEW + RLS + triggers + seed catalog
   - `user_profiles` + `local_credentials` ready in SQL; cloud auth uses Supabase Auth
-- **Group invitations from UI** — same pattern as friend requests (`GroupInvitationEntity` → accept trigger)
-- **Real purchase flow** — deduct points from DataStore on purchase (currently placeholder)
 - **Tests** — only placeholder tests exist (`ExampleUnitTest`, `ExampleInstrumentedTest`)
   - Turbine, MockK, Room in-memory planned
 

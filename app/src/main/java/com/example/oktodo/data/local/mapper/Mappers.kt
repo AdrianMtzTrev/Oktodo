@@ -73,7 +73,8 @@ fun GroupEntity.toDomain() = Group(
     name = name,
     icon = icon,
     members = membersJoined.split(",").filter { it.isNotBlank() },
-    eventCount = eventCount
+    eventCount = eventCount,
+    creatorId = creatorId
 )
 
 fun Group.toEntity() = GroupEntity(
@@ -81,10 +82,21 @@ fun Group.toEntity() = GroupEntity(
     name = name,
     icon = icon,
     membersJoined = members.joinToString(","),
-    eventCount = eventCount
+    eventCount = eventCount,
+    creatorId = creatorId
 )
 
 // ── SharedEvent ───────────────────────────────────────
+fun SharedEvent.toCalendarEvent() = CalendarEvent(
+    id = "shared_$id",
+    title = "👥 $title",
+    date = LocalDate.parse(date),
+    time = try { LocalTime.parse(time) } catch (_: Exception) { null },
+    location = location.ifBlank { null },
+    color = Color(0xFF7C3AED),
+    description = "Creado por: $creator"
+)
+
 fun SharedEventEntity.toDomain() = SharedEvent(
     id = id,
     title = title,
@@ -93,7 +105,8 @@ fun SharedEventEntity.toDomain() = SharedEvent(
     date = date,
     time = time,
     location = location,
-    participants = participantsJoined.split(",").filter { it.isNotBlank() }
+    participants = participantsJoined.split(",").filter { it.isNotBlank() },
+    editors = canEditJoined.split(",").filter { it.isNotBlank() }
 )
 
 fun SharedEvent.toEntity() = SharedEventEntity(
@@ -104,7 +117,8 @@ fun SharedEvent.toEntity() = SharedEventEntity(
     date = date,
     time = time,
     location = location,
-    participantsJoined = participants.joinToString(",")
+    participantsJoined = participants.joinToString(","),
+    canEditJoined = editors.joinToString(",")
 )
 
 // ── Notification ──────────────────────────────────────
@@ -156,6 +170,32 @@ fun FriendRequest.toEntity() = FriendRequestEntity(
     fromAvatarEmoji = fromAvatarEmoji,
     toDisplayName = toDisplayName,
     toAvatarEmoji = toAvatarEmoji,
+    status = status,
+    createdAt = createdAt
+)
+
+// ── GroupInvitation ───────────────────────────────────
+fun GroupInvitationEntity.toDomain() = GroupInvitation(
+    id = id,
+    fromUserId = fromUserId,
+    fromDisplayName = fromDisplayName,
+    toUserId = toUserId,
+    toDisplayName = toDisplayName,
+    groupId = groupId,
+    groupName = groupName,
+    groupIcon = groupIcon,
+    status = status,
+    createdAt = createdAt
+)
+fun GroupInvitation.toEntity() = GroupInvitationEntity(
+    id = id,
+    fromUserId = fromUserId,
+    fromDisplayName = fromDisplayName,
+    toUserId = toUserId,
+    toDisplayName = toDisplayName,
+    groupId = groupId,
+    groupName = groupName,
+    groupIcon = groupIcon,
     status = status,
     createdAt = createdAt
 )

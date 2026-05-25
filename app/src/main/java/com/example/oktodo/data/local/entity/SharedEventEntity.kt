@@ -12,5 +12,6 @@ data class SharedEventEntity(
     val date: String,
     val time: String,
     val location: String,
-    val participantsJoined: String
+    val participantsJoined: String,
+    val canEditJoined: String = ""
 )

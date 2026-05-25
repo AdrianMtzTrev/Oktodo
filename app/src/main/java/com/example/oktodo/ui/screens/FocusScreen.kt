@@ -193,7 +193,7 @@ fun FocusScreen() {
                     Icon(
                         imageVector = if (isTimerRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
                         contentDescription = if (isTimerRunning) "Pausar" else "Iniciar",
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -375,7 +375,7 @@ fun DurationChip(
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                 color = if (isSelected)
-                    Color.White
+                    MaterialTheme.colorScheme.onPrimary
                 else
                     MaterialTheme.colorScheme.onSurfaceVariant
             )

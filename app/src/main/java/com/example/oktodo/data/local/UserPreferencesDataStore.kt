@@ -8,7 +8,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
+import java.time.temporal.WeekFields
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,13 +29,16 @@ data class UserPreferences(
     val isDarkMode: Boolean = false,
     val lastActiveDate: String = "",
     val isSocialRegistered: Boolean = false,
-    val userId: String = ""
+    val userId: String = "",
+    val lastWeekReset: String = ""
 )
 
 @Singleton
 class UserPreferencesDataStore @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
+    private val dataStoreMutex = Mutex()
+
     private object Keys {
         val DISPLAY_NAME = stringPreferencesKey("display_name")
         val USERNAME = stringPreferencesKey("username")
@@ -47,6 +53,7 @@ class UserPreferencesDataStore @Inject constructor(
         val NOTIFIED_ACHIEVEMENTS = stringPreferencesKey("notified_achievements")
         val IS_SOCIAL_REGISTERED = booleanPreferencesKey("is_social_registered")
         val USER_ID = stringPreferencesKey("user_id")
+        val LAST_WEEK_RESET = stringPreferencesKey("last_week_reset")
     }
 
     val preferences: Flow<UserPreferences> = context.dataStore.data.map { prefs ->
@@ -62,7 +69,8 @@ class UserPreferencesDataStore @Inject constructor(
             isDarkMode = prefs[Keys.DARK_MODE] ?: false,
             lastActiveDate = prefs[Keys.LAST_ACTIVE_DATE] ?: "",
             isSocialRegistered = prefs[Keys.IS_SOCIAL_REGISTERED] ?: false,
-            userId = prefs[Keys.USER_ID] ?: ""
+            userId = prefs[Keys.USER_ID] ?: "",
+            lastWeekReset = prefs[Keys.LAST_WEEK_RESET] ?: ""
         )
     }
 
@@ -80,12 +88,14 @@ class UserPreferencesDataStore @Inject constructor(
         username: String,
         avatarEmoji: String
     ) {
-        context.dataStore.edit { prefs ->
-            prefs[Keys.USER_ID] = userId
-            prefs[Keys.DISPLAY_NAME] = displayName
-            prefs[Keys.USERNAME] = username
-            prefs[Keys.AVATAR] = avatarEmoji
-            prefs[Keys.IS_SOCIAL_REGISTERED] = true
+        dataStoreMutex.withLock {
+            context.dataStore.edit { prefs ->
+                prefs[Keys.USER_ID] = userId
+                prefs[Keys.DISPLAY_NAME] = displayName
+                prefs[Keys.USERNAME] = username
+                prefs[Keys.AVATAR] = avatarEmoji
+                prefs[Keys.IS_SOCIAL_REGISTERED] = true
+            }
         }
     }
 
@@ -142,16 +152,46 @@ class UserPreferencesDataStore @Inject constructor(
         }
     }
 
-    suspend fun purchaseItem(cost: Int) {
+    suspend fun purchaseItem(cost: Int): Boolean {
+        var success = false
         context.dataStore.edit { prefs ->
             val current = prefs[Keys.POINTS] ?: 0
-            if (current >= cost) prefs[Keys.POINTS] = current - cost
+            if (current >= cost) {
+                prefs[Keys.POINTS] = current - cost
+                success = true
+            }
+        }
+        return success
+    }
+
+    suspend fun setWeeklyGoal(goal: Int) {
+        dataStoreMutex.withLock {
+            context.dataStore.edit { prefs ->
+                prefs[Keys.WEEKLY_GOAL] = goal.coerceIn(1, 30)
+            }
+        }
+    }
+
+    suspend fun checkWeeklyReset() {
+        dataStoreMutex.withLock {
+            val currentWeek = LocalDate.now().let {
+                "${it.year}-W${it.get(WeekFields.ISO.weekOfWeekBasedYear())}"
+            }
+            context.dataStore.edit { prefs ->
+                val lastReset = prefs[Keys.LAST_WEEK_RESET] ?: ""
+                if (lastReset != currentWeek) {
+                    prefs[Keys.WEEKLY_COMPLETED] = 0
+                    prefs[Keys.LAST_WEEK_RESET] = currentWeek
+                }
+            }
         }
     }
 
     suspend fun logoutSocial() {
-        context.dataStore.edit { prefs ->
-            prefs[Keys.IS_SOCIAL_REGISTERED] = false
+        dataStoreMutex.withLock {
+            context.dataStore.edit { prefs ->
+                prefs[Keys.IS_SOCIAL_REGISTERED] = false
+            }
         }
     }
 }

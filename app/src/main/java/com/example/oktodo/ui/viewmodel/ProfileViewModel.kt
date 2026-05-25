@@ -101,6 +101,10 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch { prefs.updateProfile(displayName, username, avatarEmoji) }
     }
 
+    fun setWeeklyGoal(goal: Int) {
+        viewModelScope.launch { prefs.setWeeklyGoal(goal) }
+    }
+
     fun addPoints(points: Int) {
         viewModelScope.launch { prefs.addPoints(points) }
     }

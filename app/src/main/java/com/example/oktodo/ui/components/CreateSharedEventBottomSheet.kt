@@ -39,7 +39,7 @@ fun CreateSharedEventBottomSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Color.White
+        containerColor = MaterialTheme.colorScheme.surface
     ) {
         Column(
             modifier = Modifier
@@ -209,7 +209,7 @@ fun CreateSharedEventBottomSheet(
                     .height(54.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF7C3AED)
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
                 Text("Crear evento")

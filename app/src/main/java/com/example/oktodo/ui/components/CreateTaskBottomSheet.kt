@@ -201,7 +201,7 @@ fun CreateTaskBottomSheet(
                     text = "Crear tarea",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
 

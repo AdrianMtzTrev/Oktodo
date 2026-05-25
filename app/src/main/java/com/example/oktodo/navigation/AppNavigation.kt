@@ -31,6 +31,7 @@ import com.example.oktodo.ui.screens.FocusScreen
 import com.example.oktodo.ui.screens.FriendsScreen
 import com.example.oktodo.ui.screens.GroupDetailScreen
 import com.example.oktodo.ui.screens.NotificationsScreen
+import com.example.oktodo.ui.screens.SharedEventDetailScreen
 import com.example.oktodo.ui.screens.OctoShopScreen
 import com.example.oktodo.ui.screens.ProfileScreen
 import com.example.oktodo.ui.screens.SettingsScreen
@@ -83,6 +84,16 @@ fun AppNavigation(themeViewModel: ThemeViewModel) {
                 GroupDetailScreen(
                     navController = navController,
                     groupId = groupId,
+                    viewModel = friendsViewModel
+                )
+            }
+            composable("shared_event_detail/{groupId}/{eventId}") { backStackEntry ->
+                val groupId = backStackEntry.arguments?.getString("groupId").orEmpty()
+                val eventId = backStackEntry.arguments?.getString("eventId").orEmpty()
+                SharedEventDetailScreen(
+                    navController = navController,
+                    groupId = groupId,
+                    eventId = eventId,
                     viewModel = friendsViewModel
                 )
             }

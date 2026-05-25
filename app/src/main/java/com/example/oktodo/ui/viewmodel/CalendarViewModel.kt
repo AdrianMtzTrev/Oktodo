@@ -2,13 +2,17 @@ package com.example.oktodo.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.oktodo.data.local.UserPreferencesDataStore
+import com.example.oktodo.data.local.mapper.toCalendarEvent
 import com.example.oktodo.data.repository.CalendarEventRepository
+import com.example.oktodo.data.repository.FriendsRepository
 import com.example.oktodo.ui.model.CalendarEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -17,11 +21,26 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CalendarViewModel @Inject constructor(
-    private val repository: CalendarEventRepository
+    private val repository: CalendarEventRepository,
+    private val friendsRepository: FriendsRepository,
+    private val prefs: UserPreferencesDataStore
 ) : ViewModel() {
 
-    val events: StateFlow<List<CalendarEvent>> = repository.events
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val events: StateFlow<List<CalendarEvent>> = combine(
+        repository.events,
+        friendsRepository.sharedEvents,
+        friendsRepository.groups,
+        prefs.preferences
+    ) { calendarEvents, sharedEvents, allGroups, p ->
+        val userGroupIds = allGroups
+            .filter { group -> group.creatorId == p.userId || group.members.contains(p.displayName) }
+            .map { it.id }
+            .toSet()
+        val mappedShared = sharedEvents
+            .filter { it.groupId in userGroupIds }
+            .map { it.toCalendarEvent() }
+        calendarEvents + mappedShared
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _selectedDate = MutableStateFlow(LocalDate.now())
     val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()

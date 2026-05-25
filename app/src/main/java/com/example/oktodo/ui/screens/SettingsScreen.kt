@@ -25,10 +25,11 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    var displayName by remember { mutableStateOf(uiState.displayName) }
-    var username by remember { mutableStateOf(uiState.username) }
-    var selectedAvatar by remember { mutableStateOf(uiState.avatarEmoji) }
+    var displayName by remember(uiState.displayName) { mutableStateOf(uiState.displayName) }
+    var username by remember(uiState.username) { mutableStateOf(uiState.username) }
+    var selectedAvatar by remember(uiState.avatarEmoji) { mutableStateOf(uiState.avatarEmoji) }
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var goalValue by remember(uiState.weeklyGoal) { mutableStateOf(uiState.weeklyGoal) }
 
     val avatarOptions = listOf("🐙", "🐱", "🐶", "🦊", "🐼", "🐸", "🦄", "🐻")
 
@@ -162,10 +163,104 @@ fun SettingsScreen(
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.White
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
                 Text("Guardar cambios")
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            Text(
+                text = "Preferencias",
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("🎯", style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column {
+                            Text(
+                                text = "Meta semanal",
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "${uiState.weeklyCompleted} de $goalValue completadas esta semana",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    LinearProgressIndicator(
+                        progress = {
+                            (uiState.weeklyCompleted.toFloat() / goalValue.toFloat()).coerceIn(0f, 1f)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        FilledTonalIconButton(
+                            onClick = {
+                                if (goalValue > 1) {
+                                    goalValue--
+                                    viewModel.setWeeklyGoal(goalValue)
+                                }
+                            }
+                        ) {
+                            Text("−", style = MaterialTheme.typography.titleLarge)
+                        }
+
+                        Spacer(modifier = Modifier.width(28.dp))
+
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "$goalValue",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "tareas / semana",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(28.dp))
+
+                        FilledTonalIconButton(
+                            onClick = {
+                                if (goalValue < 30) {
+                                    goalValue++
+                                    viewModel.setWeeklyGoal(goalValue)
+                                }
+                            }
+                        ) {
+                            Text("+", style = MaterialTheme.typography.titleLarge)
+                        }
+                    }
+                }
             }
 
             if (uiState.isSocialRegistered) {
@@ -218,7 +313,10 @@ fun SettingsScreen(
                     onClick = {
                         viewModel.logoutSocial()
                         showLogoutDialog = false
-                        navController.popBackStack()
+                        navController.navigate("friends") {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
                     },
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = MaterialTheme.colorScheme.error
