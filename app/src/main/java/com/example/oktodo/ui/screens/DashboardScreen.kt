@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Badge
@@ -72,6 +73,7 @@ fun DashboardScreen(
 ) {
     val tasks by tasksViewModel.tasks.collectAsState()
     val showBottomSheet by tasksViewModel.showBottomSheet.collectAsState()
+    val editingTask by tasksViewModel.editingTask.collectAsState()
     val points by tasksViewModel.points.collectAsState()
     val userName by tasksViewModel.displayName.collectAsState()
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
@@ -101,15 +103,22 @@ fun DashboardScreen(
             points = points,
             userName = userName,
             onTaskToggle = { tasksViewModel.toggleTaskCompletion(it) },
-            onTaskDelete = { tasksViewModel.deleteTask(it) }
+            onTaskDelete = { tasksViewModel.deleteTask(it) },
+            onTaskEdit = { tasksViewModel.editTask(it) }
         )
     }
 
     if (showBottomSheet) {
         CreateTaskBottomSheet(
+            existingTask = editingTask,
             onDismiss = { tasksViewModel.hideBottomSheet() },
             onTaskCreated = { title, time, priority ->
                 tasksViewModel.addTask(title, time, priority)
+            },
+            onTaskUpdated = { title, time, priority ->
+                if (editingTask != null) {
+                    tasksViewModel.updateTask(editingTask!!, title, time, priority)
+                }
             }
         )
     }
@@ -233,7 +242,8 @@ fun DashboardContent(
     points: Int,
     userName: String,
     onTaskToggle: (Task) -> Unit,
-    onTaskDelete: (Task) -> Unit
+    onTaskDelete: (Task) -> Unit,
+    onTaskEdit: (Task) -> Unit
 ) {
     val greeting = remember { getGreeting() }
 
@@ -273,7 +283,8 @@ fun DashboardContent(
             items(pendingTasks, key = { it.id }) { task ->
                 TaskItem(
                     task = task,
-                    onToggle = { onTaskToggle(task) }
+                    onToggle = { onTaskToggle(task) },
+                    onEdit = { onTaskEdit(task) }
                 )
             }
         }
@@ -302,7 +313,8 @@ fun DashboardContent(
                 items(completedTasks, key = { it.id }) { task ->
                     TaskItem(
                         task = task,
-                        onToggle = { onTaskToggle(task) }
+                        onToggle = { onTaskToggle(task) },
+                        onEdit = { onTaskEdit(task) }
                     )
                 }
             }
@@ -411,7 +423,8 @@ fun SectionHeader(title: String) {
 @Composable
 fun TaskItem(
     task: Task,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
+    onEdit: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -480,6 +493,20 @@ fun TaskItem(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            if (!task.isCompleted) {
+                IconButton(
+                    onClick = onEdit,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Edit,
+                        contentDescription = "Editar tarea",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }

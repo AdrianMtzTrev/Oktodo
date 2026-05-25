@@ -20,18 +20,22 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.oktodo.ui.model.Task
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateTaskBottomSheet(
+    existingTask: Task? = null,
     onDismiss: () -> Unit,
-    onTaskCreated: (String, String, String) -> Unit
+    onTaskCreated: (String, String, String) -> Unit,
+    onTaskUpdated: ((String, String, String) -> Unit)? = null
 ) {
-    var taskTitle by remember { mutableStateOf("") }
-    var taskTime by remember { mutableStateOf("") }
+    val isEditing = existingTask != null
+    var taskTitle by remember { mutableStateOf(existingTask?.title ?: "") }
+    var taskTime by remember { mutableStateOf(existingTask?.time ?: "") }
     var showTimePicker by remember { mutableStateOf(false) }
-    var selectedPriority by remember { mutableStateOf("Media") }
+    var selectedPriority by remember { mutableStateOf(existingTask?.priority ?: "Media") }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     val now = java.time.LocalTime.now()
@@ -71,7 +75,7 @@ fun CreateTaskBottomSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Crear nueva tarea",
+                    text = if (isEditing) "Editar tarea" else "Crear nueva tarea",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -184,7 +188,11 @@ fun CreateTaskBottomSheet(
                 onClick = {
                     keyboardController?.hide()
                     if (taskTitle.isNotBlank() && taskTime.isNotBlank()) {
-                        onTaskCreated(taskTitle, taskTime, selectedPriority)
+                        if (isEditing) {
+                            onTaskUpdated?.invoke(taskTitle, taskTime, selectedPriority)
+                        } else {
+                            onTaskCreated(taskTitle, taskTime, selectedPriority)
+                        }
                         onDismiss()
                     }
                 },
@@ -199,7 +207,7 @@ fun CreateTaskBottomSheet(
                 enabled = taskTitle.isNotBlank() && taskTime.isNotBlank()
             ) {
                 Text(
-                    text = "Crear tarea",
+                    text = if (isEditing) "Guardar cambios" else "Crear tarea",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onPrimary
