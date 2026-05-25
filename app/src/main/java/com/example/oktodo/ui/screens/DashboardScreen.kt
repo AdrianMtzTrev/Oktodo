@@ -270,7 +270,7 @@ fun DashboardContent(
                 SectionHeader(title = "Pendientes (${pendingTasks.size})")
             }
 
-            items(pendingTasks) { task ->
+            items(pendingTasks, key = { it.id }) { task ->
                 TaskItem(
                     task = task,
                     onToggle = { onTaskToggle(task) }
@@ -299,7 +299,7 @@ fun DashboardContent(
             }
 
             if (showCompleted) {
-                items(completedTasks) { task ->
+                items(completedTasks, key = { it.id }) { task ->
                     TaskItem(
                         task = task,
                         onToggle = { onTaskToggle(task) }

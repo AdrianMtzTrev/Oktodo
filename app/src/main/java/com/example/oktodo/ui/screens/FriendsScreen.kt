@@ -137,7 +137,7 @@ private fun SocialContent(
                                 )
                                 Spacer(modifier = Modifier.height(10.dp))
                             }
-                            items(pendingIncoming) { request ->
+                            items(pendingIncoming, key = { it.id }) { request ->
                                 PendingRequestCard(
                                     request = request,
                                     onAccept = { viewModel.acceptFriendRequest(request) },
@@ -156,12 +156,12 @@ private fun SocialContent(
                                 )
                                 Spacer(modifier = Modifier.height(10.dp))
                             }
-                            items(pendingOutgoing) { request ->
+                            items(pendingOutgoing, key = { it.id }) { request ->
                                 OutgoingRequestCard(request = request)
                             }
                         }
 
-                        items(friends) { friend ->
+                        items(friends, key = { it.id }) { friend ->
                             FriendCard(friend = friend)
                         }
                     }
@@ -194,7 +194,7 @@ private fun SocialContent(
                                 )
                                 Spacer(modifier = Modifier.height(10.dp))
                             }
-                            items(pendingGroupInvitations) { invitation ->
+                            items(pendingGroupInvitations, key = { it.id }) { invitation ->
                                 GroupInvitationCard(
                                     invitation = invitation,
                                     onAccept = { viewModel.acceptGroupInvitation(invitation) },
@@ -203,7 +203,7 @@ private fun SocialContent(
                             }
                             item { Spacer(modifier = Modifier.height(16.dp)) }
                         }
-                        items(groups) { group ->
+                        items(groups, key = { it.id }) { group ->
                             GroupCard(
                                 group = group,
                                 onClick = {
@@ -242,7 +242,7 @@ private fun SocialContent(
                                 )
                             }
 
-                            items(dateEvents) { event ->
+                            items(dateEvents, key = { it.id }) { event ->
                                 SharedEventCard(event = event)
                             }
                         }

@@ -99,7 +99,7 @@ fun SearchFriendBottomSheet(
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(searchResults) { profile ->
+                    items(searchResults, key = { it.id }) { profile ->
                         UserSearchResultRow(
                             profile = profile,
                             onAddClick = { onAddFriend(profile) }

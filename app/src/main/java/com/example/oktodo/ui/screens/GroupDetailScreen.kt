@@ -258,7 +258,7 @@ fun GroupDetailScreen(
                 }
             }
         } else {
-            items(dayEvents) { event ->
+            items(dayEvents, key = { it.id }) { event ->
                 SharedEventCard(
                     event = event,
                     onClick = { navController.navigate("shared_event_detail/$groupId/${event.id}") }
