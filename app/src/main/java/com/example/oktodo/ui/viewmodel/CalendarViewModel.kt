@@ -52,6 +52,10 @@ class CalendarViewModel @Inject constructor(
         viewModelScope.launch { repository.add(event) }
     }
 
+    fun updateEvent(event: CalendarEvent) {
+        viewModelScope.launch { repository.update(event) }
+    }
+
     fun deleteEvent(eventId: String) {
         viewModelScope.launch { repository.deleteById(eventId) }
     }
