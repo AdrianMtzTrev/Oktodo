@@ -26,4 +26,10 @@ interface ShopItemDao {
 
     @Query("UPDATE shop_items SET isEquipped = 0 WHERE id = :id")
     suspend fun unequip(id: String)
+
+    @Transaction
+    suspend fun equipAtomically(id: String) {
+        unequipAll()
+        equip(id)
+    }
 }

@@ -28,8 +28,7 @@ class ShopItemRepository @Inject constructor(
     }
 
     suspend fun equip(id: String) {
-        dao.unequipAll()
-        dao.equip(id)
+        dao.equipAtomically(id)
     }
 
     suspend fun unequip(id: String) {
