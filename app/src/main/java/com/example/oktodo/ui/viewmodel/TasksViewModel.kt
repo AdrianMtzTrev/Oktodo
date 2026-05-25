@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 @HiltViewModel
@@ -24,6 +26,8 @@ class TasksViewModel @Inject constructor(
 
     val tasks: StateFlow<List<Task>> = repository.tasks
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    private val taskMutex = Mutex()
 
     private val _showBottomSheet = MutableStateFlow(false)
     val showBottomSheet: StateFlow<Boolean> = _showBottomSheet.asStateFlow()
@@ -64,21 +68,28 @@ class TasksViewModel @Inject constructor(
 
     fun toggleTaskCompletion(task: Task) {
         viewModelScope.launch {
-            val newState = !task.isCompleted
-            repository.update(task.copy(isCompleted = newState))
-            if (newState) {
-                prefs.addPoints(task.pointsReward)
-                prefs.updateStreak()
-            } else {
-                prefs.addPoints(-task.pointsReward)
+            taskMutex.withLock {
+                val current = repository.getTaskById(task.id)
+                if (current == null) return@withLock
+                val newState = !current.isCompleted
+                repository.update(current.copy(isCompleted = newState))
+                if (newState) {
+                    prefs.addPoints(current.pointsReward)
+                    prefs.updateStreak()
+                } else {
+                    prefs.addPoints(-current.pointsReward)
+                }
             }
         }
     }
 
     fun deleteTask(task: Task) {
         viewModelScope.launch {
-            if (task.isCompleted) prefs.addPoints(-task.pointsReward)
-            repository.delete(task)
+            taskMutex.withLock {
+                val current = repository.getTaskById(task.id) ?: return@withLock
+                if (current.isCompleted) prefs.addPoints(-current.pointsReward)
+                repository.delete(current)
+            }
         }
     }
 
