@@ -13,7 +13,6 @@ import com.example.oktodo.data.local.entity.FriendEntity
 import com.example.oktodo.data.local.entity.FriendRequestEntity
 import com.example.oktodo.data.local.entity.GroupEntity
 import com.example.oktodo.data.local.entity.GroupInvitationEntity
-import com.example.oktodo.data.local.entity.SharedEventEntity
 import com.example.oktodo.data.local.entity.UserProfileEntity
 import com.example.oktodo.data.local.mapper.toDomain
 import com.example.oktodo.data.local.mapper.toEntity

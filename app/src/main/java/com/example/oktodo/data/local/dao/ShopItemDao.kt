@@ -28,8 +28,8 @@ interface ShopItemDao {
     }
 
     @Query("UPDATE shop_items SET isEquipped = 0")
-    private suspend fun unequipAll()
+    suspend fun unequipAll()
 
     @Query("UPDATE shop_items SET isEquipped = 1 WHERE id = :id")
-    private suspend fun equip(id: String)
+    suspend fun equip(id: String)
 }
