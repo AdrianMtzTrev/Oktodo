@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -28,6 +29,14 @@ class TasksViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val taskMutex = Mutex()
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    val filteredTasks: StateFlow<List<Task>> = combine(tasks, _searchQuery) { allTasks, query ->
+        if (query.isBlank()) allTasks
+        else allTasks.filter { it.title.contains(query, ignoreCase = true) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _showBottomSheet = MutableStateFlow(false)
     val showBottomSheet: StateFlow<Boolean> = _showBottomSheet.asStateFlow()
@@ -127,4 +136,6 @@ class TasksViewModel @Inject constructor(
         _showBottomSheet.value = false
         _editingTask.value = null
     }
+
+    fun setSearchQuery(query: String) { _searchQuery.value = query }
 }

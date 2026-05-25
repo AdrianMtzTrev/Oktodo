@@ -21,8 +21,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.LightMode
@@ -38,6 +41,7 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -72,13 +76,17 @@ fun DashboardScreen(
     notificationViewModel: NotificationViewModel
 ) {
     val tasks by tasksViewModel.tasks.collectAsState()
+    val searchQuery by tasksViewModel.searchQuery.collectAsState()
+    val filteredTasks by tasksViewModel.filteredTasks.collectAsState()
     val showBottomSheet by tasksViewModel.showBottomSheet.collectAsState()
     val editingTask by tasksViewModel.editingTask.collectAsState()
     val points by tasksViewModel.points.collectAsState()
     val userName by tasksViewModel.displayName.collectAsState()
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
     val unreadNotifications by notificationViewModel.unreadCount.collectAsState()
-    val pendingCount = tasks.count { !it.isCompleted }
+    val displayTasks = if (searchQuery.isBlank()) tasks else filteredTasks
+
+    val pendingCount = displayTasks.count { !it.isCompleted }
 
     Scaffold(
         topBar = {
@@ -87,7 +95,9 @@ fun DashboardScreen(
                 isDarkMode = isDarkMode,
                 points = points,
                 notificationCount = unreadNotifications,
-                onNotificationsClick = { navController.navigate("notifications") }
+                onNotificationsClick = { navController.navigate("notifications") },
+                searchQuery = searchQuery,
+                onSearchQueryChange = { tasksViewModel.setSearchQuery(it) }
             )
         },
         floatingActionButton = {
@@ -99,7 +109,7 @@ fun DashboardScreen(
     ) { paddingValues ->
         DashboardContent(
             modifier = Modifier.padding(paddingValues),
-            tasks = tasks,
+            tasks = displayTasks,
             points = points,
             userName = userName,
             onTaskToggle = { tasksViewModel.toggleTaskCompletion(it) },
@@ -130,25 +140,38 @@ fun DashboardHeader(
     isDarkMode: Boolean,
     points: Int,
     notificationCount: Int = 0,
-    onNotificationsClick: () -> Unit = {}
+    onNotificationsClick: () -> Unit = {},
+    searchQuery: String = "",
+    onSearchQueryChange: (String) -> Unit = {}
 ) {
+    var showSearch by remember { mutableStateOf(false) }
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            StreakBadge(streakPoints = points)
-
+        Column(modifier = Modifier.fillMaxWidth()) {
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = onThemeToggle) {
+                StreakBadge(streakPoints = points)
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { showSearch = !showSearch }) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "Buscar",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    IconButton(onClick = onThemeToggle) {
                     Icon(
                         imageVector = if (isDarkMode) {
                             Icons.Outlined.LightMode
@@ -179,6 +202,26 @@ fun DashboardHeader(
                         )
                     }
                 }
+            }
+        }
+
+        if (showSearch) {
+            OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                    placeholder = { Text("Buscar tareas...") },
+                    singleLine = true,
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { onSearchQueryChange("") }) {
+                                Icon(Icons.Filled.Clear, contentDescription = "Limpiar")
+                            }
+                        }
+                    }
+                )
             }
         }
     }

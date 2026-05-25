@@ -15,6 +15,9 @@ interface TaskDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(task: TaskEntity)
 
+    @Query("SELECT * FROM tasks WHERE title LIKE '%' || :query || '%' ORDER BY isCompleted ASC")
+    fun searchTasks(query: String): Flow<List<TaskEntity>>
+
     @Update
     suspend fun update(task: TaskEntity)
 

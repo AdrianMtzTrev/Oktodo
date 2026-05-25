@@ -13,6 +13,8 @@ import javax.inject.Singleton
 class TaskRepository @Inject constructor(private val dao: TaskDao) {
     val tasks: Flow<List<Task>> = dao.getAllTasks().map { list -> list.map { it.toDomain() } }
 
+    fun searchTasks(query: String): Flow<List<Task>> = dao.searchTasks(query).map { list -> list.map { it.toDomain() } }
+
     suspend fun add(task: Task) = dao.insert(task.toEntity())
     suspend fun update(task: Task) = dao.update(task.toEntity())
     suspend fun delete(task: Task) = dao.delete(task.toEntity())

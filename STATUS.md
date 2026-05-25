@@ -20,9 +20,9 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 
 ## Current Status
 
-- **Active branch:** `develop` (ahead of `main`)
-- **Last activity:** 19 May 2026 — weekly goal UI + reset logic, group invitations, group settings, purchase flow fix, seed cleanup
-- **Working tree:** clean
+- **Active branch:** `develop` (ahead of `origin/develop`)
+- **Last activity:** 25 May 2026 — tareas recurrentes, buscar tareas
+- **Working tree:** dirty (search feature pending commit)
 
 ### Branches
 
@@ -49,7 +49,7 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 | Settings | `settings` | ProfileViewModel |
 | Octo Shop | `octo_shop` | ProfileViewModel |
 | Notifications | `notifications` | NotificationViewModel |
-| Notifications | `notifications` | NotificationViewModel |
+| Edit Profile | `edit_profile` | ProfileViewModel |
 
 ### Data Layer
 
@@ -61,11 +61,12 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 | ShopItemRepository | `shop_items` |
 | NotificationRepository | `notifications` |
 
-- **Room DB version 8** (destructive migration for dev) — 10 entities total
+- **Room DB version 14** (destructive migration for dev) — 10 entities
+- TaskEntity: supports `category` (String), `recurrenceType` ("none"/"daily"/"weekly"/"monthly"), `recurrenceInterval` (Int)
 
 ### Components
 
-- Bottom sheets: `CreateTaskBottomSheet`, `AddEventBottomSheet`, `AddEventDialog`, `CreateSharedEventBottomSheet`, `CreateGroupBottomSheet`, `SearchFriendBottomSheet`, `InviteToGroupBottomSheet`
+- Bottom sheets: `CreateTaskBottomSheet` (create + edit), `AddEventBottomSheet`, `CreateSharedEventBottomSheet`, `CreateGroupBottomSheet`, `SearchFriendBottomSheet`, `InviteToGroupBottomSheet`
 - Calendar views: `MonthlyCalendar`, `WeekCalendar`, `DayCalendar`, `YearCalendar`
 - Cards: `FriendCard`, `GroupCard`, `SharedEventCard`, `PendingRequestCard`, `OutgoingRequestCard`, `GroupInvitationCard`
 - Friends chrome: `FriendsTabSwitcher`, `FriendsTopBar`
@@ -74,6 +75,9 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 ### Key Features
 
 - Task CRUD with date/time pickers (Material3)
+- **Editar tarea** — CreateTaskBottomSheet opens in edit mode with pre-filled fields when editing
+- **Tareas recurrentes** — marking a task with `recurrenceType != "none"` as complete auto-creates a new task for the next period
+- **Buscar tareas** — search icon in DashboardHeader toggles a text field; filters tasks client-side by title
 - Calendar with 4 view modes (day / week / month / year)
 - Focus timer with configurable duration picker
 - Friends, groups, and shared events (local-only)
@@ -109,28 +113,34 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 
 ---
 
-## Recent Commits (19 May 2026)
+## Recent Commits (25 May 2026)
 
 ```
-5b9e839 feat: weekly goal UI with reset logic
-2a746df feat: group invitations, group settings, real purchase flow, remove seed data
-2d1dedc fix: per-user notification filtering with userId
-c6d123d feat: friend requests with notifications
-307a29a feat: signup ahora pide nombre + avatar + username + contraseña
-358f931 feat: SettingsScreen replaces EditProfileScreen with logout
-4ffce66 feat: password-based signup/login for social features
-6012efd feat: search friends UI with SearchFriendBottomSheet
-ab1c0b4 feat: social registration flow (local login/signup in FriendsScreen)
-8f6588e feat: Supabase SQL schema with 11 tables and invitations system
-81cf37b feat: OctoShop purchase flow with confirm dialog, snackbar and equip system
-9befe0c feat: auto-generate notifications when achievements unlock
-38c76fe feat: notifications system with CRUD, screen and bell icon
+212124c feat: tareas recurrentes - crear nueva tarea al completar una con recurrenceType != none
+c2bff9e feat: editar tarea - CreateTaskBottomSheet con modo edicion, updateTask/editTask en VM, icono de editar en TaskItem
+7fddf92 fix: errores de compilacion preexistentes - import @Update faltante, private en DAO, import duplicado, remember faltante
+11d8e79 feat: schema categorias + tareas recurrentes, agregar category/recurrenceType/recurrenceInterval a TaskEntity
+49dc8b3 fix: Bug1 currentWeekKey usa now.year en vez de ISO year, Bug2 scrollToItem offset negativo
+daa0f67 fix: DatePicker en CreateSharedEventBottomSheet abre en 1970, pasar initialSelectedDateMillis
+26870b7 fix: eliminar shared event desde calendario no funciona, redirigir segun prefijo shared_
+423727a fix: timer no reinicia al llegar a 0, resetear timeLeft al presionar play
+bfec714 fix: updateProfile no persiste a Room, agregar @Update en DAO y sync en VM
+87ce691 fix: race condition checkWeeklyReset + completeTask, unificar en edit atomico
+2f2e10b fix: awaitSeed cuelga forever si seedIfEmpty lanza, agregar try/catch/finally
+c48b707 fix: remove unused Date import in NotificationsScreen
+b1e043e fix: L1 WeekCalendar O(7n), L3 SimpleDateFormat, L4 time default, L5 key scroll, L6 dead onClick
+a56587b fix: M22 SettingsScreen escribe DataStore en cada click, M25 createSharedEvent no transaccional
+008b03c fix: M21 pause no cancela timerJob, M23 collectAsState inline, M24 username default en blanco
+5d36306 fix: purchaseItem race condition, esperar seedIfEmpty con CompletableDeferred
+d960b36 fix: sendFriendRequest sin check de duplicado, usar findExisting antes de insertar
 ```
 
 ---
 
 ## What's Missing / Next Up
 
+- **Undo delete** — SnackbarHost + `_pendingDeletedTask` state in TasksViewModel to allow undoing a deletion
+- **Task categories picker** — UI for selecting/assigning a category when creating/editing a task
 - **Cloud sync / Backend** — SQL schema ready (`sql/` folder), pending client implementation
   - Supabase: 12 tables + 1 VIEW + RLS + triggers + seed catalog
   - `user_profiles` + `local_credentials` ready in SQL; cloud auth uses Supabase Auth
