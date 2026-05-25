@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.oktodo.ui.components.DurationPickerDialog
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -46,6 +47,7 @@ fun FocusScreen() {
     var showDurationPicker by remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
+    var timerJob by remember { mutableStateOf<Job?>(null) }
 
     val blockedApps = listOf(
         "Instagram" to Icons.Outlined.PhotoCamera,
@@ -174,7 +176,8 @@ fun FocusScreen() {
                             isTimerRunning = false
                         } else {
                             isTimerRunning = true
-                            coroutineScope.launch {
+                            timerJob?.cancel()
+                            timerJob = coroutineScope.launch {
                                 while (isTimerRunning && timeLeft > 0) {
                                     delay(1000)
                                     timeLeft--
@@ -201,6 +204,7 @@ fun FocusScreen() {
                 // Botón de reinicio
                 FloatingActionButton(
                     onClick = {
+                        timerJob?.cancel()
                         isTimerRunning = false
                         timeLeft = sessionDurationSeconds
                         progress = 0f
