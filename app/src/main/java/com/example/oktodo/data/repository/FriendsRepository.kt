@@ -102,6 +102,7 @@ class FriendsRepository @Inject constructor(
         fromDisplayName: String, fromAvatarEmoji: String,
         toDisplayName: String, toAvatarEmoji: String
     ) {
+        if (friendRequestDao.findExisting(fromUserId, toUserId) != null) return
         friendRequestDao.insert(
             FriendRequestEntity(
                 id = UUID.randomUUID().toString(),
