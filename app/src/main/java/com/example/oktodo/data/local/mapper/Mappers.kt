@@ -211,7 +211,7 @@ fun ShopItemEntity.toDomain() = ShopItem(
     isEquipped = isEquipped
 )
 
-fun ShopItem.toEntity(isPurchased: Boolean = false, isEquipped: Boolean = false) = ShopItemEntity(
+fun ShopItem.toEntity() = ShopItemEntity(
     id = id,
     title = title,
     emoji = emoji,
