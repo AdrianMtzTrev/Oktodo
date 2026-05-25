@@ -62,8 +62,9 @@ fun GroupDetailScreen(
     )
 
     val visibleMonth = calendarState.firstVisibleMonth.yearMonth
-    val dayEvents = remember(selectedDate, viewModel.sharedEvents) {
-        viewModel.getEventsForGroupOnDate(groupId, selectedDate)
+    val sharedEvents by viewModel.sharedEvents.collectAsState()
+    val dayEvents = remember(selectedDate, sharedEvents) {
+        sharedEvents.filter { it.groupId == groupId && it.date == selectedDate.toString() }
     }
 
     LazyColumn(
