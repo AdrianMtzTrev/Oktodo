@@ -117,6 +117,8 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 ## Recent Commits (25 May 2026)
 
 ```
+1d2b1ea refactor: replace NavigationBarItem with custom Column+clickable for bottom nav
+969e38d fix: remove elevation from completed task cards
 5a6119a fix: getGreeting sin remember para que sea dinamico segun la hora
 22e3a17 feat: deshacer eliminar - pendingDeletedTask con delay 5s, snackbar Host, undoDelete, delete button en TaskItem
 ef92957 fix: show shop items in offline mode
