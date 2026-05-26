@@ -14,6 +14,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -59,17 +61,28 @@ class ProfileViewModel @Inject constructor(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ProfileUiState())
 
-    val shopItems = shopItemRepository.items
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    private val currentUserId = prefs.preferences
+        .map { it.userId }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
-    val equippedItem = shopItemRepository.equippedItem
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+    val shopItems = currentUserId.flatMapLatest { userId ->
+        if (userId.isBlank()) flowOf(emptyList())
+        else shopItemRepository.getItemsForUser(userId)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val equippedItem = currentUserId.flatMapLatest { userId ->
+        if (userId.isBlank()) flowOf(null)
+        else shopItemRepository.getEquippedItemForUser(userId)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     private val _purchaseEvent = Channel<PurchaseEvent>(Channel.BUFFERED)
     val purchaseEvent = _purchaseEvent.receiveAsFlow()
 
     init {
-        viewModelScope.launch { shopItemRepository.seedIfEmpty() }
+        viewModelScope.launch {
+            val userId = prefs.getUserId()
+            if (userId != null) shopItemRepository.seedIfEmpty(userId)
+        }
         observeNewAchievements()
     }
 
@@ -116,9 +129,10 @@ class ProfileViewModel @Inject constructor(
 
     fun purchaseItem(itemId: String) {
         viewModelScope.launch {
-            shopItemRepository.awaitSeed()
+            val userId = prefs.getUserId() ?: return@launch
+            shopItemRepository.seedIfEmpty(userId)
             val item = shopItems.value.find { it.id == itemId } ?: return@launch
-            val success = shopItemRepository.purchase(item, uiState.value.points)
+            val success = shopItemRepository.purchase(item, userId, uiState.value.points)
             if (success) {
                 _purchaseEvent.send(PurchaseEvent.Success(item.title))
             } else {
@@ -128,11 +142,17 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun equipItem(itemId: String) {
-        viewModelScope.launch { shopItemRepository.equip(itemId) }
+        viewModelScope.launch {
+            val userId = prefs.getUserId() ?: return@launch
+            shopItemRepository.equip(itemId, userId)
+        }
     }
 
     fun unequipItem(itemId: String) {
-        viewModelScope.launch { shopItemRepository.unequip(itemId) }
+        viewModelScope.launch {
+            val userId = prefs.getUserId() ?: return@launch
+            shopItemRepository.unequip(itemId, userId)
+        }
     }
 
     fun logoutSocial() {

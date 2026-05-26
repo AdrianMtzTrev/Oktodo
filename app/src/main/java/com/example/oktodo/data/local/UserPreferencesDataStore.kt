@@ -209,6 +209,11 @@ class UserPreferencesDataStore @Inject constructor(
         dataStoreMutex.withLock {
             context.dataStore.edit { prefs ->
                 prefs[Keys.IS_SOCIAL_REGISTERED] = false
+                prefs[Keys.USER_ID] = ""
+                prefs[Keys.DISPLAY_NAME] = "Usuario OKTodo"
+                prefs[Keys.USERNAME] = ""
+                prefs[Keys.AVATAR] = "🐙"
+                prefs[Keys.NOTIFIED_ACHIEVEMENTS] = ""
             }
         }
     }

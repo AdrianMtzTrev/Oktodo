@@ -226,6 +226,7 @@ fun GroupInvitation.toEntity() = GroupInvitationEntity(
 // ── ShopItem ──────────────────────────────────────────
 fun ShopItemEntity.toDomain() = ShopItem(
     id = id,
+    userId = userId,
     title = title,
     emoji = emoji,
     price = price,
@@ -236,6 +237,7 @@ fun ShopItemEntity.toDomain() = ShopItem(
 
 fun ShopItem.toEntity() = ShopItemEntity(
     id = id,
+    userId = userId,
     title = title,
     emoji = emoji,
     price = price,

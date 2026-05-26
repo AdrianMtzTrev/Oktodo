@@ -66,13 +66,15 @@ CREATE TABLE shared_events (
 
 -- ── shop_items ──────────────────────────────────────────
 CREATE TABLE shop_items (
-    id          TEXT    NOT NULL PRIMARY KEY,
+    id          TEXT    NOT NULL,            -- item catalog id ("s1", "s2", ...)
+    userId      TEXT    NOT NULL,            -- owner of this item record
     title       TEXT    NOT NULL,
     emoji       TEXT    NOT NULL,
     price       INTEGER NOT NULL,
     category    TEXT    NOT NULL,
     isPurchased INTEGER NOT NULL,            -- 0=false, 1=true
-    isEquipped  INTEGER NOT NULL DEFAULT 0   -- 0=false, 1=true
+    isEquipped  INTEGER NOT NULL DEFAULT 0,  -- 0=false, 1=true
+    PRIMARY KEY (id, userId)
 );
 
 -- ── notifications ───────────────────────────────────────

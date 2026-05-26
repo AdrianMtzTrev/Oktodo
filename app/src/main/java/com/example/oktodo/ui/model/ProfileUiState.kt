@@ -23,6 +23,7 @@ data class Achievement(
 
 data class ShopItem(
     val id: String,
+    val userId: String = "",
     val title: String,
     val emoji: String,
     val price: Int,

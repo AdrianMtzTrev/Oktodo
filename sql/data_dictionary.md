@@ -101,12 +101,15 @@ En Supabase se divide en `shop_catalog` y `user_items`.
 | Columna | Tipo | Nulo | Default | Descripción |
 |---|---|---|---|---|
 | id | TEXT | NO | — | Identificador del ítem (ej. "s1", "s2") |
+| userId | TEXT | NO | — | UUID del usuario propietario |
 | title | TEXT | NO | — | Nombre visible del ítem |
 | emoji | TEXT | NO | — | Emoji del ítem |
 | price | INTEGER | NO | — | Costo en puntos |
 | category | TEXT | NO | — | Categoría: `Accesorio`, `Ropa`, `Premium`, `Skin` |
 | isPurchased | INTEGER | NO | — | 0 = no comprado, 1 = comprado |
 | isEquipped | INTEGER | NO | 0 | 0 = no equipado, 1 = equipado actualmente |
+
+**Primary Key compuesta:** `(id, userId)` — cada usuario tiene su propia copia del catálogo con su estado de compra/equipo.
 
 ---
 
