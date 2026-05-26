@@ -53,8 +53,6 @@ import com.example.oktodo.ui.viewmodel.ThemeViewModel
 @Composable
 fun AppNavigation(themeViewModel: ThemeViewModel) {
     val navController = rememberNavController()
-    val tasksViewModel: TasksViewModel = hiltViewModel()
-    val calendarViewModel: CalendarViewModel = hiltViewModel()
     val friendsViewModel: FriendsViewModel = hiltViewModel()
     val profileViewModel: ProfileViewModel = hiltViewModel()
     val notificationViewModel: NotificationViewModel = hiltViewModel()
@@ -67,7 +65,8 @@ fun AppNavigation(themeViewModel: ThemeViewModel) {
             startDestination = "dashboard",
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable("dashboard") {
+            composable("dashboard") { backStackEntry ->
+                val tasksViewModel: TasksViewModel = hiltViewModel(backStackEntry)
                 DashboardScreen(
                     navController = navController,
                     themeViewModel = themeViewModel,
@@ -75,7 +74,8 @@ fun AppNavigation(themeViewModel: ThemeViewModel) {
                     notificationViewModel = notificationViewModel
                 )
             }
-            composable("calendario") {
+            composable("calendario") { backStackEntry ->
+                val calendarViewModel: CalendarViewModel = hiltViewModel(backStackEntry)
                 CalendarScreen(calendarViewModel = calendarViewModel)
             }
             composable("focus") {
