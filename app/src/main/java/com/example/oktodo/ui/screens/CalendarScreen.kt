@@ -200,16 +200,18 @@ fun CalendarScreen(
                     }
 
                     CalendarView.MONTH -> {
-                        MonthlyCalendar(
-                            selectedDate = selectedDate,
-                            events = events,
-                            onDateSelected = { date ->
-                                calendarViewModel.selectDate(date)
-                            },
-                            onEventClick = { event ->
-                                selectedEvent = event
-                            }
-                        )
+                        key(YearMonth.from(selectedDate)) {
+                            MonthlyCalendar(
+                                selectedDate = selectedDate,
+                                events = events,
+                                onDateSelected = { date ->
+                                    calendarViewModel.selectDate(date)
+                                },
+                                onEventClick = { event ->
+                                    selectedEvent = event
+                                }
+                            )
+                        }
                     }
 
                     CalendarView.WEEK -> {
