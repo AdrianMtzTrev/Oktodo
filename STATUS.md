@@ -21,7 +21,7 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 ## Current Status
 
 - **Active branch:** `develop` (ahead of `origin/develop`)
-- **Last activity:** 25 May 2026 — undo delete, greeting dinámico
+- **Last activity:** 26 May 2026 — DurationPickerDialog snap fix
 - **Working tree:** clean
 
 ### Branches
@@ -79,6 +79,7 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 - **Tareas recurrentes** — marking a task with `recurrenceType != "none"` as complete auto-creates a new task for the next period
 - **Buscar tareas** — search icon in DashboardHeader toggles a text field; filters tasks client-side by title
 - **Deshacer eliminar** — delete button in TaskItem removes task and shows Snackbar with undo option (5s window)
+- **DurationPickerDialog snap** — initial value correctly centered; user scroll snaps without +4 offset drift
 - Calendar with 4 view modes (day / week / month / year)
 - Focus timer with configurable duration picker
 - Friends, groups, and shared events (local-only)
@@ -114,9 +115,12 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 
 ---
 
-## Recent Commits (25 May 2026)
+## Recent Commits (26 May 2026)
 
 ```
+5d7a800 fix: DurationPickerDialog scrollOffset sign inversion caused +4 offset snap
+399ae56 fix: add key(YearMonth) to MonthlyCalendar for proper recomposition on month change
+70be306 perf: scoped TasksViewModel y CalendarViewModel al NavBackStackEntry para que solo consuman recursos en pestaña activa
 1d2b1ea refactor: replace NavigationBarItem with custom Column+clickable for bottom nav
 969e38d fix: remove elevation from completed task cards
 5a6119a fix: getGreeting sin remember para que sea dinamico segun la hora
