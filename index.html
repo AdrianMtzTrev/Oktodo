@@ -107,8 +107,18 @@
 
     /* ── Hero ── */
     .hero {
-      padding: 96px 24px 72px;
+      padding: 0 24px 72px;
       text-align: center;
+    }
+
+    .hero-fold {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding-top: 0;
+      padding-bottom: 120px;
     }
 
     .badge {
@@ -617,6 +627,22 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
     }
+
+    /* ── Scroll reveal ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal[data-delay="1"] { transition-delay: 0.10s; }
+    .reveal[data-delay="2"] { transition-delay: 0.20s; }
+    .reveal[data-delay="3"] { transition-delay: 0.30s; }
+    .reveal[data-delay="4"] { transition-delay: 0.40s; }
+    .reveal[data-delay="5"] { transition-delay: 0.50s; }
   </style>
 </head>
 <body>
@@ -634,6 +660,7 @@
 
   <!-- Hero -->
   <section class="hero">
+    <div class="hero-fold">
     <div class="badge">
       <span class="badge-dot" aria-hidden="true"></span>
       v0.2.2 Latest
@@ -660,9 +687,10 @@
       </a>
     </div>
     <p class="hero-note">Android 7.0+ &nbsp;·&nbsp; Permite "Instalar apps desconocidas" en ajustes &nbsp;·&nbsp; <a href="https://github.com/AdrianMtzTrev/Oktodo/releases" style="color:var(--primary-light);">Ver todas las releases</a></p>
+    </div><!-- /.hero-fold -->
 
     <!-- Phone mockup -->
-    <div class="mockup-wrap" aria-hidden="true">
+    <div class="mockup-wrap reveal" aria-hidden="true">
       <div class="phone">
         <div class="phone-status">
           <span>9:49</span>
@@ -750,14 +778,14 @@
   <!-- Features -->
   <section class="features">
     <div class="container">
-      <p class="section-label">Pantallas</p>
-      <h2 class="section-title">Todo lo que necesitas</h2>
-      <p class="section-sub">Cinco pantallas diseñadas para mantener tu vida organizada y tu enfoque intacto.</p>
+      <p class="section-label reveal">Pantallas</p>
+      <h2 class="section-title reveal" data-delay="1">Todo lo que necesitas</h2>
+      <p class="section-sub reveal" data-delay="2">Cinco pantallas diseñadas para mantener tu vida organizada y tu enfoque intacto.</p>
 
       <div class="features-grid">
 
         <!-- Inicio / Tareas -->
-        <div class="feature-card">
+        <div class="feature-card reveal" data-delay="1">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
@@ -768,7 +796,7 @@
         </div>
 
         <!-- Calendario -->
-        <div class="feature-card">
+        <div class="feature-card reveal" data-delay="2">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
@@ -779,7 +807,7 @@
         </div>
 
         <!-- Enfoque -->
-        <div class="feature-card">
+        <div class="feature-card reveal" data-delay="3">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
@@ -790,7 +818,7 @@
         </div>
 
         <!-- Amigos -->
-        <div class="feature-card">
+        <div class="feature-card reveal" data-delay="4">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
@@ -801,7 +829,7 @@
         </div>
 
         <!-- Perfil -->
-        <div class="feature-card">
+        <div class="feature-card reveal" data-delay="5">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -818,7 +846,7 @@
   <!-- Okto / Gamificación -->
   <section class="mascot-section">
     <div class="container">
-      <div class="mascot-card">
+      <div class="mascot-card reveal">
         <div class="mascot-text">
           <h2>Conoce a <span>Okto</span></h2>
           <p>Tu compañero de productividad. Okto te motiva a completar tareas, mantener rachas y alcanzar tus metas — porque avanzar solo es más difícil.</p>
@@ -866,22 +894,22 @@
   <!-- Changelog -->
   <section class="cta" style="padding:40px 24px 0;">
     <div class="container">
-      <p class="section-label">v0.2.2</p>
-      <h2 class="section-title" style="margin-bottom:32px;">Últimos cambios</h2>
+      <p class="section-label reveal">v0.2.2</p>
+      <h2 class="section-title reveal" data-delay="1" style="margin-bottom:32px;">Últimos cambios</h2>
       <div style="max-width:520px;margin:0 auto;text-align:left;display:flex;flex-direction:column;gap:12px;">
-        <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div class="reveal" data-delay="1" style="display:flex;align-items:flex-start;gap:12px;">
           <span style="color:#10B981;flex-shrink:0;font-size:16px;">✓</span>
           <span style="color:var(--fg-muted);font-size:14px;"><strong style="color:var(--fg);">DatePicker</strong> — corrige resta de 1 día al seleccionar fecha en zona horaria negativa</span>
         </div>
-        <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div class="reveal" data-delay="2" style="display:flex;align-items:flex-start;gap:12px;">
           <span style="color:#10B981;flex-shrink:0;font-size:16px;">✓</span>
           <span style="color:var(--fg-muted);font-size:14px;"><strong style="color:var(--fg);">DurationPicker</strong> — corrige snap +4 que mostraba valor incorrecto al hacer scroll</span>
         </div>
-        <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div class="reveal" data-delay="3" style="display:flex;align-items:flex-start;gap:12px;">
           <span style="color:#10B981;flex-shrink:0;font-size:16px;">✓</span>
           <span style="color:var(--fg-muted);font-size:14px;"><strong style="color:var(--fg);">Amigos</strong> — evita que te agregues a ti mismo (crash)</span>
         </div>
-        <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div class="reveal" data-delay="4" style="display:flex;align-items:flex-start;gap:12px;">
           <span style="color:#10B981;flex-shrink:0;font-size:16px;">✓</span>
           <span style="color:var(--fg-muted);font-size:14px;"><strong style="color:var(--fg);">Selector de color</strong> — borde visible en el color seleccionado</span>
         </div>
@@ -891,7 +919,7 @@
 
   <!-- CTA -->
   <section class="cta">
-    <div class="cta-card">
+    <div class="cta-card reveal">
       <h2>¿Listo para organizarte?</h2>
       <p>Descarga el APK y prueba Oktodo en tu dispositivo Android. v0.2.2 disponible ahora.</p>
       <a
@@ -915,5 +943,17 @@
     <a href="https://github.com/AdrianMtzTrev/Oktodo" target="_blank" rel="noopener">github.com/AdrianMtzTrev/Oktodo</a>
   </footer>
 
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
 </body>
 </html>
