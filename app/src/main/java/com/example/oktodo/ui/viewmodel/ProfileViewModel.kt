@@ -14,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -79,11 +80,14 @@ class ProfileViewModel @Inject constructor(
     val purchaseEvent = _purchaseEvent.receiveAsFlow()
 
     init {
-        viewModelScope.launch {
-            val userId = prefs.getUserId()
-            if (userId != null) shopItemRepository.seedIfEmpty(userId)
-        }
         observeNewAchievements()
+        viewModelScope.launch {
+            prefs.preferences.map { it.userId }.distinctUntilChanged().collect { userId ->
+                if (userId.isNotBlank()) {
+                    shopItemRepository.seedIfEmpty(userId)
+                }
+            }
+        }
     }
 
     private fun observeNewAchievements() {
