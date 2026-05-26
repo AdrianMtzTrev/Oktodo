@@ -307,7 +307,7 @@ fun DashboardContent(
     onTaskDelete: (Task) -> Unit,
     onTaskEdit: (Task) -> Unit
 ) {
-    val greeting = remember { getGreeting() }
+    val greeting = getGreeting()
 
     val pendingTasks = tasks.filter { !it.isCompleted }
     val completedTasks = tasks.filter { it.isCompleted }
