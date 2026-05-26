@@ -636,16 +636,16 @@
   <section class="hero">
     <div class="badge">
       <span class="badge-dot" aria-hidden="true"></span>
-      v0.1.0 Pre-release
+      v0.2.2 Latest
     </div>
     <h1>Productividad con<br /><span>propósito.</span></h1>
     <p>Oktodo combina gestión de tareas, calendario interactivo, modo enfoque Pomodoro y funciones sociales — todo acompañado por Okto, tu mascota virtual.</p>
     <div class="hero-actions">
       <a
         class="btn-primary"
-        href="https://github.com/AdrianMtzTrev/Oktodo/releases/download/v0.1.0/oktodo-v0.1.0.apk"
+        href="https://github.com/AdrianMtzTrev/Oktodo/releases/download/v0.2.2/Oktodo-v0.2.2.apk"
         download
-        aria-label="Descargar Oktodo APK v0.1.0"
+        aria-label="Descargar Oktodo APK v0.2.2"
       >
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
@@ -659,7 +659,7 @@
         Ver en GitHub
       </a>
     </div>
-    <p class="hero-note">Android 7.0+ &nbsp;·&nbsp; Permite "Instalar apps desconocidas" en ajustes</p>
+    <p class="hero-note">Android 7.0+ &nbsp;·&nbsp; Permite "Instalar apps desconocidas" en ajustes &nbsp;·&nbsp; <a href="https://github.com/AdrianMtzTrev/Oktodo/releases" style="color:var(--primary-light);">Ver todas las releases</a></p>
 
     <!-- Phone mockup -->
     <div class="mockup-wrap" aria-hidden="true">
@@ -763,8 +763,8 @@
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
             </svg>
           </div>
-          <h3>Inicio & Tareas</h3>
-          <p>Saludo dinámico según la hora del día. Crea tareas desde un BottomSheet y gana puntos al completarlas.</p>
+      <h3>Inicio & Tareas</h3>
+      <p>Saludo dinámico según la hora del día. Crea, edita y busca tareas desde un BottomSheet. Deshaz eliminaciones con Snackbar. Tareas recurrentes diarias/semanales/mensuales.</p>
         </div>
 
         <!-- Calendario -->
@@ -785,8 +785,8 @@
               <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
           </div>
-          <h3>Modo Enfoque</h3>
-          <p>Temporizador Pomodoro circular con sesiones de 15, 25, 45 o 60 min. Bloquea apps para concentrarte.</p>
+      <h3>Modo Enfoque</h3>
+      <p>Temporizador Pomodoro circular con sesiones de 15, 25, 45 o 60 min. Temporizador personalizable con selector de horas, minutos y segundos.</p>
         </div>
 
         <!-- Amigos -->
@@ -828,12 +828,12 @@
               <span class="stat-label">por tarea</span>
             </div>
             <div class="stat">
-              <span class="stat-value">4 vistas</span>
-              <span class="stat-label">de calendario</span>
+              <span class="stat-value">10</span>
+              <span class="stat-label">pantallas</span>
             </div>
             <div class="stat">
-              <span class="stat-value">Dark mode</span>
-              <span class="stat-label">completo</span>
+              <span class="stat-value">v0.2.2</span>
+              <span class="stat-label">última versión</span>
             </div>
           </div>
         </div>
@@ -863,21 +863,47 @@
     </div>
   </section>
 
+  <!-- Changelog -->
+  <section class="cta" style="padding:40px 24px 0;">
+    <div class="container">
+      <p class="section-label">v0.2.2</p>
+      <h2 class="section-title" style="margin-bottom:32px;">Últimos cambios</h2>
+      <div style="max-width:520px;margin:0 auto;text-align:left;display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <span style="color:#10B981;flex-shrink:0;font-size:16px;">✓</span>
+          <span style="color:var(--fg-muted);font-size:14px;"><strong style="color:var(--fg);">DatePicker</strong> — corrige resta de 1 día al seleccionar fecha en zona horaria negativa</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <span style="color:#10B981;flex-shrink:0;font-size:16px;">✓</span>
+          <span style="color:var(--fg-muted);font-size:14px;"><strong style="color:var(--fg);">DurationPicker</strong> — corrige snap +4 que mostraba valor incorrecto al hacer scroll</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <span style="color:#10B981;flex-shrink:0;font-size:16px;">✓</span>
+          <span style="color:var(--fg-muted);font-size:14px;"><strong style="color:var(--fg);">Amigos</strong> — evita que te agregues a ti mismo (crash)</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <span style="color:#10B981;flex-shrink:0;font-size:16px;">✓</span>
+          <span style="color:var(--fg-muted);font-size:14px;"><strong style="color:var(--fg);">Selector de color</strong> — borde visible en el color seleccionado</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- CTA -->
   <section class="cta">
     <div class="cta-card">
       <h2>¿Listo para organizarte?</h2>
-      <p>Descarga el APK y prueba Oktodo en tu dispositivo Android. Pre-release v0.1.0 disponible ahora.</p>
+      <p>Descarga el APK y prueba Oktodo en tu dispositivo Android. v0.2.2 disponible ahora.</p>
       <a
         class="btn-primary"
-        href="https://github.com/AdrianMtzTrev/Oktodo/releases/download/v0.1.0/oktodo-v0.1.0.apk"
+        href="https://github.com/AdrianMtzTrev/Oktodo/releases/download/v0.2.2/Oktodo-v0.2.2.apk"
         download
-        aria-label="Descargar Oktodo APK v0.1.0"
+        aria-label="Descargar Oktodo APK v0.2.2"
       >
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
-        Descargar APK — v0.1.0
+        Descargar APK — v0.2.2
       </a>
     </div>
   </section>
