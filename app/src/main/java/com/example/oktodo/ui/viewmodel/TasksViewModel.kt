@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.oktodo.data.local.UserPreferencesDataStore
 import com.example.oktodo.data.repository.CalendarEventRepository
 import com.example.oktodo.data.repository.TaskRepository
-import com.example.oktodo.ui.model.CalendarEvent
 import com.example.oktodo.ui.model.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +19,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
-import java.time.LocalTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -103,15 +101,6 @@ class TasksViewModel @Inject constructor(
                 date = today
             )
             repository.add(task)
-
-            val calEvent = CalendarEvent(
-                title = title,
-                date = today,
-                time = try { LocalTime.parse(time) } catch (_: Exception) { null },
-                color = color
-            )
-            calendarEventRepository.add(calEvent)
-
             hideBottomSheet()
         }
     }

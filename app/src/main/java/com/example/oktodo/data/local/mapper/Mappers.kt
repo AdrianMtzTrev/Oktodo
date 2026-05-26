@@ -97,6 +97,17 @@ fun Group.toEntity() = GroupEntity(
     creatorId = creatorId
 )
 
+// ── Task → CalendarEvent (para mostrar tasks en el calendario) ──
+fun Task.toCalendarEvent() = CalendarEvent(
+    id = "task_$id",
+    title = "✅ $title",
+    date = date,
+    time = try { LocalTime.parse(time) } catch (_: DateTimeParseException) { null },
+    location = null,
+    color = color,
+    description = null
+)
+
 // ── SharedEvent ───────────────────────────────────────
 fun SharedEvent.toCalendarEvent() = CalendarEvent(
     id = "shared_$id",
