@@ -75,7 +75,7 @@ fun DashboardScreen(
     tasksViewModel: TasksViewModel,
     notificationViewModel: NotificationViewModel
 ) {
-    val tasks by tasksViewModel.tasks.collectAsState()
+    val dashboardItems by tasksViewModel.dashboardItems.collectAsState()
     val searchQuery by tasksViewModel.searchQuery.collectAsState()
     val filteredTasks by tasksViewModel.filteredTasks.collectAsState()
     val showBottomSheet by tasksViewModel.showBottomSheet.collectAsState()
@@ -84,7 +84,7 @@ fun DashboardScreen(
     val userName by tasksViewModel.displayName.collectAsState()
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
     val unreadNotifications by notificationViewModel.unreadCount.collectAsState()
-    val displayTasks = if (searchQuery.isBlank()) tasks else filteredTasks
+    val displayTasks = if (searchQuery.isBlank()) dashboardItems else filteredTasks
 
     val pendingCount = displayTasks.count { !it.isCompleted }
 
@@ -501,6 +501,14 @@ fun TaskItem(
                         }
                     )
             )
+
+            if (task.category == "📅 Evento") {
+                Text(
+                    text = "📅",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(end = 4.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.width(14.dp))
 

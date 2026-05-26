@@ -18,6 +18,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE title LIKE '%' || :query || '%' ORDER BY isCompleted ASC")
     fun searchTasks(query: String): Flow<List<TaskEntity>>
 
+    @Query("SELECT * FROM tasks WHERE dateString = :dateString ORDER BY isCompleted ASC")
+    fun getTasksByDate(dateString: String): Flow<List<TaskEntity>>
+
     @Update
     suspend fun update(task: TaskEntity)
 

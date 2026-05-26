@@ -18,7 +18,7 @@ import com.example.oktodo.data.local.entity.*
         FriendRequestEntity::class,
         GroupInvitationEntity::class
     ],
-    version = 14,
+    version = 15,
     exportSchema = false
 )
 abstract class OktodoDatabase : RoomDatabase() {

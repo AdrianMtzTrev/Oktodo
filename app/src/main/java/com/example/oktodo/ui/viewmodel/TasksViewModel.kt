@@ -4,7 +4,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.oktodo.data.local.UserPreferencesDataStore
+import com.example.oktodo.data.repository.CalendarEventRepository
 import com.example.oktodo.data.repository.TaskRepository
+import com.example.oktodo.ui.model.CalendarEvent
 import com.example.oktodo.ui.model.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,25 +19,51 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.time.LocalDate
+import java.time.LocalTime
 import javax.inject.Inject
 
 @HiltViewModel
 class TasksViewModel @Inject constructor(
     private val repository: TaskRepository,
-    private val prefs: UserPreferencesDataStore
+    private val prefs: UserPreferencesDataStore,
+    private val calendarEventRepository: CalendarEventRepository
 ) : ViewModel() {
 
     val tasks: StateFlow<List<Task>> = repository.tasks
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val dashboardItems: StateFlow<List<Task>> = combine(
+        repository.tasks,
+        calendarEventRepository.events,
+        prefs.preferences
+    ) { allTasks, events, _ ->
+        val todayStr = LocalDate.now().toString()
+        val todayEvents = events.filter { it.date.toString() == todayStr }
+        val syntheticTasks = todayEvents.map { event ->
+            Task(
+                id = "event_${event.id}",
+                title = event.title,
+                time = event.time?.toString() ?: "",
+                priority = "Media",
+                color = event.color,
+                isCompleted = false,
+                pointsReward = 0,
+                category = "📅 Evento",
+                date = event.date
+            )
+        }
+        allTasks + syntheticTasks
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val taskMutex = Mutex()
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    val filteredTasks: StateFlow<List<Task>> = combine(tasks, _searchQuery) { allTasks, query ->
-        if (query.isBlank()) allTasks
-        else allTasks.filter { it.title.contains(query, ignoreCase = true) }
+    val filteredTasks: StateFlow<List<Task>> = combine(dashboardItems, _searchQuery) { allItems, query ->
+        if (query.isBlank()) allItems
+        else allItems.filter { it.title.contains(query, ignoreCase = true) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _showBottomSheet = MutableStateFlow(false)
@@ -64,16 +92,26 @@ class TasksViewModel @Inject constructor(
             else  -> Color(0xFF7C3AED)
         }
         viewModelScope.launch {
-            repository.add(
-                Task(
-                    title = title,
-                    time = time,
-                    priority = priority,
-                    color = color,
-                    isCompleted = false,
-                    pointsReward = 10
-                )
+            val today = LocalDate.now()
+            val task = Task(
+                title = title,
+                time = time,
+                priority = priority,
+                color = color,
+                isCompleted = false,
+                pointsReward = 10,
+                date = today
             )
+            repository.add(task)
+
+            val calEvent = CalendarEvent(
+                title = title,
+                date = today,
+                time = try { LocalTime.parse(time) } catch (_: Exception) { null },
+                color = color
+            )
+            calendarEventRepository.add(calEvent)
+
             hideBottomSheet()
         }
     }
@@ -97,6 +135,7 @@ class TasksViewModel @Inject constructor(
     }
 
     fun toggleTaskCompletion(task: Task) {
+        if (task.id.startsWith("event_")) return
         viewModelScope.launch {
             taskMutex.withLock {
                 val current = repository.getTaskById(task.id)
@@ -122,6 +161,7 @@ class TasksViewModel @Inject constructor(
     }
 
     fun deleteTask(task: Task) {
+        if (task.id.startsWith("event_")) return
         viewModelScope.launch {
             taskMutex.withLock {
                 val current = repository.getTaskById(task.id) ?: return@withLock

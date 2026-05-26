@@ -1,6 +1,7 @@
 package com.example.oktodo.ui.model
 
 import androidx.compose.ui.graphics.Color
+import java.time.LocalDate
 import java.util.UUID
 
 data class Task(
@@ -13,5 +14,6 @@ data class Task(
     val pointsReward: Int = 10,
     val category: String = "",
     val recurrenceType: String = "none",
-    val recurrenceInterval: Int = 1
+    val recurrenceInterval: Int = 1,
+    val date: LocalDate = LocalDate.now()
 )

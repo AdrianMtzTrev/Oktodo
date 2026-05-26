@@ -14,5 +14,6 @@ data class TaskEntity(
     val pointsReward: Int,
     val category: String = "",
     val recurrenceType: String = "none",
-    val recurrenceInterval: Int = 1
+    val recurrenceInterval: Int = 1,
+    val dateString: String
 )

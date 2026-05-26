@@ -18,7 +18,8 @@ fun TaskEntity.toDomain() = Task(
     pointsReward = pointsReward,
     category = category,
     recurrenceType = recurrenceType,
-    recurrenceInterval = recurrenceInterval
+    recurrenceInterval = recurrenceInterval,
+    date = try { LocalDate.parse(dateString) } catch (_: DateTimeParseException) { LocalDate.now() }
 )
 
 fun Task.toEntity() = TaskEntity(
@@ -31,7 +32,8 @@ fun Task.toEntity() = TaskEntity(
     pointsReward = pointsReward,
     category = category,
     recurrenceType = recurrenceType,
-    recurrenceInterval = recurrenceInterval
+    recurrenceInterval = recurrenceInterval,
+    dateString = date.toString()
 )
 
 // ── CalendarEvent ─────────────────────────────────────
