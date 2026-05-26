@@ -21,8 +21,8 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 ## Current Status
 
 - **Active branch:** `develop` (ahead of `origin/develop`)
-- **Last activity:** 25 May 2026 — tareas recurrentes, buscar tareas
-- **Working tree:** dirty (search feature pending commit)
+- **Last activity:** 25 May 2026 — undo delete, greeting dinámico
+- **Working tree:** clean
 
 ### Branches
 
@@ -78,6 +78,7 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 - **Editar tarea** — CreateTaskBottomSheet opens in edit mode with pre-filled fields when editing
 - **Tareas recurrentes** — marking a task with `recurrenceType != "none"` as complete auto-creates a new task for the next period
 - **Buscar tareas** — search icon in DashboardHeader toggles a text field; filters tasks client-side by title
+- **Deshacer eliminar** — delete button in TaskItem removes task and shows Snackbar with undo option (5s window)
 - Calendar with 4 view modes (day / week / month / year)
 - Focus timer with configurable duration picker
 - Friends, groups, and shared events (local-only)
@@ -116,6 +117,14 @@ Follows **MVVM + Repository** pattern with **Room** for persistence and **DataSt
 ## Recent Commits (25 May 2026)
 
 ```
+5a6119a fix: getGreeting sin remember para que sea dinamico segun la hora
+22e3a17 feat: deshacer eliminar - pendingDeletedTask con delay 5s, snackbar Host, undoDelete, delete button en TaskItem
+ef92957 fix: show shop items in offline mode
+cbdb2bc fix: reactive seed of shop items on userId change
+1e4097d refactor: avoid data duplication between tasks and calendar
+57dc0e4 fix: isolate shop items per user
+8b26ad7 fix: sync tasks and calendar events
+b6d8205 feat: buscar tareas - search bar in DashboardHeader, filteredTasks combine flow, setSearchQuery in VM
 212124c feat: tareas recurrentes - crear nueva tarea al completar una con recurrenceType != none
 c2bff9e feat: editar tarea - CreateTaskBottomSheet con modo edicion, updateTask/editTask en VM, icono de editar en TaskItem
 7fddf92 fix: errores de compilacion preexistentes - import @Update faltante, private en DAO, import duplicado, remember faltante
@@ -139,7 +148,6 @@ d960b36 fix: sendFriendRequest sin check de duplicado, usar findExisting antes d
 
 ## What's Missing / Next Up
 
-- **Undo delete** — SnackbarHost + `_pendingDeletedTask` state in TasksViewModel to allow undoing a deletion
 - **Task categories picker** — UI for selecting/assigning a category when creating/editing a task
 - **Cloud sync / Backend** — SQL schema ready (`sql/` folder), pending client implementation
   - Supabase: 12 tables + 1 VIEW + RLS + triggers + seed catalog
