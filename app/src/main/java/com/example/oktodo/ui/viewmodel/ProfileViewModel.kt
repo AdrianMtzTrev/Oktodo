@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -35,6 +34,13 @@ class ProfileViewModel @Inject constructor(
     private val shopItemRepository: ShopItemRepository,
     private val notificationRepository: NotificationRepository
 ) : ViewModel() {
+
+    companion object {
+        private const val LOCAL_USER_ID = "offline"
+    }
+
+    private fun effectiveUserId(raw: String): String =
+        if (raw.isNotBlank()) raw else LOCAL_USER_ID
 
     val uiState = prefs.preferences
         .map { p ->
@@ -63,17 +69,15 @@ class ProfileViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ProfileUiState())
 
     private val currentUserId = prefs.preferences
-        .map { it.userId }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
+        .map { effectiveUserId(it.userId) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), LOCAL_USER_ID)
 
     val shopItems = currentUserId.flatMapLatest { userId ->
-        if (userId.isBlank()) flowOf(emptyList())
-        else shopItemRepository.getItemsForUser(userId)
+        shopItemRepository.getItemsForUser(userId)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val equippedItem = currentUserId.flatMapLatest { userId ->
-        if (userId.isBlank()) flowOf(null)
-        else shopItemRepository.getEquippedItemForUser(userId)
+        shopItemRepository.getEquippedItemForUser(userId)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     private val _purchaseEvent = Channel<PurchaseEvent>(Channel.BUFFERED)
@@ -82,10 +86,8 @@ class ProfileViewModel @Inject constructor(
     init {
         observeNewAchievements()
         viewModelScope.launch {
-            prefs.preferences.map { it.userId }.distinctUntilChanged().collect { userId ->
-                if (userId.isNotBlank()) {
-                    shopItemRepository.seedIfEmpty(userId)
-                }
+            prefs.preferences.map { effectiveUserId(it.userId) }.distinctUntilChanged().collect { userId ->
+                shopItemRepository.seedIfEmpty(userId)
             }
         }
     }
@@ -133,7 +135,7 @@ class ProfileViewModel @Inject constructor(
 
     fun purchaseItem(itemId: String) {
         viewModelScope.launch {
-            val userId = prefs.getUserId() ?: return@launch
+            val userId = effectiveUserId(prefs.getUserId() ?: "")
             shopItemRepository.seedIfEmpty(userId)
             val item = shopItems.value.find { it.id == itemId } ?: return@launch
             val success = shopItemRepository.purchase(item, userId, uiState.value.points)
@@ -147,14 +149,14 @@ class ProfileViewModel @Inject constructor(
 
     fun equipItem(itemId: String) {
         viewModelScope.launch {
-            val userId = prefs.getUserId() ?: return@launch
+            val userId = effectiveUserId(prefs.getUserId() ?: "")
             shopItemRepository.equip(itemId, userId)
         }
     }
 
     fun unequipItem(itemId: String) {
         viewModelScope.launch {
-            val userId = prefs.getUserId() ?: return@launch
+            val userId = effectiveUserId(prefs.getUserId() ?: "")
             shopItemRepository.unequip(itemId, userId)
         }
     }
