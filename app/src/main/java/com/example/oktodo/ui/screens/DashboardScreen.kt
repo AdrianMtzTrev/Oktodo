@@ -503,7 +503,9 @@ fun TaskItem(
                 MaterialTheme.colorScheme.surface
             }
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (task.isCompleted) 0.dp else 2.dp
+        )
     ) {
         Row(
             modifier = Modifier
