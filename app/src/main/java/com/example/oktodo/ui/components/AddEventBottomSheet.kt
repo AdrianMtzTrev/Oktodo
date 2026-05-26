@@ -3,6 +3,7 @@
 package com.example.oktodo.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -241,10 +242,18 @@ fun AddEventBottomSheet(
                 eventColors.forEach { color ->
                     Surface(
                         modifier = Modifier
-                            .size(34.dp),
+                            .size(34.dp)
+                            .then(
+                                if (selectedColor == color) {
+                                    Modifier.border(
+                                        width = 2.dp,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        shape = CircleShape
+                                    )
+                                } else Modifier
+                            ),
                         shape = CircleShape,
                         color = color,
-                        tonalElevation = if (selectedColor == color) 4.dp else 0.dp,
                         onClick = { selectedColor = color }
                     ) {}
                 }
