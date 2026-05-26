@@ -26,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -135,11 +136,26 @@ private fun NumberPickerColumn(
         }
     }
 
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = maxOf(0, extraSpacers + state.initialIndex - 2)
-    )
+    val listState = rememberLazyListState()
     var hasUserScrolled by remember { mutableStateOf(false) }
     var isSnapping by remember { mutableStateOf(false) }
+    var initialSnapDone by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        repeat(5) { withFrameNanos { } }
+        if (initialSnapDone) return@LaunchedEffect
+        initialSnapDone = true
+        val layoutInfo = listState.layoutInfo
+        if (layoutInfo.visibleItemsInfo.isEmpty()) return@LaunchedEffect
+        val itemSize = layoutInfo.visibleItemsInfo.first().size
+        val targetIdx = extraSpacers + state.initialIndex
+        isSnapping = true
+        listState.scrollToItem(
+            targetIdx,
+            itemSize / 2 - layoutInfo.viewportSize.height / 2
+        )
+        isSnapping = false
+    }
 
     LaunchedEffect(listState) {
         snapshotFlow { listState.isScrollInProgress }
@@ -163,7 +179,7 @@ private fun NumberPickerColumn(
                                 isSnapping = true
                                 listState.scrollToItem(
                                     it.index,
-                                    center - it.size / 2
+                                    it.size / 2 - center
                                 )
                                 isSnapping = false
                             }
