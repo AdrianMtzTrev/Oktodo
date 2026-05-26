@@ -295,8 +295,7 @@ fun AddEventBottomSheet(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        val instant = java.time.Instant.ofEpochMilli(millis)
-                        selectedDate = instant.atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+                        selectedDate = java.time.LocalDate.ofEpochDay(millis / 86400000L)
                     }
                     showDatePicker = false
                 }) { Text("Aceptar") }
