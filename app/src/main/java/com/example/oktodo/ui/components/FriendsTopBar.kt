@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun FriendsTopBar(
+    points: Int = 0,
     onShareClick: () -> Unit,
     onAddClick: () -> Unit
 ) {
@@ -63,7 +64,7 @@ fun FriendsTopBar(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "0",
+                        text = points.toString(),
                         color = accentText,
                         fontWeight = FontWeight.Bold
                     )

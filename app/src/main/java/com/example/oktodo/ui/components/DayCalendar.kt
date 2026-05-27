@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.oktodo.ui.model.CalendarEvent
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -153,12 +155,13 @@ fun DayCalendar(
                 }
             }
         } else {
+            val sortedEvents = remember(events) { events.sortedBy { it.time ?: LocalTime.MAX } }
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(
-                    items = events.sortedBy { it.time },
+                    items = sortedEvents,
                     key = { it.id }
                 ) { event ->
                     EventCard(

@@ -17,7 +17,9 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): OktodoDatabase =
-        Room.databaseBuilder(context, OktodoDatabase::class.java, "oktodo.db").build()
+        Room.databaseBuilder(context, OktodoDatabase::class.java, "oktodo.db")
+            .fallbackToDestructiveMigration()
+            .build()
 
     @Provides fun provideTaskDao(db: OktodoDatabase) = db.taskDao()
     @Provides fun provideCalendarEventDao(db: OktodoDatabase) = db.calendarEventDao()
@@ -25,4 +27,8 @@ object DatabaseModule {
     @Provides fun provideGroupDao(db: OktodoDatabase) = db.groupDao()
     @Provides fun provideSharedEventDao(db: OktodoDatabase) = db.sharedEventDao()
     @Provides fun provideShopItemDao(db: OktodoDatabase) = db.shopItemDao()
+    @Provides fun provideNotificationDao(db: OktodoDatabase) = db.notificationDao()
+    @Provides fun provideUserProfileDao(db: OktodoDatabase) = db.userProfileDao()
+    @Provides fun provideFriendRequestDao(db: OktodoDatabase) = db.friendRequestDao()
+    @Provides fun provideGroupInvitationDao(db: OktodoDatabase) = db.groupInvitationDao()
 }

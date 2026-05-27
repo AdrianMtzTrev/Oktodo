@@ -3,29 +3,31 @@
 package com.example.oktodo.ui.model
 
 data class ProfileUiState(
-    val username: String = "Usuario OKTodo",
+    val displayName: String = "Usuario OKTodo",
+    val username: String = "",
     val avatarEmoji: String = "🐙",
     val points: Int = 0,
     val completedTasks: Int = 0,
-    val streakDays: Int = 5,
+    val streakDays: Int = 0,
     val weeklyGoal: Int = 10,
     val weeklyCompleted: Int = 0,
-    val achievements: List<Achievement> = listOf(
-        Achievement("🏆", "Primera tarea"),
-        Achievement("🔥", "5 días racha"),
-        Achievement("⭐", "100 puntos")
-    )
+    val achievements: List<Achievement> = emptyList(),
+    val isSocialRegistered: Boolean = false
 )
 
 data class Achievement(
     val icon: String,
-    val title: String
+    val title: String,
+    val isUnlocked: Boolean = false
 )
 
 data class ShopItem(
     val id: String,
+    val userId: String = "",
     val title: String,
     val emoji: String,
     val price: Int,
-    val category: String
+    val category: String,
+    val isPurchased: Boolean = false,
+    val isEquipped: Boolean = false
 )

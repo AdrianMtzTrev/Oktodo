@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -18,12 +17,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -35,11 +36,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.oktodo.ui.viewmodel.ProfileViewModel
@@ -50,6 +54,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val equippedItem by viewModel.equippedItem.collectAsState()
 
     val background = MaterialTheme.colorScheme.background
     val surface = MaterialTheme.colorScheme.surface
@@ -74,7 +79,8 @@ fun ProfileScreen(
         topBar = {
             ProfileHeaderBar(
                 points = uiState.points,
-                onEditClick = { navController?.navigate("edit_profile") }
+                onEditClick = { navController?.navigate("settings") },
+                onNotificationsClick = { navController?.navigate("notifications") }
             )
         }
     ) { innerPadding ->
@@ -85,14 +91,6 @@ fun ProfileScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
-            ProfileHeader(
-                username = uiState.username,
-                avatarEmoji = uiState.avatarEmoji,
-                bannerBrush = bannerBrush
-            )
-
-            Spacer(modifier = Modifier.height(18.dp))
-
             Text(
                 text = "Mi Perfil",
                 style = MaterialTheme.typography.headlineSmall,
@@ -104,6 +102,17 @@ fun ProfileScreen(
                 text = "Tu progreso y logros",
                 style = MaterialTheme.typography.bodyMedium,
                 color = onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            ProfileHeader(
+                displayName = uiState.displayName,
+                username = uiState.username,
+                avatarEmoji = uiState.avatarEmoji,
+                bannerBrush = bannerBrush,
+                equippedEmoji = equippedItem?.emoji,
+                showUsername = uiState.isSocialRegistered
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -136,7 +145,7 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.height(14.dp))
 
                     Text(
-                        text = uiState.username,
+                        text = uiState.displayName,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = onSurface
@@ -145,7 +154,7 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Tu pulpito está esperando que completes tareas 🪄",
+                        text = "Okto está esperando que completes tareas 🪄",
                         color = onSurfaceVariant
                     )
 
@@ -160,7 +169,7 @@ fun ProfileScreen(
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         )
                     ) {
-                        Text("Consentir a mi pulpito")
+                        Text("Consentir a Okto")
                     }
                 }
             }
@@ -250,32 +259,63 @@ fun ProfileScreen(
                 colors = CardDefaults.cardColors(containerColor = surface)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "🏆 Logros Desbloqueados",
-                        fontWeight = FontWeight.Bold,
-                        color = onSurface
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "🏆 Logros",
+                            fontWeight = FontWeight.Bold,
+                            color = onSurface
+                        )
+                        Text(
+                            text = "${uiState.achievements.count { it.isUnlocked }}/${uiState.achievements.size}",
+                            color = primary,
+                            fontWeight = FontWeight.SemiBold,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceAround
-                    ) {
-                        uiState.achievements.forEach { achievement ->
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(
-                                    text = achievement.icon,
-                                    style = MaterialTheme.typography.headlineMedium
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = achievement.title,
-                                    color = onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
+                    uiState.achievements.chunked(4).forEach { rowItems ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceAround
+                        ) {
+                            rowItems.forEach { achievement ->
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .alpha(if (achievement.isUnlocked) 1f else 0.3f)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text(
+                                            text = achievement.icon,
+                                            style = MaterialTheme.typography.headlineMedium
+                                        )
+                                        if (!achievement.isUnlocked) {
+                                            Text(
+                                                text = "🔒",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                modifier = Modifier.align(Alignment.BottomEnd)
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = achievement.title,
+                                        color = onSurfaceVariant,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        textAlign = TextAlign.Center,
+                                        maxLines = 2
+                                    )
+                                }
                             }
                         }
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
                 }
             }
@@ -296,21 +336,47 @@ fun ProfileScreen(
 
                     Spacer(modifier = Modifier.height(18.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 18.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    if (uiState.completedTasks == 0) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 18.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "Aún no has completado tareas",
+                                    color = onSurfaceVariant
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = "¡Empieza a cumplir tus objetivos!",
+                                    color = onSurfaceVariant
+                                )
+                            }
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = "${uiState.completedTasks} tareas completadas",
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = onSurface
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "${uiState.weeklyCompleted} esta semana · ${uiState.points} puntos ganados",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = onSurfaceVariant
+                                )
+                            }
                             Text(
-                                text = "Aún no has completado tareas",
-                                color = onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "¡Empieza a cumplir tus objetivos!",
-                                color = onSurfaceVariant
+                                text = "🏆",
+                                style = MaterialTheme.typography.headlineMedium
                             )
                         }
                     }
@@ -325,7 +391,8 @@ fun ProfileScreen(
 @Composable
 fun ProfileHeaderBar(
     points: Int,
-    onEditClick: () -> Unit
+    onEditClick: () -> Unit,
+    onNotificationsClick: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -340,17 +407,27 @@ fun ProfileHeaderBar(
         ) {
             RewardPill(points = points)
 
-            FilledIconButton(
-                onClick = onEditClick,
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Edit,
-                    contentDescription = "Editar perfil"
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onNotificationsClick) {
+                    Icon(
+                        imageVector = Icons.Outlined.Notifications,
+                        contentDescription = "Notificaciones",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                FilledIconButton(
+                    onClick = onEditClick,
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Edit,
+                        contentDescription = "Editar perfil"
+                    )
+                }
             }
         }
     }
@@ -358,9 +435,12 @@ fun ProfileHeaderBar(
 
 @Composable
 private fun ProfileHeader(
+    displayName: String,
     username: String,
     avatarEmoji: String,
-    bannerBrush: Brush
+    bannerBrush: Brush,
+    equippedEmoji: String? = null,
+    showUsername: Boolean = false
 ) {
     Box(
         modifier = Modifier.fillMaxWidth()
@@ -393,8 +473,8 @@ private fun ProfileHeader(
 
         Row(
             modifier = Modifier
-                .align(Alignment.BottomStart)
-                .offset(x = 16.dp, y = 24.dp),
+                .align(Alignment.CenterStart)
+                .padding(start = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -416,25 +496,41 @@ private fun ProfileHeader(
                         style = MaterialTheme.typography.headlineLarge
                     )
                 }
+
+                if (equippedEmoji != null) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = equippedEmoji,
+                            fontSize = 16.sp
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            Column(
-                modifier = Modifier.padding(top = 18.dp)
-            ) {
+            Column {
                 Text(
-                    text = username,
+                    text = displayName,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = "@${username.lowercase().replace(" ", "_")}",
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-                    style = MaterialTheme.typography.bodySmall
-                )
+                if (showUsername && username.isNotBlank()) {
+                    Text(
+                        text = "@$username",
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
         }
     }

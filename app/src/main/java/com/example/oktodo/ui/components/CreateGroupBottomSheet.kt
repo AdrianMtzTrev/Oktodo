@@ -89,7 +89,7 @@ fun CreateGroupBottomSheet(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.heightIn(max = 260.dp)
             ) {
-                items(friends) { friend ->
+                items(friends, key = { it.id }) { friend ->
                     val isSelected = selected.contains(friend.name)
 
                     Row(

@@ -5,5 +5,7 @@ data class Group(
     val name: String,
     val icon: String,
     val members: List<String>,
-    val eventCount: Int
+    val memberIds: List<String> = emptyList(),
+    val eventCount: Int,
+    val creatorId: String = ""
 )

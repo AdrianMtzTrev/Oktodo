@@ -2,7 +2,6 @@ package com.example.oktodo.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
 import com.example.oktodo.data.local.dao.*
 import com.example.oktodo.data.local.entity.*
 
@@ -13,12 +12,15 @@ import com.example.oktodo.data.local.entity.*
         FriendEntity::class,
         GroupEntity::class,
         SharedEventEntity::class,
-        ShopItemEntity::class
+        ShopItemEntity::class,
+        NotificationEntity::class,
+        UserProfileEntity::class,
+        FriendRequestEntity::class,
+        GroupInvitationEntity::class
     ],
-    version = 1,
+    version = 16,
     exportSchema = false
 )
-@TypeConverters(Converters::class)
 abstract class OktodoDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao
     abstract fun calendarEventDao(): CalendarEventDao
@@ -26,4 +28,8 @@ abstract class OktodoDatabase : RoomDatabase() {
     abstract fun groupDao(): GroupDao
     abstract fun sharedEventDao(): SharedEventDao
     abstract fun shopItemDao(): ShopItemDao
+    abstract fun notificationDao(): NotificationDao
+    abstract fun userProfileDao(): UserProfileDao
+    abstract fun friendRequestDao(): FriendRequestDao
+    abstract fun groupInvitationDao(): GroupInvitationDao
 }

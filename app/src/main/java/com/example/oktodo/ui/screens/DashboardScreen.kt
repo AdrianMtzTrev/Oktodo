@@ -2,6 +2,7 @@ package com.example.oktodo.ui.screens
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +21,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Badge
@@ -34,13 +41,20 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,6 +67,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.oktodo.ui.components.CreateTaskBottomSheet
 import com.example.oktodo.ui.model.Task
+import com.example.oktodo.ui.viewmodel.NotificationViewModel
 import com.example.oktodo.ui.viewmodel.TasksViewModel
 import com.example.oktodo.ui.viewmodel.ThemeViewModel
 import java.util.Calendar
@@ -61,19 +76,47 @@ import java.util.Calendar
 fun DashboardScreen(
     navController: NavController,
     themeViewModel: ThemeViewModel,
-    tasksViewModel: TasksViewModel
+    tasksViewModel: TasksViewModel,
+    notificationViewModel: NotificationViewModel
 ) {
-    val tasks by tasksViewModel.tasks.collectAsState()
+    val dashboardItems by tasksViewModel.dashboardItems.collectAsState()
+    val searchQuery by tasksViewModel.searchQuery.collectAsState()
+    val filteredTasks by tasksViewModel.filteredTasks.collectAsState()
     val showBottomSheet by tasksViewModel.showBottomSheet.collectAsState()
+    val editingTask by tasksViewModel.editingTask.collectAsState()
     val points by tasksViewModel.points.collectAsState()
+    val userName by tasksViewModel.displayName.collectAsState()
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
+    val unreadNotifications by notificationViewModel.unreadCount.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val pendingDeletedTask by tasksViewModel.pendingDeletedTask.collectAsState()
+    val displayTasks = if (searchQuery.isBlank()) dashboardItems else filteredTasks
+
+    val pendingCount = displayTasks.count { !it.isCompleted }
+
+    LaunchedEffect(pendingDeletedTask) {
+        if (pendingDeletedTask != null) {
+            val result = snackbarHostState.showSnackbar(
+                message = "Tarea eliminada",
+                actionLabel = "Deshacer"
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                tasksViewModel.undoDelete()
+            }
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             DashboardHeader(
                 onThemeToggle = { themeViewModel.toggleTheme() },
                 isDarkMode = isDarkMode,
-                points = points
+                points = points,
+                notificationCount = unreadNotifications,
+                onNotificationsClick = { navController.navigate("notifications") },
+                searchQuery = searchQuery,
+                onSearchQueryChange = { tasksViewModel.setSearchQuery(it) }
             )
         },
         floatingActionButton = {
@@ -85,18 +128,26 @@ fun DashboardScreen(
     ) { paddingValues ->
         DashboardContent(
             modifier = Modifier.padding(paddingValues),
-            tasks = tasks,
+            tasks = displayTasks,
             points = points,
+            userName = userName,
             onTaskToggle = { tasksViewModel.toggleTaskCompletion(it) },
-            onTaskDelete = { tasksViewModel.deleteTask(it) }
+            onTaskDelete = { tasksViewModel.deleteTask(it) },
+            onTaskEdit = { tasksViewModel.editTask(it) }
         )
     }
 
     if (showBottomSheet) {
         CreateTaskBottomSheet(
+            existingTask = editingTask,
             onDismiss = { tasksViewModel.hideBottomSheet() },
-            onTaskCreated = { title, time ->
-                tasksViewModel.addTask(title, time)
+            onTaskCreated = { title, time, priority ->
+                tasksViewModel.addTask(title, time, priority)
+            },
+            onTaskUpdated = { title, time, priority ->
+                if (editingTask != null) {
+                    tasksViewModel.updateTask(editingTask!!, title, time, priority)
+                }
             }
         )
     }
@@ -106,25 +157,40 @@ fun DashboardScreen(
 fun DashboardHeader(
     onThemeToggle: () -> Unit,
     isDarkMode: Boolean,
-    points: Int
+    points: Int,
+    notificationCount: Int = 0,
+    onNotificationsClick: () -> Unit = {},
+    searchQuery: String = "",
+    onSearchQueryChange: (String) -> Unit = {}
 ) {
+    var showSearch by remember { mutableStateOf(false) }
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            StreakBadge(streakPoints = points)
-
+        Column(modifier = Modifier.fillMaxWidth()) {
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = onThemeToggle) {
+                StreakBadge(streakPoints = points)
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { showSearch = !showSearch }) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "Buscar",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    IconButton(onClick = onThemeToggle) {
                     Icon(
                         imageVector = if (isDarkMode) {
                             Icons.Outlined.LightMode
@@ -140,11 +206,11 @@ fun DashboardHeader(
                     )
                 }
 
-                IconButton(onClick = {}) {
+                IconButton(onClick = onNotificationsClick) {
                     BadgedBox(
                         badge = {
-                            Badge {
-                                Text("3")
+                            if (notificationCount > 0) {
+                                Badge { Text(notificationCount.toString()) }
                             }
                         }
                     ) {
@@ -155,6 +221,26 @@ fun DashboardHeader(
                         )
                     }
                 }
+            }
+        }
+
+        if (showSearch) {
+            OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                    placeholder = { Text("Buscar tareas...") },
+                    singleLine = true,
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { onSearchQueryChange("") }) {
+                                Icon(Icons.Filled.Clear, contentDescription = "Limpiar")
+                            }
+                        }
+                    }
+                )
             }
         }
     }
@@ -216,14 +302,16 @@ fun DashboardContent(
     modifier: Modifier = Modifier,
     tasks: List<Task>,
     points: Int,
+    userName: String,
     onTaskToggle: (Task) -> Unit,
-    onTaskDelete: (Task) -> Unit
+    onTaskDelete: (Task) -> Unit,
+    onTaskEdit: (Task) -> Unit
 ) {
-    val greeting = remember { getGreeting() }
-    val userName = "Usuario"
+    val greeting = getGreeting()
 
     val pendingTasks = tasks.filter { !it.isCompleted }
     val completedTasks = tasks.filter { it.isCompleted }
+    var showCompleted by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = modifier
@@ -254,24 +342,45 @@ fun DashboardContent(
                 SectionHeader(title = "Pendientes (${pendingTasks.size})")
             }
 
-            items(pendingTasks) { task ->
+            items(pendingTasks, key = { it.id }) { task ->
                 TaskItem(
                     task = task,
-                    onToggle = { onTaskToggle(task) }
+                    onToggle = { onTaskToggle(task) },
+                    onEdit = { onTaskEdit(task) },
+                    onDelete = { onTaskDelete(task) }
                 )
             }
         }
 
         if (completedTasks.isNotEmpty()) {
             item {
-                SectionHeader(title = "Completadas (${completedTasks.size})")
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showCompleted = !showCompleted },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    SectionHeader(title = "Completadas (${completedTasks.size})")
+                    Icon(
+                        imageVector = if (showCompleted) Icons.Filled.KeyboardArrowUp
+                                      else Icons.Filled.KeyboardArrowDown,
+                        contentDescription = if (showCompleted) "Ocultar completadas"
+                                             else "Mostrar completadas",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                }
             }
 
-            items(completedTasks) { task ->
-                TaskItem(
-                    task = task,
-                    onToggle = { onTaskToggle(task) }
-                )
+            if (showCompleted) {
+                items(completedTasks, key = { it.id }) { task ->
+                    TaskItem(
+                        task = task,
+                        onToggle = { onTaskToggle(task) },
+                        onEdit = { onTaskEdit(task) },
+                        onDelete = { onTaskDelete(task) }
+                    )
+                }
             }
         }
     }
@@ -378,7 +487,9 @@ fun SectionHeader(title: String) {
 @Composable
 fun TaskItem(
     task: Task,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
+    onDelete: () -> Unit,
+    onEdit: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -392,7 +503,9 @@ fun TaskItem(
                 MaterialTheme.colorScheme.surface
             }
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (task.isCompleted) 0.dp else 2.dp
+        )
     ) {
         Row(
             modifier = Modifier
@@ -412,6 +525,14 @@ fun TaskItem(
                         }
                     )
             )
+
+            if (task.category == "📅 Evento") {
+                Text(
+                    text = "📅",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(end = 4.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.width(14.dp))
 
@@ -447,6 +568,32 @@ fun TaskItem(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            if (!task.isCompleted) {
+                IconButton(
+                    onClick = onEdit,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Edit,
+                        contentDescription = "Editar tarea",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = "Eliminar tarea",
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }

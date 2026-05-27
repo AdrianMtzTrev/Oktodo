@@ -9,5 +9,7 @@ data class GroupEntity(
     val name: String,
     val icon: String,
     val membersJoined: String,
-    val eventCount: Int
+    val memberIdsJoined: String = "",
+    val eventCount: Int,
+    val creatorId: String = ""
 )

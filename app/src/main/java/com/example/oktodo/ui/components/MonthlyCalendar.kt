@@ -25,6 +25,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.util.Locale
 import androidx.compose.foundation.shape.RoundedCornerShape
 
@@ -67,6 +68,10 @@ fun MonthlyCalendar(
         events.filter { it.date == selectedDate }
     }
 
+    val eventsByDate = remember(events) {
+        events.groupBy { it.date }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -97,9 +102,9 @@ fun MonthlyCalendar(
 
                     Text(
                         text = currentVisibleMonth
-                            .format(DateTimeFormatter.ofPattern("MMMM yyyy"))
+                            .format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale("es")))
                             .replaceFirstChar {
-                                if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+                                if (it.isLowerCase()) it.titlecase(Locale("es")) else it.toString()
                             },
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
@@ -130,7 +135,7 @@ fun MonthlyCalendar(
                         MonthDay(
                             day = day,
                             isSelected = day.date == selectedDate,
-                            events = events.filter { it.date == day.date },
+                            events = eventsByDate[day.date].orEmpty(),
                             onClick = { onDateSelected(day.date) },
                             currentMonth = currentVisibleMonth
                         )
@@ -187,7 +192,7 @@ fun DaysOfWeekTitle(daysOfWeek: List<DayOfWeek>) {
         daysOfWeek.forEach { dayOfWeek ->
             Text(
                 modifier = Modifier.weight(1f),
-                text = dayOfWeek.name.take(3).replaceFirstChar { it.uppercase() },
+                text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale("es")).replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale("es")) else it.toString() },
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

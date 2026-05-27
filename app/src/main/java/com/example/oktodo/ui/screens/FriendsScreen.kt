@@ -5,19 +5,23 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Event
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.People
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.oktodo.ui.components.CreateGroupBottomSheet
 import com.example.oktodo.ui.components.CreateSharedEventBottomSheet
@@ -25,6 +29,10 @@ import com.example.oktodo.ui.components.FriendCard
 import com.example.oktodo.ui.components.FriendsTabSwitcher
 import com.example.oktodo.ui.components.FriendsTopBar
 import com.example.oktodo.ui.components.GroupCard
+import com.example.oktodo.ui.components.GroupInvitationCard
+import com.example.oktodo.ui.components.OutgoingRequestCard
+import com.example.oktodo.ui.components.PendingRequestCard
+import com.example.oktodo.ui.components.SearchFriendBottomSheet
 import com.example.oktodo.ui.components.SharedEventCard
 import com.example.oktodo.ui.viewmodel.FriendsViewModel
 
@@ -33,13 +41,49 @@ fun FriendsScreen(
     navController: NavController? = null,
     viewModel: FriendsViewModel
 ) {
+    val socialState by viewModel.socialState.collectAsState()
+
+    if (socialState.isRegistered) {
+        SocialContent(
+            viewModel = viewModel,
+            navController = navController
+        )
+    } else {
+        AuthContent(
+            isSignupMode = socialState.isSignupMode,
+            authError = socialState.authError,
+            isLoading = socialState.isAuthLoading,
+            initialDisplayName = socialState.displayName,
+            initialAvatarEmoji = socialState.avatarEmoji,
+            onSignup = { name, avatar, username, password, confirm ->
+                viewModel.signup(name, avatar, username, password, confirm)
+            },
+            onLogin = { username, password ->
+                viewModel.login(username, password)
+            },
+            onToggleMode = { viewModel.toggleMode() }
+        )
+    }
+}
+
+@Composable
+private fun SocialContent(
+    viewModel: FriendsViewModel,
+    navController: NavController?
+) {
     val friends by viewModel.friends.collectAsState()
     val groups by viewModel.groups.collectAsState()
     val events by viewModel.sharedEvents.collectAsState()
+    val searchResults by viewModel.searchResults.collectAsState()
+    val pendingIncoming by viewModel.pendingIncoming.collectAsState()
+    val pendingOutgoing by viewModel.pendingOutgoing.collectAsState()
+    val pendingGroupInvitations by viewModel.pendingGroupInvitations.collectAsState()
+    val points by viewModel.points.collectAsState()
 
     var selectedTab by remember { mutableStateOf(0) }
     var showCreateGroupSheet by remember { mutableStateOf(false) }
     var showCreateEventSheet by remember { mutableStateOf(false) }
+    var showSearchFriendSheet by remember { mutableStateOf(false) }
 
     val background = MaterialTheme.colorScheme.background
     val textMain = MaterialTheme.colorScheme.onBackground
@@ -51,6 +95,7 @@ fun FriendsScreen(
             .background(background)
     ) {
         FriendsTopBar(
+            points = points,
             onShareClick = { },
             onAddClick = { showCreateEventSheet = true }
         )
@@ -67,47 +112,100 @@ fun FriendsScreen(
             Spacer(modifier = Modifier.height(18.dp))
 
             when (selectedTab) {
-                0 -> {
-                    SectionHeader(
-                        icon = {
-                            Icon(Icons.Outlined.People, contentDescription = null, tint = textMain)
-                        },
-                        title = "Mis Amigos",
-                        action = "Crear grupo",
-                        actionColor = accent,
-                        onActionClick = { showCreateGroupSheet = true }
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
+                 0 -> {
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         contentPadding = PaddingValues(bottom = 100.dp)
                     ) {
-                        items(friends) { friend ->
+                        item {
+                            SectionHeader(
+                                icon = {
+                                    Icon(Icons.Outlined.People, contentDescription = null, tint = textMain)
+                                },
+                                title = "Mis Amigos",
+                                action = "Buscar amigo",
+                                actionColor = accent,
+                                onActionClick = { showSearchFriendSheet = true }
+                            )
+                        }
+
+                        if (pendingIncoming.isNotEmpty()) {
+                            item {
+                                Text(
+                                    text = "Solicitudes entrantes",
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                            }
+                            items(pendingIncoming, key = { it.id }) { request ->
+                                PendingRequestCard(
+                                    request = request,
+                                    onAccept = { viewModel.acceptFriendRequest(request) },
+                                    onDecline = { viewModel.declineFriendRequest(request) }
+                                )
+                            }
+                        }
+
+                        if (pendingOutgoing.isNotEmpty()) {
+                            item {
+                                Text(
+                                    text = "Solicitudes enviadas",
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                            }
+                            items(pendingOutgoing, key = { it.id }) { request ->
+                                OutgoingRequestCard(request = request)
+                            }
+                        }
+
+                        items(friends, key = { it.id }) { friend ->
                             FriendCard(friend = friend)
                         }
                     }
                 }
 
-                1 -> {
-                    SectionHeader(
-                        icon = {
-                            Icon(Icons.Outlined.Group, contentDescription = null, tint = textMain)
-                        },
-                        title = "Mis Grupos",
-                        action = "Crear grupo",
-                        actionColor = accent,
-                        onActionClick = { showCreateGroupSheet = true }
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
+                 1 -> {
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         contentPadding = PaddingValues(bottom = 100.dp)
                     ) {
-                        items(groups) { group ->
+                        item {
+                            SectionHeader(
+                                icon = {
+                                    Icon(Icons.Outlined.Group, contentDescription = null, tint = textMain)
+                                },
+                                title = "Mis Grupos",
+                                action = "Crear grupo",
+                                actionColor = accent,
+                                onActionClick = { showCreateGroupSheet = true }
+                            )
+                        }
+
+                        if (pendingGroupInvitations.isNotEmpty()) {
+                            item {
+                                Text(
+                                    text = "Invitaciones a grupos",
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                            }
+                            items(pendingGroupInvitations, key = { it.id }) { invitation ->
+                                GroupInvitationCard(
+                                    invitation = invitation,
+                                    onAccept = { viewModel.acceptGroupInvitation(invitation) },
+                                    onDecline = { viewModel.declineGroupInvitation(invitation) }
+                                )
+                            }
+                            item { Spacer(modifier = Modifier.height(16.dp)) }
+                        }
+                        items(groups, key = { it.id }) { group ->
                             GroupCard(
                                 group = group,
                                 onClick = {
@@ -118,25 +216,25 @@ fun FriendsScreen(
                     }
                 }
 
-                2 -> {
-                    SectionHeader(
-                        icon = {
-                            Icon(Icons.Outlined.Event, contentDescription = null, tint = textMain)
-                        },
-                        title = "Eventos Compartidos",
-                        action = "",
-                        actionColor = accent,
-                        onActionClick = { }
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
+                 2 -> {
                     val grouped = events.groupBy { viewModel.getFormattedDateLabel(it.date) }
 
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(14.dp),
                         contentPadding = PaddingValues(bottom = 100.dp)
                     ) {
+                        item {
+                            SectionHeader(
+                                icon = {
+                                    Icon(Icons.Outlined.Event, contentDescription = null, tint = textMain)
+                                },
+                                title = "Eventos Compartidos",
+                                action = "",
+                                actionColor = accent,
+                                onActionClick = { }
+                            )
+                        }
+
                         grouped.forEach { (date, dateEvents) ->
                             item {
                                 Text(
@@ -146,7 +244,7 @@ fun FriendsScreen(
                                 )
                             }
 
-                            items(dateEvents) { event ->
+                            items(dateEvents, key = { it.id }) { event ->
                                 SharedEventCard(event = event)
                             }
                         }
@@ -181,6 +279,201 @@ fun FriendsScreen(
                 )
                 showCreateEventSheet = false
             }
+        )
+    }
+
+    if (showSearchFriendSheet) {
+        SearchFriendBottomSheet(
+            searchResults = searchResults,
+            onQueryChange = { viewModel.setSearchQuery(it) },
+            onAddFriend = { profile -> viewModel.sendFriendRequest(profile) },
+            onDismiss = {
+                showSearchFriendSheet = false
+                viewModel.setSearchQuery("")
+            }
+        )
+    }
+}
+
+@Composable
+private fun AuthContent(
+    isSignupMode: Boolean,
+    authError: String?,
+    isLoading: Boolean,
+    initialDisplayName: String,
+    initialAvatarEmoji: String,
+    onSignup: (displayName: String, avatarEmoji: String, username: String, password: String, confirmPassword: String) -> Unit,
+    onLogin: (username: String, password: String) -> Unit,
+    onToggleMode: () -> Unit
+) {
+    var displayName by remember { mutableStateOf(initialDisplayName) }
+    var selectedAvatar by remember { mutableStateOf(initialAvatarEmoji) }
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var showPassword by remember { mutableStateOf(false) }
+
+    val avatarOptions = listOf("🐙", "🐱", "🐶", "🦊", "🐼", "🐸", "🦄", "🐻")
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(40.dp))
+
+        Text(
+            text = if (isSignupMode) "Crear cuenta" else "Iniciar sesión",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = if (isSignupMode)
+                "Conecta con tus amigos, crea grupos y comparte eventos"
+            else
+                "Bienvenido de nuevo",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        if (isSignupMode) {
+            Surface(
+                modifier = Modifier.size(80.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(text = selectedAvatar, style = MaterialTheme.typography.displayMedium)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                avatarOptions.chunked(4).forEach { rowItems ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        rowItems.forEach { avatar ->
+                            FilterChip(
+                                selected = selectedAvatar == avatar,
+                                onClick = { selectedAvatar = avatar },
+                                label = { Text(avatar) }
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            OutlinedTextField(
+                value = displayName,
+                onValueChange = { displayName = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Nombre") },
+                placeholder = { Text("Tu nombre") },
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+        }
+
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it.lowercase().replace(" ", "_") },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Usuario") },
+            placeholder = { Text("tu_usuario") },
+            prefix = { Text("@") },
+            singleLine = true,
+            shape = RoundedCornerShape(16.dp)
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Contraseña") },
+            singleLine = true,
+            visualTransformation = if (showPassword) VisualTransformation.None
+                else PasswordVisualTransformation(),
+            shape = RoundedCornerShape(16.dp)
+        )
+
+        if (isSignupMode) {
+            Spacer(modifier = Modifier.height(14.dp))
+
+            OutlinedTextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Confirmar contraseña") },
+                singleLine = true,
+                visualTransformation = if (showPassword) VisualTransformation.None
+                    else PasswordVisualTransformation(),
+                shape = RoundedCornerShape(16.dp)
+            )
+        }
+
+        if (authError != null) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = authError,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Button(
+            onClick = {
+                if (isSignupMode) onSignup(displayName, selectedAvatar, username, password, confirmPassword)
+                else onLogin(username, password)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp),
+            shape = RoundedCornerShape(16.dp),
+            enabled = !isLoading
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(
+                    text = if (isSignupMode) "Crear cuenta" else "Iniciar sesión",
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = if (isSignupMode)
+                "¿Ya tienes cuenta? Inicia sesión"
+            else
+                "¿No tienes cuenta? Regístrate",
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.clickable { onToggleMode() }
         )
     }
 }

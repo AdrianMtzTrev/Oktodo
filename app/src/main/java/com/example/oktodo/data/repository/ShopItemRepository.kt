@@ -15,24 +15,37 @@ class ShopItemRepository @Inject constructor(
     private val dao: ShopItemDao,
     private val prefs: UserPreferencesDataStore
 ) {
-    val items: Flow<List<ShopItem>> = dao.getAllItems().map { list -> list.map { it.toDomain() } }
+    fun getItemsForUser(userId: String): Flow<List<ShopItem>> =
+        dao.getItemsForUser(userId).map { list -> list.map { it.toDomain() } }
 
-    suspend fun purchase(item: ShopItem, userPoints: Int): Boolean {
+    fun getEquippedItemForUser(userId: String): Flow<ShopItem?> =
+        getItemsForUser(userId).map { list -> list.find { it.isEquipped } }
+
+    suspend fun purchase(item: ShopItem, userId: String, userPoints: Int): Boolean {
         if (userPoints < item.price) return false
-        dao.markPurchased(item.id)
-        prefs.purchaseItem(item.price)
+        val deducted = prefs.purchaseItem(item.price)
+        if (!deducted) return false
+        dao.markPurchased(item.id, userId)
         return true
     }
 
-    suspend fun seedIfEmpty() {
-        if (dao.count() > 0) return
+    suspend fun equip(id: String, userId: String) {
+        dao.equipAtomically(id, userId)
+    }
+
+    suspend fun unequip(id: String, userId: String) {
+        dao.unequip(id, userId)
+    }
+
+    suspend fun seedIfEmpty(userId: String) {
+        if (dao.countForUser(userId) > 0) return
         listOf(
-            ShopItemEntity("s1", "Sombrero mágico", "🎩", 40, "Accesorio", false),
-            ShopItemEntity("s2", "Lentes cool", "🕶️", 25, "Accesorio", false),
-            ShopItemEntity("s3", "Bufanda morada", "🧣", 30, "Ropa", false),
-            ShopItemEntity("s4", "Corona mini", "👑", 60, "Premium", false),
-            ShopItemEntity("s5", "Moño elegante", "🎀", 20, "Accesorio", false),
-            ShopItemEntity("s6", "Traje espacial", "🧑‍🚀", 90, "Skin", false)
+            ShopItemEntity("s1", userId, "Sombrero mágico", "🎩", 40, "Accesorio", false, false),
+            ShopItemEntity("s2", userId, "Lentes cool", "🕶️", 25, "Accesorio", false, false),
+            ShopItemEntity("s3", userId, "Bufanda morada", "🧣", 30, "Ropa", false, false),
+            ShopItemEntity("s4", userId, "Corona mini", "👑", 60, "Premium", false, false),
+            ShopItemEntity("s5", userId, "Moño elegante", "🎀", 20, "Accesorio", false, false),
+            ShopItemEntity("s6", userId, "Traje espacial", "🧑‍🚀", 90, "Skin", false, false)
         ).forEach { dao.insert(it) }
     }
 }

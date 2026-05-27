@@ -11,5 +11,9 @@ data class TaskEntity(
     val priority: String,
     val colorArgb: Long,
     val isCompleted: Boolean,
-    val pointsReward: Int
+    val pointsReward: Int,
+    val category: String = "",
+    val recurrenceType: String = "none",
+    val recurrenceInterval: Int = 1,
+    val dateString: String
 )

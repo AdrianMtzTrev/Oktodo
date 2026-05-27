@@ -14,5 +14,6 @@ class CalendarEventRepository @Inject constructor(private val dao: CalendarEvent
     val events: Flow<List<CalendarEvent>> = dao.getAllEvents().map { list -> list.map { it.toDomain() } }
 
     suspend fun add(event: CalendarEvent) = dao.insert(event.toEntity())
+    suspend fun update(event: CalendarEvent) = dao.update(event.toEntity())
     suspend fun deleteById(id: String) = dao.deleteById(id)
 }

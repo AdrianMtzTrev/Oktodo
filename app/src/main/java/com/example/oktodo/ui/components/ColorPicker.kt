@@ -50,7 +50,7 @@ fun ColorPicker(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            items(EventColors.size) { index ->
+            items(EventColors.size, key = { it }) { index ->
                 val color = EventColors[index]
                 ColorItem(
                     color = color,
@@ -92,7 +92,7 @@ fun ColorItem(
             Icon(
                 Icons.Default.Check,
                 contentDescription = null,
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(24.dp)
             )
         }
