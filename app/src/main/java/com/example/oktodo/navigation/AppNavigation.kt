@@ -1,5 +1,12 @@
 package com.example.oktodo.navigation
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
@@ -10,11 +17,12 @@ import androidx.compose.material.icons.outlined.TrackChanges
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -45,8 +53,6 @@ import com.example.oktodo.ui.viewmodel.ThemeViewModel
 @Composable
 fun AppNavigation(themeViewModel: ThemeViewModel) {
     val navController = rememberNavController()
-    val tasksViewModel: TasksViewModel = hiltViewModel()
-    val calendarViewModel: CalendarViewModel = hiltViewModel()
     val friendsViewModel: FriendsViewModel = hiltViewModel()
     val profileViewModel: ProfileViewModel = hiltViewModel()
     val notificationViewModel: NotificationViewModel = hiltViewModel()
@@ -59,7 +65,8 @@ fun AppNavigation(themeViewModel: ThemeViewModel) {
             startDestination = "dashboard",
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable("dashboard") {
+            composable("dashboard") { backStackEntry ->
+                val tasksViewModel: TasksViewModel = hiltViewModel(backStackEntry)
                 DashboardScreen(
                     navController = navController,
                     themeViewModel = themeViewModel,
@@ -67,7 +74,8 @@ fun AppNavigation(themeViewModel: ThemeViewModel) {
                     notificationViewModel = notificationViewModel
                 )
             }
-            composable("calendario") {
+            composable("calendario") { backStackEntry ->
+                val calendarViewModel: CalendarViewModel = hiltViewModel(backStackEntry)
                 CalendarScreen(calendarViewModel = calendarViewModel)
             }
             composable("focus") {
@@ -151,31 +159,37 @@ fun BottomNavigationBar(navController: NavHostController) {
                     ))
             } == true
 
-            NavigationBarItem(
-                selected = selected,
-                onClick = {
-                    navController.navigate(item.route) {
-                        popUpTo(navController.graph.startDestinationId) { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                icon = {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = item.label,
-                        tint = if (selected) MaterialTheme.colorScheme.primary
-                               else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                label = {
-                    Text(
-                        text = item.label,
-                        color = if (selected) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            )
+            val iconColor = if (selected) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(80.dp)
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) {
+                        navController.navigate(item.route) {
+                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = item.icon,
+                    contentDescription = item.label,
+                    tint = iconColor
+                )
+                Text(
+                    text = item.label,
+                    color = iconColor,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
         }
     }
 }

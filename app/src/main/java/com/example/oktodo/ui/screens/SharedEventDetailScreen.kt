@@ -75,7 +75,7 @@ fun SharedEventDetailScreen(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        val ld = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
+                        val ld = java.time.LocalDate.ofEpochDay(millis / 86400000L)
                         editDate = ld.toString()
                     }
                     showDatePicker = false

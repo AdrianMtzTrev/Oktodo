@@ -101,12 +101,16 @@ class FriendsViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
-    val searchResults: StateFlow<List<UserProfile>> = _searchQuery
-        .flatMapLatest { query ->
+    val searchResults: StateFlow<List<UserProfile>> = combine(
+        _searchQuery.flatMapLatest { query ->
             if (query.isBlank()) flowOf(emptyList())
             else repository.searchUsers(query)
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        },
+        _socialState
+    ) { results, state ->
+        if (state.userId.isBlank()) results
+        else results.filter { it.id != state.userId }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun setSearchQuery(query: String) { _searchQuery.value = query }
 
@@ -128,6 +132,7 @@ class FriendsViewModel @Inject constructor(
         viewModelScope.launch {
             val state = _socialState.value
             if (!state.isRegistered || state.userId.isBlank()) return@launch
+            if (target.id == state.userId) return@launch
             try {
                 repository.sendFriendRequest(
                     fromUserId = state.userId,

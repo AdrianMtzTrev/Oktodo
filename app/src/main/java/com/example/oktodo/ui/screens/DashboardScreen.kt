@@ -22,7 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
@@ -43,9 +43,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -84,11 +88,26 @@ fun DashboardScreen(
     val userName by tasksViewModel.displayName.collectAsState()
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
     val unreadNotifications by notificationViewModel.unreadCount.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val pendingDeletedTask by tasksViewModel.pendingDeletedTask.collectAsState()
     val displayTasks = if (searchQuery.isBlank()) dashboardItems else filteredTasks
 
     val pendingCount = displayTasks.count { !it.isCompleted }
 
+    LaunchedEffect(pendingDeletedTask) {
+        if (pendingDeletedTask != null) {
+            val result = snackbarHostState.showSnackbar(
+                message = "Tarea eliminada",
+                actionLabel = "Deshacer"
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                tasksViewModel.undoDelete()
+            }
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             DashboardHeader(
                 onThemeToggle = { themeViewModel.toggleTheme() },
@@ -288,7 +307,7 @@ fun DashboardContent(
     onTaskDelete: (Task) -> Unit,
     onTaskEdit: (Task) -> Unit
 ) {
-    val greeting = remember { getGreeting() }
+    val greeting = getGreeting()
 
     val pendingTasks = tasks.filter { !it.isCompleted }
     val completedTasks = tasks.filter { it.isCompleted }
@@ -327,7 +346,8 @@ fun DashboardContent(
                 TaskItem(
                     task = task,
                     onToggle = { onTaskToggle(task) },
-                    onEdit = { onTaskEdit(task) }
+                    onEdit = { onTaskEdit(task) },
+                    onDelete = { onTaskDelete(task) }
                 )
             }
         }
@@ -357,7 +377,8 @@ fun DashboardContent(
                     TaskItem(
                         task = task,
                         onToggle = { onTaskToggle(task) },
-                        onEdit = { onTaskEdit(task) }
+                        onEdit = { onTaskEdit(task) },
+                        onDelete = { onTaskDelete(task) }
                     )
                 }
             }
@@ -467,6 +488,7 @@ fun SectionHeader(title: String) {
 fun TaskItem(
     task: Task,
     onToggle: () -> Unit,
+    onDelete: () -> Unit,
     onEdit: () -> Unit
 ) {
     Card(
@@ -481,7 +503,9 @@ fun TaskItem(
                 MaterialTheme.colorScheme.surface
             }
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (task.isCompleted) 0.dp else 2.dp
+        )
     ) {
         Row(
             modifier = Modifier
@@ -557,6 +581,18 @@ fun TaskItem(
                         imageVector = Icons.Outlined.Edit,
                         contentDescription = "Editar tarea",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = "Eliminar tarea",
+                        tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(18.dp)
                     )
                 }

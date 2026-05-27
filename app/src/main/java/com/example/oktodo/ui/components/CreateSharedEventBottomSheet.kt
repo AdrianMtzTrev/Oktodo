@@ -232,7 +232,7 @@ fun CreateSharedEventBottomSheet(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        date = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate().format(dateFormatter)
+                        date = java.time.LocalDate.ofEpochDay(millis / 86400000L).format(dateFormatter)
                     }
                     showDatePicker = false
                 }) { Text("Aceptar") }
