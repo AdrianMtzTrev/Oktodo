@@ -22,16 +22,20 @@
       --border:        rgba(255,255,255,0.08);
       --glass-border:  rgba(139,92,246,0.2);
       --radius:        16px;
+      --nav-h:         65px;
     }
 
-    html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth;
+      scroll-snap-type: y mandatory;
+      scroll-padding-top: var(--nav-h);
+    }
 
     body {
       font-family: 'Inter', sans-serif;
       background-color: var(--bg);
       color: var(--fg);
       line-height: 1.6;
-      min-height: 100dvh;
       overflow-x: hidden;
     }
 
@@ -62,6 +66,7 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
+      height: var(--nav-h);
     }
 
     .nav-logo {
@@ -96,29 +101,28 @@
       border-color: rgba(139,92,246,0.4);
     }
 
-    /* ── General ── */
-    section { position: relative; z-index: 1; }
-
-    .container {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
-    /* ── Hero ── */
-    .hero {
-      padding: 0 24px 72px;
-      text-align: center;
-    }
-
-    .hero-fold {
-      min-height: 100dvh;
+    /* ── Snap pages ── */
+    .snap-page {
+      min-height: calc(100dvh - var(--nav-h));
+      scroll-snap-align: start;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
-      padding-top: 0;
-      padding-bottom: 120px;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+      padding: 40px 24px;
+    }
+
+    /* ── Page 1: Hero ── */
+    .hero-fold {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      max-width: 680px;
+      padding-bottom: 80px;
+      gap: 36px;
     }
 
     .badge {
@@ -150,7 +154,7 @@
       50%       { opacity: 0.3; }
     }
 
-    .hero h1 {
+    .hero-fold h1 {
       font-size: clamp(38px, 6.5vw, 68px);
       font-weight: 700;
       letter-spacing: -2px;
@@ -158,9 +162,9 @@
       margin-bottom: 20px;
     }
 
-    .hero h1 span { color: var(--primary-light); }
+    .hero-fold h1 span { color: var(--primary-light); }
 
-    .hero p {
+    .hero-fold > p {
       font-size: clamp(16px, 2.2vw, 19px);
       color: var(--fg-muted);
       max-width: 520px;
@@ -222,22 +226,28 @@
       background: rgba(139,92,246,0.08);
     }
 
-    .hero .hero-note {
+    .hero-note {
       margin: 40px auto 0;
       font-size: 14px;
       color: var(--fg-muted);
+      text-align: center;
     }
 
-    /* ── Phone mockup ── */
-    .mockup-wrap {
-      margin-top: 64px;
+    /* ── Page 2: Teléfono + Pantallas ── */
+    .phone-features-layout {
       display: flex;
-      justify-content: center;
+      align-items: center;
+      gap: 56px;
+      width: 100%;
+      max-width: 1100px;
     }
+
+    /* Phone mockup */
+    .phone-col { flex-shrink: 0; }
 
     .phone {
-      width: 248px;
-      border-radius: 38px;
+      width: 390px;
+      border-radius: 60px;
       border: 1.5px solid var(--glass-border);
       background: #1A1030;
       box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03) inset, 0 0 60px rgba(124,58,237,0.1);
@@ -250,58 +260,57 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 20px 4px;
-      font-size: 10px;
+      padding: 16px 32px 7px;
+      font-size: 16px;
       color: var(--fg-muted);
       font-weight: 500;
     }
 
     .phone-notch {
-      width: 70px;
-      height: 18px;
+      width: 115px;
+      height: 27px;
       background: #0D0A14;
-      border-radius: 0 0 12px 12px;
+      border-radius: 0 0 18px 18px;
       align-self: center;
-      margin-top: -18px;
+      margin-top: -27px;
     }
 
     .phone-screen {
-      padding: 12px 16px 16px;
+      padding: 16px 26px 26px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 14px;
     }
 
     .phone-greeting {
-      font-size: 18px;
+      font-size: 28px;
       font-weight: 700;
       color: var(--fg);
       line-height: 1.2;
     }
 
     .phone-sub {
-      font-size: 11px;
+      font-size: 16px;
       color: var(--fg-muted);
-      margin-top: -6px;
+      margin-top: -4px;
     }
 
-    /* Okto mascot SVG */
     .okto-wrap {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
-      padding: 12px 0 8px;
+      gap: 6px;
+      padding: 14px 0 12px;
     }
 
     .okto-label {
-      font-size: 11px;
+      font-size: 16px;
       font-weight: 600;
       color: var(--primary-light);
     }
 
     .okto-caption {
-      font-size: 10px;
+      font-size: 15px;
       color: var(--fg-muted);
       text-align: center;
     }
@@ -309,16 +318,16 @@
     .task-item {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 9px 12px;
-      border-radius: 10px;
+      gap: 14px;
+      padding: 13px 16px;
+      border-radius: 15px;
       background: rgba(255,255,255,0.05);
       border: 1px solid var(--border);
     }
 
     .task-check {
-      width: 16px;
-      height: 16px;
+      width: 25px;
+      height: 25px;
       border-radius: 50%;
       border: 2px solid var(--primary-light);
       flex-shrink: 0;
@@ -334,20 +343,20 @@
 
     .task-check.done::after {
       content: '';
-      width: 6px;
-      height: 4px;
+      width: 5px;
+      height: 3px;
       border-left: 1.5px solid #fff;
       border-bottom: 1.5px solid #fff;
       transform: rotate(-45deg) translateY(-1px);
     }
 
-    .task-text { font-size: 11px; color: var(--fg); flex: 1; }
+    .task-text { font-size: 16px; color: var(--fg); flex: 1; }
     .task-text.done { color: var(--fg-muted); text-decoration: line-through; }
 
     .task-pts {
-      font-size: 9px;
-      padding: 2px 6px;
-      border-radius: 6px;
+      font-size: 13px;
+      padding: 3px 8px;
+      border-radius: 8px;
       background: rgba(139,92,246,0.2);
       color: #A78BFA;
       font-weight: 600;
@@ -357,7 +366,7 @@
       display: flex;
       justify-content: space-around;
       align-items: center;
-      padding: 10px 8px 14px;
+      padding: 14px 14px 24px;
       border-top: 1px solid var(--border);
     }
 
@@ -366,220 +375,580 @@
       flex-direction: column;
       align-items: center;
       gap: 3px;
+      padding: 2px 4px;
+      border-radius: 6px;
+      transition: background 150ms;
     }
+
+    .pnav-item:hover { background: transparent; }
 
     .pnav-icon {
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
       background: rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 200ms;
     }
 
-    .pnav-icon.active { background: var(--primary); }
+    .pnav-icon svg { width: 21px; height: 21px; color: var(--fg-muted); transition: color 200ms; }
+
+    .pnav-item.active .pnav-icon { background: var(--primary); }
+    .pnav-item.active .pnav-icon svg { color: #fff; }
 
     .pnav-dot {
       width: 4px;
       height: 4px;
       border-radius: 50%;
       background: transparent;
+      transition: background 200ms;
     }
 
-    .pnav-dot.active { background: var(--primary-light); }
+    .pnav-item.active .pnav-dot { background: var(--primary-light); }
 
-    /* ── Features ── */
-    .features { padding: 80px 0; }
+    /* ── Page 2 header ── */
+    #pantallas {
+      justify-content: flex-start;
+      padding-top: 28px;
+      gap: 0;
+    }
+
+    .pantallas-header {
+      width: 100%;
+      max-width: 1100px;
+      margin-top: 3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .pantallas-big-title {
+      font-size: clamp(52px, 7vw, 88px);
+      font-weight: 700;
+      letter-spacing: -3px;
+      line-height: 1.0;
+      width: 100%;
+      max-width: 1100px;
+      margin-top: calc(4.5em - 15dvh);
+      margin-bottom: 0;
+      opacity: 0;
+      transform: translateY(64px);
+    }
+
+    #pantallas.is-entering .pantallas-big-title {
+      animation: titleSlideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
+    }
+
+    @keyframes titleSlideUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Phone enter animation */
+    .phone-col .phone {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+
+    #pantallas.is-entering .phone-col .phone {
+      animation: phoneScale 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s forwards;
+    }
+
+    @keyframes phoneScale {
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .pantallas-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    /* Features column */
+    .features-col { flex: 1; min-width: 0; }
 
     .section-label {
-      text-align: center;
       font-size: 12px;
       font-weight: 600;
       letter-spacing: 1px;
       text-transform: uppercase;
       color: var(--primary-light);
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .section-title {
-      text-align: center;
-      font-size: clamp(28px, 4vw, 40px);
+      font-size: clamp(24px, 3vw, 36px);
       font-weight: 700;
       letter-spacing: -1px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .section-sub {
-      text-align: center;
       color: var(--fg-muted);
-      font-size: 16px;
-      max-width: 480px;
-      margin: 0 auto 52px;
+      font-size: 14px;
+      margin-bottom: 16px;
       line-height: 1.7;
     }
 
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 18px;
+    /* Tab strip */
+    .feature-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 5px;
     }
 
-    .feature-card {
-      grid-column: span 2;
+    .ftab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 10px 4px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--fg-muted);
+      cursor: pointer;
+      transition: background 200ms, color 200ms;
+      font-size: 11px;
+      font-weight: 500;
+      font-family: inherit;
+      line-height: 1;
     }
 
-    .feature-card:nth-child(4) { grid-column: 2 / 4; }
-    .feature-card:nth-child(5) { grid-column: 4 / 6; }
+    .ftab svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .ftab:hover:not(.active) { background: rgba(255,255,255,0.05); color: var(--fg); }
+    .ftab.active { background: var(--primary); color: #fff; }
+
+    /* Feature card */
+    .features-grid { position: relative; }
 
     .feature-card {
-      padding: 28px 22px;
+      display: none;
+      padding: 32px;
+      min-height: 300px;
       border-radius: var(--radius);
       background: var(--bg-card);
       border: 1px solid var(--glass-border);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      transition: transform 200ms ease, border-color 200ms, box-shadow 200ms;
     }
 
-    .feature-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(139,92,246,0.4);
-      box-shadow: 0 16px 48px rgba(0,0,0,0.3), 0 0 20px rgba(124,58,237,0.08);
+    .feature-card.active {
+      display: block;
+      animation: lineIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    .feature-icon {
-      width: 46px;
-      height: 46px;
-      border-radius: 12px;
+    .fc-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .feature-icon-lg {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
       background: var(--primary-dim);
       border: 1px solid rgba(139,92,246,0.3);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 16px;
+      flex-shrink: 0;
     }
 
-    .feature-icon svg { width: 20px; height: 20px; color: #A78BFA; }
+    .feature-icon-lg svg { width: 24px; height: 24px; color: #A78BFA; }
 
-    .feature-card h3 {
-      font-size: 16px;
+    .fc-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+
+    .fc-tagline {
+      font-size: 13px;
+      color: var(--fg-muted);
+      line-height: 1.5;
+    }
+
+    .fc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .fc-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--fg-muted);
+      line-height: 1.5;
+    }
+
+    .fc-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(16,185,129,0.12);
+      border: 1px solid rgba(16,185,129,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .fc-check svg { width: 10px; height: 10px; color: #10B981; }
+
+    /* ── Page 3: Okto stickers ── */
+    .okto-stickers {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .okto-sticker {
+      position: absolute;
+      top: -90px;
+      animation: octoFall linear infinite;
+    }
+
+    @keyframes octoFall {
+      0%   { opacity: 0;                    transform: translateY(0)              rotate(0deg);                }
+      10%  { opacity: var(--op, 0.5);                                                                          }
+      90%  { opacity: var(--op, 0.5);                                                                          }
+      100% { opacity: 0; transform: translateY(calc(100dvh + 100px)) rotate(var(--rot, 270deg));               }
+    }
+
+    /* ── Page 3: Okto redesign ── */
+    .okto-content {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 36px;
+    }
+
+    .okto-header { text-align: center; }
+
+    .okto-header h2 {
+      font-size: clamp(26px, 3.5vw, 38px);
+      font-weight: 700;
+      letter-spacing: -1px;
+      margin-top: 6px;
+    }
+
+    .okto-header h2 span { color: var(--primary-light); }
+
+    .okto-main {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      width: 100%;
+    }
+
+    .okto-mascot-col {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .okto-mascot-svg {
+      animation: oktoFloat 3.2s ease-in-out infinite;
+      filter: drop-shadow(0 10px 28px rgba(124,58,237,0.45));
+    }
+
+    @keyframes oktoFloat {
+      0%, 100% { transform: translateY(0px) rotate(-1deg); }
+      50%       { transform: translateY(-12px) rotate(1deg); }
+    }
+
+    .mood-dots { display: flex; gap: 7px; }
+
+    .mood-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      cursor: pointer;
+      transition: background 300ms, transform 300ms;
+    }
+
+    .mood-dot.active {
+      background: var(--primary-light);
+      transform: scale(1.4);
+    }
+
+    .okto-mood-card {
+      flex: 1;
+      padding: 26px 30px;
+      border-radius: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 8px;
+      min-height: 170px;
+      transition: border-color 500ms, background 500ms;
+    }
+
+    .okto-mood-card.mood-anim {
+      animation: moodIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes moodIn {
+      from { opacity: 0.2; transform: translateY(10px); }
+      to   { opacity: 1;   transform: translateY(0);    }
+    }
+
+    .mood-label {
+      font-size: 11px;
       font-weight: 600;
-      margin-bottom: 8px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: color 400ms;
     }
 
-    .feature-card p {
+    .mood-title {
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .mood-desc {
       font-size: 13px;
       color: var(--fg-muted);
       line-height: 1.65;
     }
 
-    /* ── Okto section ── */
-    .mascot-section {
-      padding: 72px 24px;
-    }
-
-    .mascot-card {
-      max-width: 780px;
-      margin: 0 auto;
-      padding: 48px 40px;
-      border-radius: 24px;
-      background: var(--bg-card);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+    /* Gamification loop */
+    .okto-loop {
       display: flex;
       align-items: center;
-      gap: 40px;
-      flex-wrap: wrap;
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
     }
 
-    .mascot-text { flex: 1; min-width: 220px; }
-
-    .mascot-text h2 {
-      font-size: clamp(22px, 3.5vw, 30px);
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      margin-bottom: 12px;
-    }
-
-    .mascot-text h2 span { color: var(--primary-light); }
-
-    .mascot-text p {
-      color: var(--fg-muted);
-      font-size: 15px;
-      line-height: 1.7;
-    }
-
-    .stat-row {
-      display: flex;
-      gap: 24px;
-      margin-top: 24px;
-      flex-wrap: wrap;
-    }
-
-    .stat {
+    .loop-step {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      align-items: center;
+      gap: 7px;
+      text-align: center;
+      padding: 4px 8px;
     }
 
-    .stat-value {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--primary-light);
+    .loop-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--primary-dim);
+      border: 1px solid rgba(139,92,246,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
     }
 
-    .stat-label {
+    .loop-step-title {
       font-size: 12px;
+      font-weight: 600;
+      color: var(--fg);
+      line-height: 1.3;
+    }
+
+    .loop-step-sub {
+      font-size: 11px;
       color: var(--fg-muted);
     }
 
-    /* Okto SVG illustration */
-    .okto-svg {
+    .loop-arrow {
       flex-shrink: 0;
+      color: var(--primary-light);
+      opacity: 0.45;
+      font-size: 18px;
+      padding: 0 4px;
     }
 
-    /* ── CTA ── */
-    .cta {
-      padding: 80px 24px;
-      text-align: center;
+    /* Changelog strip */
+    .okto-changelog {
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
     }
 
-    .cta-card {
-      max-width: 580px;
-      margin: 0 auto;
-      padding: 56px 40px;
-      border-radius: 24px;
-      background: var(--bg-card);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      box-shadow: 0 0 80px rgba(124,58,237,0.07);
-    }
-
-    .cta-card h2 {
-      font-size: clamp(24px, 4vw, 34px);
-      font-weight: 700;
-      letter-spacing: -1px;
+    .changelog-heading {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--fg-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
       margin-bottom: 12px;
     }
 
-    .cta-card p {
+    .changelog-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 100px;
+      background: var(--primary-dim);
+      border: 1px solid rgba(139,92,246,0.35);
+      color: #A78BFA;
+      letter-spacing: 0.3px;
+    }
+
+    .changelog-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 20px;
+    }
+
+    .changelog-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12px;
       color: var(--fg-muted);
-      font-size: 15px;
-      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    .changelog-item strong { color: var(--fg); }
+
+    .cl-check {
+      color: #10B981;
+      flex-shrink: 0;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    /* ── Page 4: Últimos cambios ── */
+    .snap-page--last {
+      height: calc(100dvh - var(--nav-h));
+      min-height: unset;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 0 24px 0;
+      overflow: hidden;
+    }
+
+    .last-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      width: 100%;
+      padding: 32px 0;
+    }
+
+    .snap-page--last footer {
+      align-self: stretch;
+      max-width: none;
+      padding-bottom: 20px;
+    }
+
+    .container {
+      max-width: 1080px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .cta-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 22px;
+    }
+
+    .cta-title {
+      font-size: clamp(52px, 8vw, 92px);
+      font-weight: 700;
+      letter-spacing: -3px;
+      line-height: 1.05;
+    }
+
+    .cta-title span { color: var(--primary-light); }
+
+    .cta-sub {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--fg-muted);
+      max-width: 500px;
       line-height: 1.7;
+    }
+
+    .btn-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 48px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 19px;
+      font-weight: 700;
+      border-radius: 18px;
+      text-decoration: none;
+      box-shadow: 0 0 56px rgba(124,58,237,0.55), 0 0 120px rgba(124,58,237,0.25);
+      transition: transform 150ms, box-shadow 150ms, background 150ms;
+      font-family: inherit;
+    }
+
+    .btn-cta:hover {
+      transform: translateY(-3px) scale(1.03);
+      background: var(--primary-light);
+      box-shadow: 0 0 80px rgba(139,92,246,0.75), 0 0 160px rgba(139,92,246,0.35);
+    }
+
+    .btn-cta:active { transform: translateY(0) scale(1); }
+
+    .cta-note {
+      font-size: 13px;
+      color: var(--fg-muted);
     }
 
     /* ── Footer ── */
     footer {
-      padding: 28px 32px;
+      width: 100%;
+      max-width: 1080px;
+      padding: 20px 24px 0;
       border-top: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 12px;
-      position: relative;
-      z-index: 1;
+      gap: 10px;
     }
 
     .footer-logo {
@@ -609,40 +978,90 @@
     footer a:hover { color: var(--fg); }
 
     /* ── Responsive ── */
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
       nav { padding: 14px 20px; }
-      .hero { padding: 64px 20px 48px; }
-      .phone { width: 210px; }
-      .cta-card { padding: 40px 24px; }
-      .mascot-card { flex-direction: column; text-align: center; padding: 36px 24px; }
+      .phone-features-layout { flex-direction: column; gap: 32px; }
+      .phone-col { display: none; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .mascot-card { flex-direction: column; text-align: center; padding: 32px 20px; }
       .stat-row { justify-content: center; }
+      .cta-card { padding: 36px 20px; }
       footer { flex-direction: column; text-align: center; }
       footer p { position: static; transform: none; white-space: normal; }
+      .snap-page--last { gap: 24px; }
+    }
+
+    @media (max-width: 480px) {
       .features-grid { grid-template-columns: 1fr; }
-      .feature-card,
-      .feature-card:nth-child(4),
-      .feature-card:nth-child(5) { grid-column: span 1; }
     }
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
     }
 
-    /* ── Scroll reveal ── */
+    /* ── Line-in animation ── */
+    @keyframes lineIn {
+      from {
+        opacity: 0;
+        transform: translateY(22px);
+        clip-path: inset(0 0 100% 0);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+        clip-path: inset(0 0 -10% 0);
+      }
+    }
+
+    /* h1 split en dos líneas */
+    .h1-line { display: block; }
+
+    /* ── Sección 1: hero — animación al entrar ── */
+    .hero-fold > * {
+      opacity: 0;
+      transform: translateY(22px);
+      clip-path: inset(0 0 100% 0);
+    }
+
+    #inicio.is-entering .hero-fold > * {
+      animation: lineIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    #inicio.is-entering .hero-fold > *:nth-child(1) { animation-delay: 0.06s; }
+    #inicio.is-entering .hero-fold > *:nth-child(2) { animation-delay: 0.20s; }
+    #inicio.is-entering .hero-fold > *:nth-child(3) { animation-delay: 0.34s; }
+    #inicio.is-entering .hero-fold > *:nth-child(4) { animation-delay: 0.48s; }
+    #inicio.is-entering .hero-fold > *:nth-child(5) { animation-delay: 0.60s; }
+
+    /* ── Sección 4: CTA — animación al entrar ── */
+    .cta-hero > * {
+      opacity: 0;
+      transform: translateY(22px);
+      clip-path: inset(0 0 100% 0);
+    }
+
+    #cambios.is-entering .cta-hero > * {
+      animation: lineIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    #cambios.is-entering .cta-hero > *:nth-child(1) { animation-delay: 0.06s; }
+    #cambios.is-entering .cta-hero > *:nth-child(2) { animation-delay: 0.20s; }
+    #cambios.is-entering .cta-hero > *:nth-child(3) { animation-delay: 0.36s; }
+    #cambios.is-entering .cta-hero > *:nth-child(4) { animation-delay: 0.52s; }
+    #cambios.is-entering .cta-hero > *:nth-child(5) { animation-delay: 0.64s; }
+
+    /* Scroll reveal para el resto de secciones */
     .reveal {
       opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
+      clip-path: inset(0 0 100% 0);
+      transform: translateY(18px);
     }
     .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
+      animation: lineIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    .reveal[data-delay="1"] { transition-delay: 0.10s; }
-    .reveal[data-delay="2"] { transition-delay: 0.20s; }
-    .reveal[data-delay="3"] { transition-delay: 0.30s; }
-    .reveal[data-delay="4"] { transition-delay: 0.40s; }
-    .reveal[data-delay="5"] { transition-delay: 0.50s; }
+    .reveal[data-delay="1"] { animation-delay: 0.10s; }
+    .reveal[data-delay="2"] { animation-delay: 0.20s; }
+    .reveal[data-delay="3"] { animation-delay: 0.30s; }
+    .reveal[data-delay="4"] { animation-delay: 0.40s; }
+    .reveal[data-delay="5"] { animation-delay: 0.50s; }
   </style>
 </head>
 <body>
@@ -658,215 +1077,266 @@
     </a>
   </nav>
 
-  <!-- Hero -->
-  <section class="hero">
+  <!-- ── Snap Page 1: Pantalla principal ── -->
+  <section class="snap-page" id="inicio">
     <div class="hero-fold">
-    <div class="badge">
-      <span class="badge-dot" aria-hidden="true"></span>
-      v0.2.2 Latest
-    </div>
-    <h1>Productividad con<br /><span>propósito.</span></h1>
-    <p>Oktodo combina gestión de tareas, calendario interactivo, modo enfoque Pomodoro y funciones sociales — todo acompañado por Okto, tu mascota virtual.</p>
-    <div class="hero-actions">
-      <a
-        class="btn-primary"
-        href="https://github.com/AdrianMtzTrev/Oktodo/releases/download/v0.2.2/Oktodo-v0.2.2.apk"
-        download
-        aria-label="Descargar Oktodo APK v0.2.2"
-      >
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        Descargar APK
-      </a>
-      <a class="btn-ghost" href="https://github.com/AdrianMtzTrev/Oktodo" target="_blank" rel="noopener">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
-        </svg>
-        Ver en GitHub
-      </a>
-    </div>
-    <p class="hero-note">Android 7.0+ &nbsp;·&nbsp; Permite "Instalar apps desconocidas" en ajustes &nbsp;·&nbsp; <a href="https://github.com/AdrianMtzTrev/Oktodo/releases" style="color:var(--primary-light);">Ver todas las releases</a></p>
-    </div><!-- /.hero-fold -->
-
-    <!-- Phone mockup -->
-    <div class="mockup-wrap reveal" aria-hidden="true">
-      <div class="phone">
-        <div class="phone-status">
-          <span>9:49</span>
-          <div style="width:60px;height:14px;background:rgba(0,0,0,0.5);border-radius:8px;align-self:center;margin-top:-8px;"></div>
-          <span>100%</span>
-        </div>
-        <div class="phone-screen">
-          <div style="font-size:10px;color:var(--fg-muted);font-weight:500;">INICIO</div>
-          <div class="phone-greeting">¡Buenas noches!</div>
-          <div class="phone-sub">¿Qué haremos hoy, Usuario?</div>
-
-          <!-- Okto mascot -->
-          <div class="okto-wrap">
-            <svg width="56" height="56" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Okto la mascota">
-              <!-- body -->
-              <ellipse cx="40" cy="32" rx="22" ry="20" fill="#7C3AED"/>
-              <!-- eyes -->
-              <circle cx="33" cy="28" r="4" fill="white"/>
-              <circle cx="47" cy="28" r="4" fill="white"/>
-              <circle cx="34" cy="29" r="2" fill="#1A1030"/>
-              <circle cx="48" cy="29" r="2" fill="#1A1030"/>
-              <!-- shine -->
-              <circle cx="35" cy="28" r="1" fill="white"/>
-              <circle cx="49" cy="28" r="1" fill="white"/>
-              <!-- smile -->
-              <path d="M34 36 Q40 41 46 36" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-              <!-- tentacles -->
-              <path d="M18 46 Q14 54 18 60" stroke="#7C3AED" stroke-width="5" stroke-linecap="round" fill="none"/>
-              <path d="M25 50 Q22 58 26 64" stroke="#7C3AED" stroke-width="5" stroke-linecap="round" fill="none"/>
-              <path d="M33 52 Q32 61 35 66" stroke="#7C3AED" stroke-width="5" stroke-linecap="round" fill="none"/>
-              <path d="M40 53 Q40 62 40 67" stroke="#8B5CF6" stroke-width="5" stroke-linecap="round" fill="none"/>
-              <path d="M47 52 Q48 61 45 66" stroke="#7C3AED" stroke-width="5" stroke-linecap="round" fill="none"/>
-              <path d="M55 50 Q58 58 54 64" stroke="#7C3AED" stroke-width="5" stroke-linecap="round" fill="none"/>
-              <path d="M62 46 Q66 54 62 60" stroke="#7C3AED" stroke-width="5" stroke-linecap="round" fill="none"/>
-              <!-- blush -->
-              <ellipse cx="30" cy="34" rx="4" ry="2.5" fill="#EC4899" opacity="0.4"/>
-              <ellipse cx="50" cy="34" rx="4" ry="2.5" fill="#EC4899" opacity="0.4"/>
-            </svg>
-            <div class="okto-label">¡Todo listo!</div>
-            <div class="okto-caption">No tienes tareas pendientes</div>
-          </div>
-
-          <div class="task-item">
-            <div class="task-check done"></div>
-            <span class="task-text done">Revisar diseño de UI</span>
-            <span class="task-pts">+10pts</span>
-          </div>
-          <div class="task-item">
-            <div class="task-check"></div>
-            <span class="task-text">Standup del equipo</span>
-            <span class="task-pts">10pts</span>
-          </div>
-          <div class="task-item">
-            <div class="task-check"></div>
-            <span class="task-text">Estudiar para examen</span>
-            <span class="task-pts">10pts</span>
-          </div>
-        </div>
-        <div class="phone-nav">
-          <div class="pnav-item">
-            <div class="pnav-icon active"></div>
-            <div class="pnav-dot active"></div>
-          </div>
-          <div class="pnav-item">
-            <div class="pnav-icon"></div>
-            <div class="pnav-dot"></div>
-          </div>
-          <div class="pnav-item">
-            <div class="pnav-icon"></div>
-            <div class="pnav-dot"></div>
-          </div>
-          <div class="pnav-item">
-            <div class="pnav-icon"></div>
-            <div class="pnav-dot"></div>
-          </div>
-          <div class="pnav-item">
-            <div class="pnav-icon"></div>
-            <div class="pnav-dot"></div>
-          </div>
-        </div>
+      <div class="badge">
+        <span class="badge-dot" aria-hidden="true"></span>
+        v0.2.2 Latest
       </div>
+      <h1>
+        <span class="h1-line">Productividad con</span>
+        <span class="h1-line" style="color:var(--primary-light)">propósito.</span>
+      </h1>
+      <p>Oktodo combina gestión de tareas, calendario interactivo, modo enfoque Pomodoro y funciones sociales — todo acompañado por Okto, tu mascota virtual.</p>
+      <div class="hero-actions">
+        <a
+          class="btn-primary"
+          href="https://github.com/AdrianMtzTrev/Oktodo/releases/download/v0.2.2/Oktodo-v0.2.2.apk"
+          download
+          aria-label="Descargar Oktodo APK v0.2.2"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Descargar APK
+        </a>
+        <a class="btn-ghost" href="https://github.com/AdrianMtzTrev/Oktodo" target="_blank" rel="noopener">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+          </svg>
+          Ver en GitHub
+        </a>
+      </div>
+      <p class="hero-note">Android 7.0+ &nbsp;·&nbsp; Permite "Instalar apps desconocidas" en ajustes &nbsp;·&nbsp; <a href="https://github.com/AdrianMtzTrev/Oktodo/releases" style="color:var(--primary-light);">Ver todas las releases</a></p>
     </div>
   </section>
 
-  <!-- Features -->
-  <section class="features">
-    <div class="container">
+  <!-- ── Snap Page 2: Teléfono con pantallas ── -->
+  <section class="snap-page" id="pantallas">
+    <div class="pantallas-header">
       <p class="section-label reveal">Pantallas</p>
-      <h2 class="section-title reveal" data-delay="1">Todo lo que necesitas</h2>
-      <p class="section-sub reveal" data-delay="2">Cinco pantallas diseñadas para mantener tu vida organizada y tu enfoque intacto.</p>
-
-      <div class="features-grid">
-
-        <!-- Inicio / Tareas -->
-        <div class="feature-card reveal" data-delay="1">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
-          </div>
-      <h3>Inicio & Tareas</h3>
-      <p>Saludo dinámico según la hora del día. Crea, edita y busca tareas desde un BottomSheet. Deshaz eliminaciones con Snackbar. Tareas recurrentes diarias/semanales/mensuales.</p>
-        </div>
-
-        <!-- Calendario -->
-        <div class="feature-card reveal" data-delay="2">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-          </div>
-          <h3>Calendario</h3>
-          <p>Vista mensual con 4 modos: Día, Semana, Mes y Año. Navega entre meses y ve eventos por fecha.</p>
-        </div>
-
-        <!-- Enfoque -->
-        <div class="feature-card reveal" data-delay="3">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
-          </div>
-      <h3>Modo Enfoque</h3>
-      <p>Temporizador Pomodoro circular con sesiones de 15, 25, 45 o 60 min. Temporizador personalizable con selector de horas, minutos y segundos.</p>
-        </div>
-
-        <!-- Amigos -->
-        <div class="feature-card reveal" data-delay="4">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-          </div>
-          <h3>Amigos</h3>
-          <p>Lista de amigos con puntos y eventos. Crea grupos y comparte eventos con hora, lugar y participantes.</p>
-        </div>
-
-        <!-- Perfil -->
-        <div class="feature-card reveal" data-delay="5">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-            </svg>
-          </div>
-          <h3>Perfil</h3>
-          <p>Consulta tus puntos, tareas completadas y días de racha. Okto te acompaña y evoluciona contigo.</p>
-        </div>
-
-      </div>
     </div>
+    <h2 class="pantallas-big-title">Todo lo que necesitas</h2>
+    <div class="pantallas-main">
+    <div class="phone-features-layout">
+
+      <!-- Phone mockup -->
+      <div class="phone-col" aria-hidden="true">
+        <div class="phone">
+          <div class="phone-status">
+            <span>9:49</span>
+            <div style="width:60px;height:14px;background:rgba(0,0,0,0.5);border-radius:8px;align-self:center;margin-top:-8px;"></div>
+            <span>100%</span>
+          </div>
+          <div class="phone-screen">
+            <div style="font-size:15px;color:var(--fg-muted);font-weight:500;">INICIO</div>
+            <div class="phone-greeting">¡Buenas noches!</div>
+            <div class="phone-sub">¿Qué haremos hoy, Usuario?</div>
+            <div class="okto-wrap">
+              <svg width="86" height="86" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Okto la mascota">
+                <ellipse cx="40" cy="32" rx="22" ry="20" fill="#7C3AED"/>
+                <circle cx="33" cy="28" r="4" fill="white"/>
+                <circle cx="47" cy="28" r="4" fill="white"/>
+                <circle cx="34" cy="29" r="2" fill="#1A1030"/>
+                <circle cx="48" cy="29" r="2" fill="#1A1030"/>
+                <circle cx="35" cy="28" r="1" fill="white"/>
+                <circle cx="49" cy="28" r="1" fill="white"/>
+                <path d="M34 36 Q40 41 46 36" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+                <path d="M18 46 Q14 54 18 60" stroke="#7C3AED" stroke-width="5" stroke-linecap="round" fill="none"/>
+                <path d="M25 50 Q22 58 26 64" stroke="#7C3AED" stroke-width="5" stroke-linecap="round" fill="none"/>
+                <path d="M33 52 Q32 61 35 66" stroke="#7C3AED" stroke-width="5" stroke-linecap="round" fill="none"/>
+                <path d="M40 53 Q40 62 40 67" stroke="#8B5CF6" stroke-width="5" stroke-linecap="round" fill="none"/>
+                <path d="M47 52 Q48 61 45 66" stroke="#7C3AED" stroke-width="5" stroke-linecap="round" fill="none"/>
+                <path d="M55 50 Q58 58 54 64" stroke="#7C3AED" stroke-width="5" stroke-linecap="round" fill="none"/>
+                <path d="M62 46 Q66 54 62 60" stroke="#7C3AED" stroke-width="5" stroke-linecap="round" fill="none"/>
+                <ellipse cx="30" cy="34" rx="4" ry="2.5" fill="#EC4899" opacity="0.4"/>
+                <ellipse cx="50" cy="34" rx="4" ry="2.5" fill="#EC4899" opacity="0.4"/>
+              </svg>
+              <div class="okto-label">¡Todo listo!</div>
+              <div class="okto-caption">No tienes tareas pendientes</div>
+            </div>
+            <div class="task-item">
+              <div class="task-check done"></div>
+              <span class="task-text done">Revisar diseño de UI</span>
+              <span class="task-pts">+10pts</span>
+            </div>
+            <div class="task-item">
+              <div class="task-check"></div>
+              <span class="task-text">Standup del equipo</span>
+              <span class="task-pts">10pts</span>
+            </div>
+            <div class="task-item">
+              <div class="task-check"></div>
+              <span class="task-text">Estudiar para examen</span>
+              <span class="task-pts">10pts</span>
+            </div>
+          </div>
+          <div class="phone-nav">
+            <div class="pnav-item active" data-tab="0">
+              <div class="pnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+              <div class="pnav-dot"></div>
+            </div>
+            <div class="pnav-item" data-tab="1">
+              <div class="pnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+              <div class="pnav-dot"></div>
+            </div>
+            <div class="pnav-item" data-tab="2">
+              <div class="pnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+              <div class="pnav-dot"></div>
+            </div>
+            <div class="pnav-item" data-tab="3">
+              <div class="pnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+              <div class="pnav-dot"></div>
+            </div>
+            <div class="pnav-item" data-tab="4">
+              <div class="pnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+              <div class="pnav-dot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Features column -->
+      <div class="features-col">
+
+        <!-- Tab strip -->
+        <div class="feature-tabs reveal" data-delay="3">
+          <button class="ftab active" data-ftab="0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Inicio
+          </button>
+          <button class="ftab" data-ftab="1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Calendario
+          </button>
+          <button class="ftab" data-ftab="2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Enfoque
+          </button>
+          <button class="ftab" data-ftab="3">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Amigos
+          </button>
+          <button class="ftab" data-ftab="4">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Perfil
+          </button>
+        </div>
+
+        <div class="features-grid">
+
+          <div class="feature-card active" data-tab="0">
+            <div class="fc-header">
+              <div class="feature-icon-lg">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </div>
+              <div>
+                <p class="fc-title">Inicio & Tareas</p>
+                <p class="fc-tagline">Tu centro de control diario</p>
+              </div>
+            </div>
+            <ul class="fc-list">
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Crea, edita y completa tareas fácilmente</li>
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Búsqueda y filtros por categoría</li>
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Deshacer eliminaciones accidentales</li>
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Gana <strong style="color:var(--fg)">+10 pts</strong> por cada tarea completada</li>
+            </ul>
+          </div>
+
+          <div class="feature-card" data-tab="1">
+            <div class="fc-header">
+              <div class="feature-icon-lg">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <div>
+                <p class="fc-title">Calendario</p>
+                <p class="fc-tagline">Nunca pierdas una fecha importante</p>
+              </div>
+            </div>
+            <ul class="fc-list">
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>4 modos de vista: Día, Semana, Mes y Año</li>
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Navega eventos por fecha con un toque</li>
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Botón "Ir a hoy" para regresar al presente</li>
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Sincronizado con tus tareas y eventos</li>
+            </ul>
+          </div>
+
+          <div class="feature-card" data-tab="2">
+            <div class="fc-header">
+              <div class="feature-icon-lg">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <div>
+                <p class="fc-title">Modo Enfoque</p>
+                <p class="fc-tagline">Concentración máxima, sin distracciones</p>
+              </div>
+            </div>
+            <ul class="fc-list">
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Temporizador Pomodoro circular animado</li>
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Sesiones de 15, 25, 45 o 60 minutos</li>
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Selecciona la tarea en la que trabajarás</li>
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Notificación al finalizar cada sesión</li>
+            </ul>
+          </div>
+
+          <div class="feature-card" data-tab="3">
+            <div class="fc-header">
+              <div class="feature-icon-lg">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div>
+                <p class="fc-title">Amigos</p>
+                <p class="fc-tagline">Productividad mejor en compañía</p>
+              </div>
+            </div>
+            <ul class="fc-list">
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Agrega amigos por nombre de usuario</li>
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Crea grupos y eventos compartidos</li>
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Define hora, lugar y participantes</li>
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Comparte tu progreso y logros</li>
+            </ul>
+          </div>
+
+          <div class="feature-card" data-tab="4">
+            <div class="fc-header">
+              <div class="feature-icon-lg">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div>
+                <p class="fc-title">Perfil</p>
+                <p class="fc-tagline">Tu historia de productividad</p>
+              </div>
+            </div>
+            <ul class="fc-list">
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Acumula puntos completando tareas</li>
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Mantén rachas diarias activas</li>
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Desbloquea logros exclusivos</li>
+              <li><span class="fc-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg></span>Okto evoluciona a tu lado</li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+    </div><!-- /.pantallas-main -->
   </section>
 
-  <!-- Okto / Gamificación -->
-  <section class="mascot-section">
-    <div class="container">
-      <div class="mascot-card reveal">
-        <div class="mascot-text">
-          <h2>Conoce a <span>Okto</span></h2>
-          <p>Tu compañero de productividad. Okto te motiva a completar tareas, mantener rachas y alcanzar tus metas — porque avanzar solo es más difícil.</p>
-          <div class="stat-row">
-            <div class="stat">
-              <span class="stat-value">+10pts</span>
-              <span class="stat-label">por tarea</span>
-            </div>
-            <div class="stat">
-              <span class="stat-value">10</span>
-              <span class="stat-label">pantallas</span>
-            </div>
-            <div class="stat">
-              <span class="stat-value">v0.2.2</span>
-              <span class="stat-label">última versión</span>
-            </div>
-          </div>
-        </div>
-        <div class="okto-svg" aria-hidden="true">
-          <svg width="120" height="120" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- ── Snap Page 3: Conoce a Okto ── -->
+  <section class="snap-page" id="okto">
+    <div class="okto-content reveal">
+
+      <!-- Header -->
+      <div class="okto-header">
+        <p class="section-label">Tu mascota</p>
+        <h2>Conoce a <span>Okto</span></h2>
+      </div>
+
+      <!-- Okto + Mood card -->
+      <div class="okto-main">
+        <div class="okto-mascot-col">
+          <svg class="okto-mascot-svg" width="130" height="130" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <ellipse cx="40" cy="32" rx="22" ry="20" fill="#7C3AED"/>
             <ellipse cx="40" cy="30" rx="20" ry="18" fill="#8B5CF6"/>
             <circle cx="33" cy="27" r="4.5" fill="white"/>
@@ -886,62 +1356,96 @@
             <ellipse cx="30" cy="33" rx="4.5" ry="2.5" fill="#EC4899" opacity="0.45"/>
             <ellipse cx="50" cy="33" rx="4.5" ry="2.5" fill="#EC4899" opacity="0.45"/>
           </svg>
+          <div class="mood-dots" id="moodDots">
+            <div class="mood-dot active" data-mood="0"></div>
+            <div class="mood-dot" data-mood="1"></div>
+            <div class="mood-dot" data-mood="2"></div>
+            <div class="mood-dot" data-mood="3"></div>
+          </div>
+        </div>
+
+        <div class="okto-mood-card" id="oktoMoodCard">
+          <p class="mood-label" id="moodLabel">Esperando</p>
+          <p class="mood-title" id="moodTitle">👋 ¡Hola, Usuario!</p>
+          <p class="mood-desc" id="moodDesc">Tienes tareas pendientes. Okto está listo para ayudarte a completarlas hoy.</p>
         </div>
       </div>
+
+      <!-- Gamification loop -->
+      <div class="okto-loop">
+        <div class="loop-step">
+          <div class="loop-icon">✅</div>
+          <p class="loop-step-title">Completa tareas</p>
+          <p class="loop-step-sub">+10 pts c/u</p>
+        </div>
+        <span class="loop-arrow">→</span>
+        <div class="loop-step">
+          <div class="loop-icon">⭐</div>
+          <p class="loop-step-title">Acumula puntos</p>
+          <p class="loop-step-sub">Sube de nivel</p>
+        </div>
+        <span class="loop-arrow">→</span>
+        <div class="loop-step">
+          <div class="loop-icon">🔥</div>
+          <p class="loop-step-title">Mantén rachas</p>
+          <p class="loop-step-sub">Días seguidos</p>
+        </div>
+        <span class="loop-arrow">→</span>
+        <div class="loop-step">
+          <div class="loop-icon">🏆</div>
+          <p class="loop-step-title">Logros & evolución</p>
+          <p class="loop-step-sub">Okto crece contigo</p>
+        </div>
+      </div>
+
+      <!-- Últimos cambios -->
+      <div class="okto-changelog">
+        <p class="changelog-heading">
+          <span class="changelog-badge">v0.2.2</span>
+          Últimos cambios
+        </p>
+        <div class="changelog-grid">
+          <div class="changelog-item"><span class="cl-check">✓</span><span><strong>DatePicker</strong> — corrige resta de 1 día en zona horaria negativa</span></div>
+          <div class="changelog-item"><span class="cl-check">✓</span><span><strong>DurationPicker</strong> — corrige snap +4 con valor incorrecto al hacer scroll</span></div>
+          <div class="changelog-item"><span class="cl-check">✓</span><span><strong>Amigos</strong> — evita que te agregues a ti mismo (crash)</span></div>
+          <div class="changelog-item"><span class="cl-check">✓</span><span><strong>Selector de color</strong> — borde visible en el color seleccionado</span></div>
+        </div>
+      </div>
+
     </div>
   </section>
 
-  <!-- Changelog -->
-  <section class="cta" style="padding:40px 24px 0;">
-    <div class="container">
-      <p class="section-label reveal">v0.2.2</p>
-      <h2 class="section-title reveal" data-delay="1" style="margin-bottom:32px;">Últimos cambios</h2>
-      <div style="max-width:520px;margin:0 auto;text-align:left;display:flex;flex-direction:column;gap:12px;">
-        <div class="reveal" data-delay="1" style="display:flex;align-items:flex-start;gap:12px;">
-          <span style="color:#10B981;flex-shrink:0;font-size:16px;">✓</span>
-          <span style="color:var(--fg-muted);font-size:14px;"><strong style="color:var(--fg);">DatePicker</strong> — corrige resta de 1 día al seleccionar fecha en zona horaria negativa</span>
-        </div>
-        <div class="reveal" data-delay="2" style="display:flex;align-items:flex-start;gap:12px;">
-          <span style="color:#10B981;flex-shrink:0;font-size:16px;">✓</span>
-          <span style="color:var(--fg-muted);font-size:14px;"><strong style="color:var(--fg);">DurationPicker</strong> — corrige snap +4 que mostraba valor incorrecto al hacer scroll</span>
-        </div>
-        <div class="reveal" data-delay="3" style="display:flex;align-items:flex-start;gap:12px;">
-          <span style="color:#10B981;flex-shrink:0;font-size:16px;">✓</span>
-          <span style="color:var(--fg-muted);font-size:14px;"><strong style="color:var(--fg);">Amigos</strong> — evita que te agregues a ti mismo (crash)</span>
-        </div>
-        <div class="reveal" data-delay="4" style="display:flex;align-items:flex-start;gap:12px;">
-          <span style="color:#10B981;flex-shrink:0;font-size:16px;">✓</span>
-          <span style="color:var(--fg-muted);font-size:14px;"><strong style="color:var(--fg);">Selector de color</strong> — borde visible en el color seleccionado</span>
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- ── Snap Page 4: Últimos cambios ── -->
+  <section class="snap-page snap-page--last" id="cambios">
+    <div class="last-body">
 
-  <!-- CTA -->
-  <section class="cta">
-    <div class="cta-card reveal">
-      <h2>¿Listo para organizarte?</h2>
-      <p>Descarga el APK y prueba Oktodo en tu dispositivo Android. v0.2.2 disponible ahora.</p>
+    <div class="cta-hero">
+      <p class="section-label">v0.2.2 · Android</p>
+      <h2 class="cta-title">¿Listo para<br><span>organizarte?</span></h2>
+      <p class="cta-sub">Descarga el APK y empieza a usar Oktodo en tu dispositivo Android ahora mismo.</p>
       <a
-        class="btn-primary"
+        class="btn-cta"
         href="https://github.com/AdrianMtzTrev/Oktodo/releases/download/v0.2.2/Oktodo-v0.2.2.apk"
         download
         aria-label="Descargar Oktodo APK v0.2.2"
       >
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
         Descargar APK — v0.2.2
       </a>
+      <p class="cta-note">Android 7.0+ &nbsp;·&nbsp; Permite "Instalar apps desconocidas" en ajustes</p>
     </div>
-  </section>
 
-  <!-- Footer -->
-  <footer>
-    <a class="footer-logo" href="#">Ok<span>todo</span></a>
-    <p>Adrian Martinez Treviño &amp; Fátima Salazar Loyola · Kotlin · Jetpack Compose</p>
-    <a href="https://github.com/AdrianMtzTrev/Oktodo" target="_blank" rel="noopener">github.com/AdrianMtzTrev/Oktodo</a>
-  </footer>
+    </div><!-- /.last-body -->
+
+    <footer>
+      <a class="footer-logo" href="#">Ok<span>todo</span></a>
+      <p>Adrian Martinez Treviño &amp; Fátima Salazar Loyola · Kotlin · Jetpack Compose</p>
+      <a href="https://github.com/AdrianMtzTrev/Oktodo" target="_blank" rel="noopener">github.com/AdrianMtzTrev/Oktodo</a>
+    </footer>
+
+  </section>
 
   <script>
     const observer = new IntersectionObserver((entries) => {
@@ -951,9 +1455,120 @@
           observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.12 });
+    }, { threshold: 0.08 });
 
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    // Solo observar .reveal fuera del hero (el hero usa CSS animation directa)
+    document.querySelectorAll('.reveal').forEach(el => {
+      if (!el.closest('#inicio')) observer.observe(el);
+    });
+
+    // Okto falling stickers on section 3
+    (function () {
+      const oktoSvg = `<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="40" cy="32" rx="22" ry="20" fill="#7C3AED"/>
+        <ellipse cx="40" cy="30" rx="20" ry="18" fill="#8B5CF6"/>
+        <circle cx="33" cy="27" r="4.5" fill="white"/>
+        <circle cx="47" cy="27" r="4.5" fill="white"/>
+        <circle cx="34" cy="28" r="2.2" fill="#1A1030"/>
+        <circle cx="48" cy="28" r="2.2" fill="#1A1030"/>
+        <circle cx="35" cy="27" r="1" fill="white"/>
+        <circle cx="49" cy="27" r="1" fill="white"/>
+        <path d="M34 35 Q40 41 46 35" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <path d="M18 46 Q13 56 18 62" stroke="#7C3AED" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+        <path d="M25 50 Q21 60 26 66" stroke="#7C3AED" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+        <path d="M33 52 Q31 62 34 68" stroke="#7C3AED" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+        <path d="M40 53 Q40 63 40 69" stroke="#8B5CF6" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+        <path d="M47 52 Q49 62 46 68" stroke="#7C3AED" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+        <path d="M55 50 Q59 60 54 66" stroke="#7C3AED" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+        <path d="M62 46 Q67 56 62 62" stroke="#7C3AED" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+        <ellipse cx="30" cy="33" rx="4.5" ry="2.5" fill="#EC4899" opacity="0.45"/>
+        <ellipse cx="50" cy="33" rx="4.5" ry="2.5" fill="#EC4899" opacity="0.45"/>
+      </svg>`;
+
+      const container = document.createElement('div');
+      container.className = 'okto-stickers';
+
+      for (let i = 0; i < 22; i++) {
+        const el = document.createElement('div');
+        el.className = 'okto-sticker';
+        const size    = 26 + Math.random() * 54;
+        const left    = Math.random() * 93;
+        const dur     = 6 + Math.random() * 11;
+        const delay   = -(Math.random() * 20);
+        const opacity = (0.25 + Math.random() * 0.45).toFixed(2);
+        const rot     = [180, 270, 360, 450][Math.floor(Math.random() * 4)];
+        const glow    = Math.random() > 0.5 ? 'rgba(124,58,237,0.5)' : 'rgba(139,92,246,0.35)';
+
+        el.style.cssText = `left:${left}%;width:${size}px;height:${size}px;animation-duration:${dur}s;animation-delay:${delay}s;--op:${opacity};--rot:${rot}deg;filter:drop-shadow(0 0 ${4 + Math.random() * 6 | 0}px ${glow});`;
+        el.innerHTML = oktoSvg;
+        container.appendChild(el);
+      }
+
+      document.getElementById('okto').prepend(container);
+    })();
+
+    // Sección 1 y 4: is-entering observer (igual que #pantallas)
+    ['inicio', 'cambios'].forEach(id => {
+      const sec = document.getElementById(id);
+      new IntersectionObserver((entries) => {
+        entries.forEach(e => sec.classList.toggle('is-entering', e.isIntersecting));
+      }, { threshold: 0.5 }).observe(sec);
+    });
+
+    // #pantallas section: phone scale-in + title slide-up on enter
+    const pantallasSection = document.getElementById('pantallas');
+    new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        pantallasSection.classList.toggle('is-entering', entry.isIntersecting);
+      });
+    }, { threshold: 0.6 }).observe(pantallasSection);
+
+    // Okto mood cycling
+    (function () {
+      const moods = [
+        { label: 'Esperando',        title: '👋 ¡Hola, Usuario!',      desc: 'Tienes tareas pendientes. Okto está listo para ayudarte a completarlas hoy.',                    color: '#8B5CF6', bg: 'rgba(139,92,246,0.14)' },
+        { label: '¡Misión cumplida!', title: '🎉 ¡Todo completado!',    desc: '¡Terminaste todas tus tareas del día! Okto está muy orgulloso de ti — ¡tú también deberías estarlo!', color: '#10B981', bg: 'rgba(16,185,129,0.1)'  },
+        { label: 'Racha activa',      title: '🔥 ¡Imparable!',          desc: 'Llevas varios días seguidos siendo productivo. Okto no quiere que rompas esa racha, ¡sigue así!', color: '#F59E0B', bg: 'rgba(245,158,11,0.1)'  },
+        { label: 'Modo Enfoque',      title: '⏱️ Concentración total',  desc: 'El temporizador Pomodoro corre. Okto cuida tu sesión para que nada ni nadie te distraiga.',       color: '#3B82F6', bg: 'rgba(59,130,246,0.1)'  },
+      ];
+
+      let cur = 0;
+      const card   = document.getElementById('oktoMoodCard');
+      const label  = document.getElementById('moodLabel');
+      const title  = document.getElementById('moodTitle');
+      const desc   = document.getElementById('moodDesc');
+      const dots   = document.querySelectorAll('.mood-dot');
+
+      function applyMood(i) {
+        const m = moods[i];
+        label.textContent = m.label;
+        label.style.color = m.color;
+        title.textContent = m.title;
+        desc.textContent  = m.desc;
+        card.style.borderColor = m.color + '55';
+        card.style.background  = m.bg;
+        dots.forEach((d, j) => d.classList.toggle('active', j === i));
+        card.classList.remove('mood-anim');
+        void card.offsetWidth; // reflow to restart animation
+        card.classList.add('mood-anim');
+        cur = i;
+      }
+
+      dots.forEach(d => d.addEventListener('click', () => applyMood(+d.dataset.mood)));
+      applyMood(0);
+      setInterval(() => applyMood((cur + 1) % moods.length), 3200);
+    })();
+
+    // Switch active tab across phone nav, tab strip, and feature cards
+    function switchTab(tab) {
+      document.querySelectorAll('.pnav-item[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+      document.querySelectorAll('.ftab[data-ftab]').forEach(b => b.classList.toggle('active', b.dataset.ftab === tab));
+      document.querySelectorAll('.feature-card[data-tab]').forEach(c => c.classList.toggle('active', c.dataset.tab === tab));
+    }
+
+    document.querySelectorAll('.ftab[data-ftab]').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.ftab));
+    });
   </script>
 </body>
 </html>
